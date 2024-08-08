@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HekiNav</title>
+    <link rel="icon" href="img/bus.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+</head>
+<body>
+    <div class="container">
+        <div class="background"></div>
+        <span hidden>A next-gen AI-powered public transport routing tool with useful tools for advanced users</span>
+        <nav><ul>
+            <li class="navItem"><a href="/nav/">Routing</a></li>
+            <li class="navItem"><a href="/changelog/">Changelog</a></li>
+            <li class="navItem"><a href="/games/">Games</a></li>
+            <li class="navItem"><a href="https://discord.gg/NVYeqdcxgp">Discord</a></li>
+            <li class="navItem"><a href="/map/">Line Map</a></li>
+        </ul></nav>
+        <div class="title">
+            <h1 class="name">HekiNav</h1>
+        </div>
+        <div class="desc">
+            <p>The new AI-powered pubic transport routing tool<br> already used for </p>
+            <div class="bignumber">
+                <div class='numCounter' data-value='16541'></div>
+                <p>routes</p>
+            </div>
+            <button id="search" onclick="getRoute()">To Routing</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

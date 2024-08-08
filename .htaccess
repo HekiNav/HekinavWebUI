@@ -1,0 +1,15 @@
+
+DirectoryIndex index.php index.html index.htm index2.html
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin *
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+</IfModule>
+
+
+ErrorDocument 403 https://foobaerrors.42web.io/erors/403/
+
+ErrorDocument 404 https://foobaerrors.42web.io/erors/404/
+
+ErrorDocument 500 https://foobaerrors.42web.io/erors/500/
