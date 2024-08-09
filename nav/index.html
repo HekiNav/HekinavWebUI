@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HekiNav</title>
+    <link rel="icon" href="img/bus.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style2.css">
+    <link rel="stylesheet" href="leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+
+</head>
+<body>
+    <div class="container">
+        <div id="error">
+            <svg class="error" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#fff" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>              
+            <span id="errorMessage"></span>
+            <svg fill="#fff" version="1.1" class="x" id="closeError" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-46.08 -46.08 552.93 552.93" xml:space="preserve" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)" stroke="#555" stroke-width="0.00460775"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path> </g></svg>
+        </div>
+        <nav><ul>
+            <li><div class="logo"><a href="/"></a></div></li>
+            <li class="navItem"><a href="/map/">Line Map</a></li>
+            <li class="navItem"><a href="#top">Routing</a></li>
+            <li class="navItem"><a href="/changelog/">Changelog</a></li>
+            <li class="navItem"><a href="/games/">Games</a></li>
+            <li class="navItem"><a href="https://discord.gg/NVYeqdcxgp">Discord</a></li>
+        </ul></nav>
+        <main id="maincontent">
+            <button id="search" class="sb1">Search</button>
+            <h1 class="text1 sb1">from</h1>
+            <div class="input1 sb1">
+                <input autocomplete="off" type="text" placeholder="Origin" id="input1"/>
+                <ul class="autocorrect" id="autocorrect1"></ul>
+                <p id="error1" hidden>Origin not valid</p>
+            </div>
+            <h1 class="text2 sb1">to</h1>
+            <div class="input2 sb1">
+                <input autocomplete="off" type="text" placeholder="Destination" id="input2"/>
+                <div class="autocorrect" id="autocorrect2"></div>
+                <p id="error2" hidden>Destination not valid</p>
+            </div>
+            <h1 class="text3 sb1">at</h1>
+            <input autocomplete="off" name="date" id="input4" type="date" class="sb1" max="1">
+            <input autocomplete="off" name="time" id="input3" type="time" class="sb1">
+            <div id="route" class="sb3"></div>
+            <button class="sb2 sb3 back" onclick="sidebarMode(currentMode == 'route' ? 'routepreview' : 'main')"></button>
+            <div id="options" class="sb1">
+                <label for="walkDistance">Max walking distance</label>
+                <select name="walkDistance" id="walkDistance">
+                    <option value="0">0 m</option>
+                    <option value="50">50 m</option>
+                    <option value="100">100 m</option>
+                    <option value="200">200 m</option>
+                    <option value="200">500 m</option>
+                    <option value="1000">1000 m</option>
+                    <option value="2000">2000 m</option>
+                </select>
+            </div>
+            <h1 id="rph" class="sb2">Loading routes</h1>
+            <div id="routes" class="sb2"></div>
+            <div id="map"></div>
+            <div id="popup"></div>
+            <div id="stopPopup">
+                <div id="resizer"><hr></div>
+                <div id="popupContent"></div>
+                <svg fill="#555" version="1.1" class="x" id="closePopup" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-46.08 -46.08 552.93 552.93" xml:space="preserve" transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)" stroke="#555" stroke-width="0.00460775"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M285.08,230.397L456.218,59.27c6.076-6.077,6.076-15.911,0-21.986L423.511,4.565c-2.913-2.911-6.866-4.55-10.992-4.55 c-4.127,0-8.08,1.639-10.993,4.55l-171.138,171.14L59.25,4.565c-2.913-2.911-6.866-4.55-10.993-4.55 c-4.126,0-8.08,1.639-10.992,4.55L4.558,37.284c-6.077,6.075-6.077,15.909,0,21.986l171.138,171.128L4.575,401.505 c-6.074,6.077-6.074,15.911,0,21.986l32.709,32.719c2.911,2.911,6.865,4.55,10.992,4.55c4.127,0,8.08-1.639,10.994-4.55 l171.117-171.12l171.118,171.12c2.913,2.911,6.866,4.55,10.993,4.55c4.128,0,8.081-1.639,10.992-4.55l32.709-32.719 c6.074-6.075,6.074-15.909,0-21.986L285.08,230.397z"></path> </g></svg>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/minisearch@6.3.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
+    <script src="script/LVectorGrid/L.VectorGrid.js"></script>
+    <script src="script/LTextPath/L.TextPath.js"></script>
+    <script src="script/setup.js"></script>
+    <script src="script/main.js"></script> 
+    
+</body>
+</html>
