@@ -1,4 +1,5 @@
 # Changelog
+
 <table>
                 <th>Version 0.4.5</th>
                 <tr><td class="added">New feature</td><td>Stopdeps filtering</td></tr>
