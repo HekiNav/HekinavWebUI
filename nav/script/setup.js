@@ -81,7 +81,8 @@ async function getDepartures(stop, stopPopup) {
                 if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
-
+                    
+                    console.log(stop.labels)
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
                     popupText += '<tr><th>Departures</th></tr>'
@@ -1121,4 +1122,9 @@ function moveHandler(e, polyline) {
     })
     labels += `</div>`
     polyline.openTooltip(e.latlng).setTooltipContent(labels)
+}
+
+function routeTypeToSortValue(routeType) {
+    if(routeType == 102) return 110
+    return routeType
 }

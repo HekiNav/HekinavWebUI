@@ -2167,15 +2167,17 @@
         let linelabels2 = ""
         
         const patterns = JSON.parse(layer.stop.properties.patterns)
+        //sort first by routetype then name (issue #4)
         patterns.sort((a, b) => {
-          if (a.shortName < b.shortName) {
-            return -1;
-          }
-          if (a.shortName > b.shortName) {
-            return 1;
-          }
+          if (routeTypeToSortValue(a.gtfsType) < routeTypeToSortValue(b.gtfsType)) return -1;
+          if (routeTypeToSortValue(a.gtfsType) > routeTypeToSortValue(b.gtfsType)) return 1;
+
+          if (a.shortName < b.shortName) return -1;
+          if (a.shortName > b.shortName) return 1;
+          // Both idential, return 0
           return 0;
-        })
+        });
+        
         patterns.forEach(p => {
           const name = p.shortName || routeType(p.gtfsType).text
           if (lines.find(e => {return (e.name == name)})) return
