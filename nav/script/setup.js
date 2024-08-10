@@ -71,8 +71,9 @@ async function getDepartures(stop, stopPopup) {
                 //removes entries which have passed more than 60 seconds ago (why does digitransit even have those)
                 // loop goes backward so indices don't change when removing something
                 const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
+                console.log(deps)
                 for (let i = deps.length - 1; i > -1; i--) {
-                    if (deps[i].realtimeArrival < date - 60) {
+                    if (deps[i].realtimeArrival < date - 60 && deps[i].serviceDate == new Date().setHours(0, 0, 0, 0)) {
                         console.log(`removing ${i}`)
                         deps.splice(i, 1);
                     }
