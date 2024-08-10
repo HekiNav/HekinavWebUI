@@ -71,7 +71,6 @@ async function getDepartures(stop, stopPopup) {
                 //removes entries which have passed more than 60 seconds ago (why does digitransit even have those)
                 // loop goes backward so indices don't change when removing something
                 const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
-                console.log(deps)
                 for (let i = deps.length - 1; i > -1; i--) {
                     if (deps[i].realtimeArrival < date - 60 && deps[i].serviceDate == new Date().setHours(0, 0, 0, 0)) {
                         console.log(`removing ${i}`)
@@ -82,7 +81,6 @@ async function getDepartures(stop, stopPopup) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
                     
-                    console.log(stop.labels)
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
                     popupText += '<tr><th>Departures</th></tr>'
@@ -1126,5 +1124,6 @@ function moveHandler(e, polyline) {
 
 function routeTypeToSortValue(routeType) {
     if(routeType == 102) return 110
+    if(routeType == 702) return 699
     return routeType
 }
