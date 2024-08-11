@@ -171,13 +171,12 @@ h4{
   .logo{  
     height: 5vh;
     grid-area: logo;
-    background: white;
-    background-image:url(img/hekinav.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-      
+    background: white;      
+    margin: 0;
   }
+.logo-link{
+    padding: 0;
+}
 .lds {
   display: inline-block;
   position: relative;
