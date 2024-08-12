@@ -139,7 +139,7 @@ h4{
     grid-area: nav;
     top: 0;
     width: 100%;
-    height: 90%;
+    height: 100%;
   }
   nav ul {
     list-style-type: none;
@@ -147,34 +147,39 @@ h4{
     padding: 0;
     overflow: hidden;
     background-color: #fff;
-    height: 90%;
+    height: 100%;
   }
   li{
     float: left;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    height: 100%;
   }
   li a {
+    height: 3vh;
     font-size: 2vh;
-    width: calc(95vw/var(--nav-items));
+    width: calc(100vw/var(--nav-items));
     display: block;
     color: #000;
     text-align: center;
-    padding-top: 10%;
-    padding-bottom: 10%;
     text-decoration: none;
-    height: 90%;
   }
     
-  .navItem a:hover {
+  .navItem:hover {
     background-color: #003ec4;
     color: #ffffff;
   }
   .logo{  
     height: 5vh;
-    grid-area: logo;
-    background: white;      
-    margin: 0;
+    background: white;   
+    padding-bottom: 2%;   
   }
 .logo-link{
+  flex-wrap: wrap;
+  display: flex;
+  align-content: center;
+  height: 100%;
     padding: 0;
 }
 .lds {
