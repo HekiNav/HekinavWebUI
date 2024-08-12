@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HekiNav</title>
+    <link rel="icon" href="img/bus.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script> 
+</head>
+<body>
+    <div class="container">
+        <nav><ul>
+            <li><div class="logo"><a href="/"></a></div></li>
+            <li class="navItem"><a href="/nav/">Routing</a></li>
+            <li class="navItem"><a href="/changelog/">Changelog</a></li>
+            <li class="navItem"><a href="#top">Games</a></li>
+            <li class="navItem"><a href="https://discord.gg/NVYeqdcxgp">Discord</a></li>
+            <li class="navItem"><a href="/map/">Line Map</a></li>
+        </ul></nav>
+        <main id="maincontent">
+            <!-- layout0(loading) -->
+            <div class="m0 loading" hidden>
+                <div class="progressContainer">
+                    <div id="progressBar"></div>
+                    <h1 id="progress">Loading 0 of 0</h1>
+                </div>
+            </div>
+            <!-- layout1(mainpage) -->
+            <h1 class="m1 header">The HekiNav Game</h1> 
+            <div class="m1 options">
+                <div class="gameRounds" id="gameRounds">
+                    <h1>Amount of rounds</h1>
+                    <div><input type="number" inputmode="numeric" maxlength="2" max="99" min="1" placeholder="1 to 100" name="roundCount" id="roundCount" value="2"></div>
+                </div>
+                <div class="gameTypes" id="gameTypes">
+                    <h1>Question types</h1>
+                    <div onclick="select()"><input type="checkbox" name="selectAll" id="c1" >All</div>
+                    <div><input type="checkbox" name="time" class="checkbox1">Time</div>
+                    <div><input type="checkbox" name="distance" class="checkbox1">Distance</div>
+                </div>
+            </div>
+            <button id="gameStart" class="start m1" onclick="beginGame()">Start</button>
+            <!-- layout2(game) -->
+            <div class="information m2" hidden>
+                <h1 class="info" id="score">Score: 0</h1>
+                <h1 class="info" id="round">Round: 1/10</h1>
+            </div>
+            <h1 class="m2" id="question" hidden>topcool??!?!??!?</h1>
+            <div class="route m2 route1" onclick="game(1)" hidden>
+                <div id="route1"></div>
+                <div id="route1details"></div>
+            </div>
+            <div class="route m2 route2" onclick="game(2)" hidden>
+                <div id="route2"></div>
+                <div id="route2details" hidden></div>
+            </div>
+            <!-- layout3(results) -->
+            <div class="score m3" hidden>
+                <p>Your score was</p>
+                <h1 id="scoore">0</h1>
+            </div>
+            <h1 class="comment m3" hidden>Well done!</h1>
+            <button onclick="documentMode('main')" class="again m3" hidden>Play again!</button>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

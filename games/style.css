@@ -1,0 +1,314 @@
+:root{
+  --main-border: 0px #001049 outset;
+  --nav-items: 6
+}
+html{
+  padding: 0;
+  font-family: 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+body{
+	margin: 0;
+}
+.container{
+  margin: 0;
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 19fr;
+  grid-template-areas: 
+  "nav"
+  "main";
+}
+nav{
+	grid-area: nav;
+	top: 0;
+	width: 100%;
+  height: 100%;
+}
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #fff;
+}
+
+li{
+	float: left;
+}
+  
+li a {
+  font-size: 2vh;
+  width: calc(95vw/var(--nav-items));
+	display: block;
+	color: #000;
+	text-align: center;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+	text-decoration: none;
+  height: 100%;
+}
+  
+.navItem a:hover {
+	background-color: #003ec4;
+	color: #ffffff;
+}
+.logo{  
+  height: 6vh;
+  grid-area: logo;
+  background: white;
+  background-image:url(img/hekinav.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+    
+}
+
+#maincontent{
+  height: 92vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 3fr 3fr 3fr;
+  grid-template-areas: 
+  "header header"
+  "options options"
+  "options options"
+  "begin begin"
+  "begin begin";
+  gap: 0.2rem;
+  border: var(--main-border);
+  padding: 0;
+  background: #ffffff;
+  grid-area: main; 
+}
+/* M0 */
+.loading{
+  grid-area: loading;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  background-color: #a9c4ff;
+  --s: 100px; /* control the size */
+  --c1: #008cff;
+  --c2: #94cdff;
+  
+  --_s: calc(2*var(--s)) calc(2*var(--s));
+  --_g: var(--_s) conic-gradient(at 40% 40%,#0000 75%,var(--c1) 0);
+  --_p: var(--_s) conic-gradient(at 20% 20%,#0000 75%,var(--c2) 0);
+  background:
+    calc( .9*var(--s)) calc( .9*var(--s))/var(--_p),
+    calc(-.1*var(--s)) calc(-.1*var(--s))/var(--_p),
+    calc( .7*var(--s)) calc( .7*var(--s))/var(--_g),
+    calc(-.3*var(--s)) calc(-.3*var(--s))/var(--_g),
+    conic-gradient(from 90deg at 20% 20%,var(--c2) 25%,var(--c1) 0) 
+     0 0/var(--s) var(--s);
+  animation: m 3s infinite;
+}
+@keyframes m {
+  0% {
+   background-position: 
+    calc( .9*var(--s)) calc( .9*var(--s)),
+    calc(-.1*var(--s)) calc(-.1*var(--s)),
+    calc( .7*var(--s)) calc( .7*var(--s)),
+    calc(-.3*var(--s)) calc(-.3*var(--s)),0 0
+  }
+  25% {
+   background-position: 
+    calc(1.9*var(--s)) calc( .9*var(--s)),
+    calc(-1.1*var(--s)) calc(-.1*var(--s)),
+    calc(1.7*var(--s)) calc( .7*var(--s)),
+    calc(-1.3*var(--s)) calc(-.3*var(--s)),0 0
+  }
+  50% {
+   background-position: 
+    calc(1.9*var(--s)) calc(-.1*var(--s)),
+    calc(-1.1*var(--s)) calc( .9*var(--s)),
+    calc(1.7*var(--s)) calc(-.3*var(--s)),
+    calc(-1.3*var(--s)) calc( .7*var(--s)),0 0
+  }
+  75% {
+   background-position: 
+    calc(2.9*var(--s)) calc(-.1*var(--s)),
+    calc(-2.1*var(--s)) calc( .9*var(--s)),
+    calc(2.7*var(--s)) calc(-.3*var(--s)),
+    calc(-2.3*var(--s)) calc( .7*var(--s)),0 0
+  }
+  100% {
+   background-position: 
+    calc(2.9*var(--s)) calc(-1.1*var(--s)),
+    calc(-2.1*var(--s)) calc(1.9*var(--s)),
+    calc(2.7*var(--s)) calc(-1.3*var(--s)),
+    calc(-2.3*var(--s)) calc(1.7*var(--s)),0 0
+  }
+}
+.loadingIcon{
+  width: 200px;
+  height: 200px;
+}
+.progressContainer{
+  display: flex;
+  margin: 0;
+  padding: 0;
+  width: 20vw;
+  height: 10vh;
+  background-color: #ffffff;
+  border: #001049 5px inset;
+  border-radius: 20px;
+}
+#progress{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3vh;
+  margin: 1.3% 0 0 0;
+  color: #0088ff;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+#progressBar{
+  animation: ease-in-out 1s;
+  background-color: #003ec4;
+  height: 100%;
+  width: 100%;
+  border-radius: 15px;
+}
+/* M1 */
+.header{
+  font-size: calc(6vw + 4vh);
+  grid-area: header;
+  justify-self: center;
+  color: #003ec4;
+  text-shadow: rgba(0, 0, 0, 0.5) 0rem 0.5rem 5px;
+  -webkit-text-stroke: 2px #001049;
+  margin: 1% 0 1% 0;
+}
+.options{
+  grid-area: options;
+  display: flex;
+  flex-direction:row;
+  justify-content: center;
+  height: 100%;
+}
+.options div{
+  margin:0 2% 0 2%;
+  font-size: 2vh;
+}
+.gameMode input{
+  height: 2vh;
+  width: 20%;
+}
+.gameTypes input{
+  height: 2vh;
+  width: 20%;
+}
+.cities input{
+  height: 2vh;
+  width: 10%;
+}
+.cities{
+  width: 15%;
+}
+.gameRounds input{
+  font-size: 2vh;
+}
+.start{
+  height: 100%;
+  border: #000a1e 5px outset;
+  font-size: 25vh;
+  color: #ffffff;
+  background-color: #003ec4;
+  text-shadow: rgba(0, 0, 0, 0.5) 0rem 0.5rem 5px;
+  -webkit-text-stroke: 2px #000a1e;
+  grid-area: begin;
+  margin: 0 12% 10% 12%;
+}
+/* M2 */
+.information{
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  grid-area: information;
+  height: 100%;
+}
+.info{
+  padding: 0 2vw 0 2vw;
+  font-size: 5vh;
+  margin: 0;
+}
+#question{
+  margin: 0;
+  font-size: 8vh;
+  grid-area: question;
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+.route{
+  width: 88%;
+  height: 90%;
+  background-color: #fefefe;
+  border-radius: 50px;
+  border: black 20px outset;
+  margin:  0 3% 0 3%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 7vh;
+}
+.route1{
+  grid-area: route1;
+}
+.route2{
+  grid-area: route2;
+}
+/* M3 */
+.score{
+  grid-area: score;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+  margin: 0;
+  flex-direction: column;
+  font-size: 5vh;
+}
+.score p{
+  margin: 0;
+}
+#scoore{
+  font-size: 25vh;
+  margin: 0;
+}
+.comment{
+  grid-area: comment;
+  margin: 0;
+  font-size: 10vh;
+  display: flex;
+  justify-content: center;
+}
+.again{
+  height: 100%;
+  border: #000a1e 5px outset;
+  font-size: 10vh;
+  color: #ffffff;
+  background-color: #003ec4;
+  text-shadow: rgba(0, 0, 0, 0.5) 0rem 0.5rem 5px;
+  -webkit-text-stroke: 2px #000a1e;
+  grid-area: again;
+  margin: 0 12% 10% 12%;
+}
+/* OTHER */
+[hidden]{
+  display: none !important;;
+}
+  
+	

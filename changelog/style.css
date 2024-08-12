@@ -1,0 +1,103 @@
+:root{
+    --main-radius:5px;
+    --main-padding:5px;
+    --main-border: 5px black;
+    --font-size: 2vw;
+    --nav-items: 5
+}
+html{
+    padding: 0;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+nav{
+	grid-area: nav;
+	top: 0;
+	width: 100%;
+  height: 100%;
+}
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #fff;
+}
+  
+li {
+	float: left;
+}
+  
+li a {
+  font-size: 2vh;
+  width: calc(95vw/var(--nav-items));
+	display: block;
+	color: #000;
+	text-align: center;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+	text-decoration: none;
+  height: 100%;
+}
+  
+.navItem a:hover {
+	background-color: #003ec4;
+	color: #ffffff;
+}
+.logo{  
+  height: 6vh;
+  grid-area: logo;
+  background: white;
+  background-image:url(img/hekinav.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+    
+}
+
+.container{
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    grid-template-rows: 0.1fr 2fr 0.6fr;
+    grid-template-areas: 
+    "nav nav"
+    "log log"
+    "footer footer";
+    gap: 0.2rem;
+    height: 100vh;
+}
+.added{
+    background-color: #69ff43;
+}
+.bugfx{
+    background-color: #ff4343;
+}
+.tweak{
+    background-color: #fffc43;
+}
+.cText{
+    align-self: flex-end;
+    color: white;
+    font-size: 300%;
+	text-decoration: none;
+}
+nav{
+    border: var(--main-border);
+    padding: var(--main-padding);
+    border-radius: var(--main-radius);
+    background: white;
+    grid-area: nav;
+}
+.log{
+  font-size: 2vh;
+    padding-left: 10%;
+    grid-area: log;
+}
+footer{
+    border: var(--main-border);
+    padding: var(--main-padding);
+    border-radius: var(--main-radius);
+    background: #b0b0ff;
+    grid-area: footer;
+    bottom: 0;
+}
