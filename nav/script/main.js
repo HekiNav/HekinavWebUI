@@ -62,14 +62,6 @@ const baseLayers = {
     "Satellite" : satelliteTiles
 }
 L.control.layers(baseLayers).addTo(map)
-/* const searchIndex = new MiniSearch({
-    fields: ['name','code','type'],
-    storeFields: ['name','code','text','position','city'],
-    searchOptions: {
-        prefix: true,
-        fuzzy: 0.3,
-    },
-}) */
 let recentSearches = []
 let maxRecentSearches = 10
 recentSearches.add = function(values){

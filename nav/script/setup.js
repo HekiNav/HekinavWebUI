@@ -206,6 +206,32 @@ function changeDepTime(dep_date, className, popup, stop, v) {
         return
     }
 }
+function realtime(stop, callback) {
+    const client = mqtt.connect("wss://mqtt.digitransit.fi:443/");
+    client.on("connect", () => {
+//https://digitransit.fi/en/developers/apis/4-realtime-api/vehicle-positions/digitransit-mqtt/
+        client.subscribe("/gtfsrt/vp/digitraffic/+/+/+/+/+/+/#", (err) => {
+            if (err) console.log("MQTT Error:", err)
+            else console.log("Subscription succeeded")
+        });
+    });
+    client.on("message", (topic, response) => {
+        client.end()
+
+        const parts = topic.split("/")
+        console.log(topic,response)
+        protobuf.load("data/gtfs-realtime.proto", function(err, root) {
+            if (err)
+                console.error(err)
+        
+            const message = root.lookupType("transit_realtime.FeedMessage");
+        
+            var data = message.decode(new Uint8Array(response));
+            console.log(data)
+        
+        });
+    });
+}
 function renderShapes(shapes) {
     shapes.forEach(p => {
         const polyline = renderPolyline(p.geometry, routeType(p.route.type).color, false, true)
