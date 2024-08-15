@@ -100,7 +100,17 @@ async function getDepartures(stop, stopPopup) {
                         }
                     })
 
-                    deps.sort((a, b) => a.realtimeArrival - b.realtimeArrival)
+                    //sort by date then time
+                    deps.sort((a, b) => {
+                        if (a.serviceDay < b.serviceDay) return -1;
+                        if (a.serviceDay > b.serviceDay) return 1;
+              
+                        if (a.realtimeArrival < b.realtimeArrival) return -1;
+                        if (a.realtimeArrival > b.realtimeArrival) return 1;
+                        // Both idential, return 0
+                        return 0;
+                      });
+
                     popupText += `<tr>${platforms ? '<th>Platform</th>' : ''}<th>Route</th><th>Estimated time</th><th>Scheduled time</th>${latency ? '<th>Latency</th>' : ''}</tr>`
 
                     for (let i = 0; i < deps.length; i++) {
@@ -129,7 +139,7 @@ async function getDepartures(stop, stopPopup) {
                         if (diff >= -60 | tomorrow) {
                             popupText += `<tr>${platforms ? `<td class="center">${dep.stop.platformCode}</td>` : ''}
                                     <td><span class="depRoute"style="background-color:${routeType(dep.trip.route.type).color}">${dep.trip.route.shortName || dep.trip.route.longName}</span>&nbsp${dep.headsign || dep.trip.tripHeadsign}</td>
-                                    <td class="center time${i} ${dep.status}">${tomorrow ? sToTime(dep.realtimeArrival) + "(tomorrow)" : sToTime(dep.realtimeArrival)}</td><td class="center">${sToTime(dep.scheduledArrival)}</td>
+                                    <td class="center time${i} ${dep.status}">${tomorrow ? "tomorrow " + sToTime(dep.realtimeArrival) : sToTime(dep.realtimeArrival)}</td><td class="center">${sToTime(dep.scheduledArrival)}</td>
                                     ${dep.status == 'UNKNOWN' ? '</tr>' : `<td class="center ${dep.status}">${dep.latency < 0 ? Math.floor(dep.latency / 60) : "+" + Math.floor(dep.latency / 60)}&nbspmin</td></tr>`}`
                         }
                     }
