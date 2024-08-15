@@ -71,9 +71,9 @@ async function getDepartures(stop, stopPopup) {
                 //removes entries which have passed more than 60 seconds ago (why does digitransit even have those)
                 // loop goes backward so indices don't change when removing something
                 const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
+                const dateInUnix = new Date().setHours(0, 0, 0, 0) / 1000
                 for (let i = deps.length - 1; i > -1; i--) {
-                    if (deps[i].realtimeArrival < date - 60 && deps[i].serviceDate == new Date().setHours(0, 0, 0, 0)) {
-                        console.log(`removing ${i}`)
+                    if (deps[i].realtimeArrival < date - 60 && deps[i].serviceDay <= dateInUnix) {
                         deps.splice(i, 1);
                     }
                 }
@@ -125,10 +125,11 @@ async function getDepartures(stop, stopPopup) {
                             reload = null
                         }
                         if (diff < 400) reload = false
-                        if (diff >= -60) {
+                        const tomorrow = dep.serviceDay > dateInUnix
+                        if (diff >= -60 | tomorrow) {
                             popupText += `<tr>${platforms ? `<td class="center">${dep.stop.platformCode}</td>` : ''}
                                     <td><span class="depRoute"style="background-color:${routeType(dep.trip.route.type).color}">${dep.trip.route.shortName || dep.trip.route.longName}</span>&nbsp${dep.headsign || dep.trip.tripHeadsign}</td>
-                                    <td class="center time${i} ${dep.status}">${sToTime(dep.realtimeArrival)}</td><td class="center">${sToTime(dep.scheduledArrival)}</td>
+                                    <td class="center time${i} ${dep.status}">${tomorrow ? sToTime(dep.realtimeArrival) + "(tomorrow)" : sToTime(dep.realtimeArrival)}</td><td class="center">${sToTime(dep.scheduledArrival)}</td>
                                     ${dep.status == 'UNKNOWN' ? '</tr>' : `<td class="center ${dep.status}">${dep.latency < 0 ? Math.floor(dep.latency / 60) : "+" + Math.floor(dep.latency / 60)}&nbspmin</td></tr>`}`
                         }
                     }
