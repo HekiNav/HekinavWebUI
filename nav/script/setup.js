@@ -447,7 +447,11 @@ async function search(inputElement) {
         const row = document.createElement('div')
         row.classList.add('stopRow')
 
-        const code = document.createElement('div')
+        const name = document.createElement('div')
+        name.classList.add('')
+        name.textContent = 'Name'
+
+        /*const code = document.createElement('div')
         code.classList.add('stopCode')
         code.textContent = 'Code'
 
@@ -461,7 +465,8 @@ async function search(inputElement) {
 
         row.append(code)
         row.append(city)
-        row.append(text)
+        row.append(text)*/
+        row.append(name)
         autocorrect.append(row)
         for (let i = 0; i < features.length && i < 100; i++) {
             const element = features[i].properties;
@@ -487,6 +492,12 @@ async function search(inputElement) {
             row.append(code)
             row.append(city)
             row.append(text)*/
+
+            const text = document.createElement('div')
+            text.classList.add('stopText')
+            text.textContent = element.name
+
+            row.append(text)
             row.addEventListener('click', e => {
                 setValue(element.position, element.name, inputElement);
                 recentSearches.add(element)

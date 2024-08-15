@@ -199,20 +199,20 @@ document.getElementById('input1').addEventListener('keyup', event => {
     autocorrect2.hidden = true
     autocorrect1.hidden = false
 })
-/*
+
 document.getElementById('input1').addEventListener('click', event => {
     search(1)
-})*/
+})
 document.getElementById('input2').addEventListener('keyup', event => {
     if (document.getElementById('input2').value.length > 1) {
         search(2)
     }
     autocorrect2.hidden = false
     autocorrect1.hidden = true
-})/*
+})
 document.getElementById('input2').addEventListener('click', event => {
     search(2)
-})*/
+})
 document.getElementById('resizer').addEventListener('mousedown', e => {
     mouseDown = true
 })
