@@ -357,10 +357,12 @@ function routeType(code) {
     }
     //Return the information
     return { text: text, color: color, importance: importance }
-}
-function search(inputElement) {
+} 
+async function search(inputElement) {
     const input = document.getElementById('input' + inputElement).value
-    const searchResults = searchIndex.search(input)
+    const rawdata = await fetch('https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94&text=' + input)
+    const result = await rawdata.json()
+    const features = result.features
     let autocorrect
     let otherAutocorrect
     if (inputElement == 1) {
@@ -372,7 +374,7 @@ function search(inputElement) {
     }
     otherAutocorrect.innerHTML = ''
     autocorrect.innerHTML = ''
-    if (searchResults.length < 1) {
+    if (features.length < 1) {
 
         const header = document.createElement('div')
         header.classList.add('stopRow')
@@ -450,14 +452,15 @@ function search(inputElement) {
         row.append(city)
         row.append(text)
         autocorrect.append(row)
-        for (let i = 0; i < searchResults.length && i < 100; i++) {
-            const element = searchResults[i];
+        for (let i = 0; i < features.length && i < 100; i++) {
+            const element = features[i].properties;
             /* element.city = element.city.replaceAll('ae','ä')
             element.city = element.city.replaceAll('oe','ö') */
 
             const row = document.createElement('div')
             row.classList.add('stopRow')
-
+            
+            /*
             const code = document.createElement('div')
             code.classList.add('stopCode')
             code.textContent = element.code
@@ -472,7 +475,7 @@ function search(inputElement) {
 
             row.append(code)
             row.append(city)
-            row.append(text)
+            row.append(text)*/
             row.addEventListener('click', e => {
                 setValue(element.position, element.name, inputElement);
                 recentSearches.add(element)
