@@ -151,7 +151,7 @@ const sb3 = document.getElementsByClassName('sb3')
 let mouseDown = false
 inputIds = [false, false]
 
-getPreviousRoute()
+//getPreviousRoute()
 
 const date = new Date()
 document.getElementById('input3').value = padNumber(date.getHours()) + ':' + padNumber(date.getMinutes())
@@ -166,7 +166,7 @@ recentSearches.add(getRecentSearches())
 
 
 searchButton.addEventListener('click', () => {
-    digitransitRoute()
+    api()
 })
 document.querySelector('.input1').addEventListener('mouseout', e => {
     autocorrect1.hidden = true
@@ -182,7 +182,7 @@ document.querySelector('.input2').addEventListener('mouseover', e => {
 })
 window.addEventListener('keydown', event => {
     if (event.key == 'Enter') {
-        digitransitRoute()
+        api()
         document.getElementById('error1').hidden = true
         document.getElementById('error2').hidden = true
     }
