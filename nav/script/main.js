@@ -1,4 +1,3 @@
-
 const canvasRenderer = L.canvas({ padding: 0.5, tolerance: 5 });
 const svgRenderer = L.svg({ padding: 0.5 })
 const osmTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -167,7 +166,7 @@ recentSearches.add(getRecentSearches())
 
 
 searchButton.addEventListener('click', () => {
-    preAPI()
+    digitransitRoute()
 })
 document.querySelector('.input1').addEventListener('mouseout', e => {
     autocorrect1.hidden = true
@@ -183,7 +182,7 @@ document.querySelector('.input2').addEventListener('mouseover', e => {
 })
 window.addEventListener('keydown', event => {
     if (event.key == 'Enter') {
-        preAPI()
+        digitransitRoute()
         document.getElementById('error1').hidden = true
         document.getElementById('error2').hidden = true
     }
@@ -201,7 +200,9 @@ document.getElementById('input1').addEventListener('keyup', event => {
 })
 
 document.getElementById('input1').addEventListener('click', event => {
-    search(1)
+    if (document.getElementById('input1').value.length > 1) {
+        search(1)
+    }
 })
 document.getElementById('input2').addEventListener('keyup', event => {
     if (document.getElementById('input2').value.length > 1) {
@@ -211,7 +212,9 @@ document.getElementById('input2').addEventListener('keyup', event => {
     autocorrect1.hidden = true
 })
 document.getElementById('input2').addEventListener('click', event => {
-    search(2)
+    if (document.getElementById('input2').value.length > 1) {
+        search(2)
+    }
 })
 document.getElementById('resizer').addEventListener('mousedown', e => {
     mouseDown = true

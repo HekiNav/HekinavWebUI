@@ -54,6 +54,7 @@ async function getDepartures(stop, stopPopup) {
         console.time(`loading departures for ${stop.text}`)
         let rawdata = null
         const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign pattern{ geometry { lat lon}} route { type   longName     shortName        }      }      headsign    }  }}\"}`
+        console.log(query)
         try {
             rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/json", }, "body": query, "method": "POST", });
             data = await rawdata.json()
@@ -80,7 +81,7 @@ async function getDepartures(stop, stopPopup) {
                 if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
-                    
+
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
                     popupText += '<tr><th>Departures</th></tr>'
@@ -104,12 +105,12 @@ async function getDepartures(stop, stopPopup) {
                     deps.sort((a, b) => {
                         if (a.serviceDay < b.serviceDay) return -1;
                         if (a.serviceDay > b.serviceDay) return 1;
-              
+
                         if (a.realtimeArrival < b.realtimeArrival) return -1;
                         if (a.realtimeArrival > b.realtimeArrival) return 1;
                         // Both idential, return 0
                         return 0;
-                      });
+                    });
 
                     popupText += `<tr>${platforms ? '<th>Platform</th>' : ''}<th>Route</th><th>Estimated time</th><th>Scheduled time</th>${latency ? '<th>Latency</th>' : ''}</tr>`
 
@@ -309,7 +310,11 @@ function routeType(code) {
     let text
     let color
     let importance
-    if (code == 0 || code == "TRAM") {
+    if(code == "WALK") {
+        text = 'walk'
+        color = 'grey'
+        importance = 0
+    } else if (code == 0 || code == "TRAM") {
         text = 'tram'
         color = 'green'
         importance = 13
@@ -368,7 +373,7 @@ function routeType(code) {
     }
     //Return the information
     return { text: text, color: color, importance: importance }
-} 
+}
 async function search(inputElement) {
     const input = document.getElementById('input' + inputElement).value
     const rawdata = await fetch('https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94&text=' + input)
@@ -448,7 +453,7 @@ async function search(inputElement) {
         row.classList.add('stopRow')
 
         const name = document.createElement('div')
-        name.classList.add('')
+        name.classList.add('TEMP')
         name.textContent = 'Name'
 
         /*const code = document.createElement('div')
@@ -475,7 +480,7 @@ async function search(inputElement) {
 
             const row = document.createElement('div')
             row.classList.add('stopRow')
-            
+
             /*
             const code = document.createElement('div')
             code.classList.add('stopCode')
@@ -499,9 +504,10 @@ async function search(inputElement) {
 
             row.append(text)
             row.addEventListener('click', e => {
-                setValue(element.position, element.name, inputElement);
+                setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
             })
+            console.log(values.from)
             autocorrect.append(row)
         }
     }
@@ -907,16 +913,16 @@ function route(json, i) {
     document.getElementById('routes').append(table)
     return { html: routeHTML, bbox: bbox, transfers: transfers, colors: colors, trips: json.trips, duration: json.duration, walk_distance: json.walk_distance, fares: json.fares }
 }
-function setValue(value, display, field) {
+function setValue(lat, lon, display, field) {
     if (field == 1) {
-        values.from = { value: value, display: display }
-        //autocorrect1.hidden = true
-        inputIds[0] = value
+        values.from = { lat: lat, lon: lon, display: display }
+        autocorrect1.hidden = true
+        //inputIds[0] = value
         document.getElementById('input1').value = display
     } else if (field == 2) {
-        values.to = { value: value, display: display }
-        //autocorrect2.hidden = true
-        inputIds[1] = value
+        values.to = { lat: lat, lon: lon, display: display }
+        autocorrect2.hidden = true
+        //inputIds[1] = value
         document.getElementById('input2').value = display
     }
 }
@@ -1148,7 +1154,89 @@ function moveHandler(e, polyline) {
 }
 
 function routeTypeToSortValue(routeType) {
-    if(routeType == 102) return 110
-    if(routeType == 702) return 699
+    if (routeType == 102) return 110
+    if (routeType == 702) return 699
     return routeType
 }
+
+async function digitransitRoute() {
+    if(values.from == undefined){
+        fromLat = 60.17664172012474
+        fromLon = 24.656461728643194
+    } else {
+        fromLat = values.from.lat
+        fromLon = values.from.lon
+    }
+    if(values.to == undefined){
+        toLat = 60.294005904697535
+        toLon = 25.040987683425318
+    } else {
+        toLat = values.to.lat
+        toLon = values.to.lon
+    }
+
+    clearMap() 
+    const date = document.getElementById('input4').value
+    const query = `{
+  plan(
+    from: {lat: ${fromLat}, lon: ${fromLon}}
+    to: {lat: ${toLat}, lon: ${toLon}}
+    date: "${document.getElementById('input4').value}",
+    time: "${document.getElementById('input3').value}",
+  ) {
+    itineraries {
+      startTime
+      endTime
+      legs {
+        startTime
+        endTime
+        departureDelay
+        arrivalDelay
+        mode
+        duration
+        realTime
+        realtimeState
+        distance
+        transitLeg
+        from {
+          lat
+          lon
+        }
+        to {
+          lat
+          lon
+        }
+        legGeometry {
+          length  
+          points
+        }
+      }
+    }
+  }
+}`
+    console.log(query)
+    const rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
+    const result = await rawdata.json()
+    if(result.data.plan.itineraries.length > 0){
+        showRoute(result.data.plan.itineraries[0])
+    } else {
+        console.log("NO ROUTE FOUND")
+    }
+    
+}
+
+function showRoute(route) {
+    console.log(route.legs.length)
+    for(var i = 0; i < route.legs.length; i++) {
+        const leg = route.legs[i]
+        var coordinates = L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs();
+        renderPolyline(coordinates, color = routeType(leg.mode).color)
+
+        renderCircle(stop = {lat: leg.from.lat, lon: leg.from.lon}, color = routeType(leg.mode).color)
+    }/*
+    const startCoords = L.latLng(route.legs[0].from.lat, route.legs[0].from.lon)
+    const endCoords = L.latLng(route.legs[route.legs.length-1].to.lat, route.legs[route.legs.length-1].to.lon)
+    L.fitToBounds(startCoords, endCoords)*/
+
+}
+
