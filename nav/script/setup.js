@@ -93,7 +93,7 @@ async function getDepartures(stop, stopPopup) {
                                         pane: "vehiclePane",
                                         icon: L.divIcon({
                                             html: image.vehicle(20, routeType(topic[6]).color, values.hdg, values.desi),
-                                            iconSize: [20,20],
+                                            iconSize: [25,25],
                                             className: "vehicle-marker"
                                         })
                                     })
@@ -344,65 +344,94 @@ function routeType(code) {
     if (code instanceof String || typeof code == 'string') {
         code = code.toUpperCase()
     }
-    let text
-    let color
-    let importance
-    if (code == 0 || code == "TRAM") {
-        text = 'tram'
-        color = 'green'
-        importance = 13
-    } else if (code == 1 || code == "SUBWAY" || code == "METRO") {
-        text = 'metro'
-        color = 'red'
-        importance = 12
-    } else if (code == 4 || code == "FERRY") {
-        text = 'ferry'
-        color = 'teal'
-        importance = 13
-    } else if (code == 109 || code == "RAIL" || code == "TRAIN") {
-        text = 'train'
-        color = 'purple'
-        importance = 9
-    } else if (code == 700 || code == 3 || code == 715 || code == "BUS") {
-        text = 'bus'
-        color = 'blue'
-        importance = 15
-    } else if (code == 701) {
-        text = 'regional bus'
-        color = 'blue'
-        importance = 15
-    } else if (code == 702) {
-        text = 'trunk bus'
-        color = '#EA7000'
-        importance = 13
-    } else if (code == 704 || code == 712) {
-        text = 'local bus'
-        color = 'cyan'
-        importance = 15
-    } else if (code == 900) {
-        text = 'lightrail'
-        color = 'darkgreen'
-        importance = 13
-    } else if (code == 2) {
-        text = 'walk'
-        color = 'gray'
-        importance = null
-    } else if (code == 1104 || code == "AIRPLANE") {
-        text = 'airplane'
-        color = 'darkblue'
-        importance = 0
-    } else if (code == 102) {
-        text = 'intercity train'
-        color = 'green'
-    } else if (code == '') {
-        text = 'none'
-        color = 'white'
-        importance = null
-    } else {
-        //If not any code
-        text = 'main'
-        color = 'pink'
-        console.trace('Unsupported vehicle type: ', code)
+    switch (code) {
+        case "TRAM":
+        case 0:
+            text = 'tram'
+            color = 'green'
+            importance = 13
+            break;
+        case 0:
+        case "TRAM":
+            text = 'tram'
+            color = 'green'
+            importance = 13
+            break;
+        case 1:
+        case "SUBWAY":
+        case "METRO":
+            text = 'metro'
+            color = 'red'
+            importance = 12
+            break;
+        case 4:
+        case "FERRY":
+            text = 'ferry'
+            color = 'teal'
+            importance = 13
+            break;
+        case 109:
+        case "RAIL":
+        case "TRAIN":
+            text = 'train'
+            color = 'purple'
+            importance = 9
+            break;
+        case 700:
+        case 3:
+        case 715:
+        case "BUS":
+            text = 'bus'
+            color = 'blue'
+            importance = 15
+            break;
+        case 701:
+            text = 'regional bus'
+            color = 'blue'
+            importance = 15
+            break;
+        case 702:
+            text = 'trunk bus'
+            color = '#EA7000'
+            importance = 13
+            break;
+        case 704:
+        case 712:
+            text = 'local bus'
+            color = 'cyan'
+            importance = 15
+            break;
+        case 900:
+            text = 'lightrail'
+            color = 'darkgreen'
+            importance = 13
+            break;
+        case 2:
+            text = 'walk'
+            color = 'gray'
+            importance = null
+            break;
+        case 1104:
+        case "AIRPLANE":
+            text = 'airplane'
+            color = 'darkblue'
+            importance = 0
+            break;
+        case 102:
+            text = 'intercity train'
+            color = 'green'
+            break;
+        case '':
+            text = 'none'
+            color = 'white'
+            importance = null
+            break;
+        default:
+            //If not any code
+            text = 'main'
+            color = 'pink'
+            importance = null
+            console.trace('Unsupported vehicle type: ', code)
     }
     //Return the information
     return { text: text, color: color, importance: importance }
@@ -1172,7 +1201,6 @@ function moveHandler(e, polyline) {
     labels += `</div>`
     polyline.openTooltip(e.latlng).setTooltipContent(labels)
 }
-
 function routeTypeToSortValue(routeType) {
     if(routeType == 102) return 110
     if(routeType == 702) return 699
