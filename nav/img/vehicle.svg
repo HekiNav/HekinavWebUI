@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="100" height="100" version="1.1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
- <circle cx="50" cy="50" r="49.9" fill="#d40000" fill-opacity=".5" style="-inkscape-stroke:none"/>
- <path style="transform: rotate(180deg); transform-origin: center center" d="m82.661 25.161-32.661-15.322-32.661 15.322" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="9.6784"/>
- <text x="49.84375" y="63.984375" fill="#000000" font-family="'Yu Gothic UI'" style="resize: both; height: 75px; width: 500px;" font-weight="600" letter-spacing=".01px" stroke-linecap="round" stroke-linejoin="round" stroke-width="15" text-align="center" text-anchor="middle" style="line-height:0;text-decoration-color:#000000" xml:space="preserve"><tspan x="49.848751" y="63.984375">542</tspan></text>
-</svg>

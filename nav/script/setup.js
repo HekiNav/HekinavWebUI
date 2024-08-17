@@ -92,8 +92,8 @@ async function getDepartures(stop, stopPopup) {
                                     const marker = L.marker([values.lat,values.long], {
                                         pane: "vehiclePane",
                                         icon: L.divIcon({
-                                            html: image.vehicle(20, routeType(topic[6]).color, values.hdg, values.desi),
-                                            iconSize: [25,25],
+                                            html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
+                                            iconSize: [30,30],
                                             className: "vehicle-marker"
                                         })
                                     })
