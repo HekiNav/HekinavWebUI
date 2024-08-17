@@ -265,7 +265,8 @@ function renderCircle(stop = { lat: 0, lon: 0 }, color, transfer, draw = true) {
             radius: radius,
             color: color,
             fillColor: 'white',
-            fillOpacity: 1
+            fillOpacity: 1,
+            pane: 'transfermarkers'
         })
     if (draw) {
         marker.addTo(layerGroup)
@@ -775,25 +776,24 @@ function route(route, i) {
                 endTime: sToTime(leg.endTime / 1000 - dateInUnix),
             })
 
-        } else {
+        } /* transit */ else {
             const duration = leg.endTime / 1000 - leg.startTime / 1000
             const waittime = leg.startTime / 1000 - previousTrip.endTime / 1000
             const color = routeType(leg.mode).color
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if(i == 0){
 
-            } else /* transit */ {
+            } else  {
                 const img1 = `background-image:url("img/route/start${color}.png")`
                 const img2 = `background-image:url("img/route/${color}.png")`
                 const img3 = `background-image:url("img/route/end${color}.png")`
-                const img4 = `background-image:url("img/route/startgrey.png")`
                 const img5 = `background-image:url("img/route/grey.png")`
                 routeHTML +=
                 `${waittime > 0 ? `<tr><td></td>
                 <td class="td" id="img" style=${img5}></td>
                 <td class="td">wait ${sToHMinS(waittime)}</td>
                 </tr>` : ""}<tr>
-                <td class="border_td">${sToTime(leg.startTime / 1000 - dateInUnix)}</td>
+                <td class="border_td">${sToTime(leg.startTime / 1000 - dateInUnix)}\n${leg.mode.toLowerCase()}</td>
                 <td class="border_td" id="img" style=${img1}></td>
                 <td class="border_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
                 </tr><tr>
@@ -827,15 +827,19 @@ function route(route, i) {
     const table = document.createElement('table')
     table.classList.add('route-preview')
     console.log(trips[0])
+    let fare
+    if(route.fares != null & route.fares[0].cents != -1){
+        fare = route.fares[0].cents / 100
+    }
     table.innerHTML = `
         <tr>
         <td>${trips[0].startTime} - ${trips[trips.length - 1].endTime}</td>
         <td></td>
         <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
         </tr><tr>
-        <td>${route.fares != null ? route.fares.cents : "idk"}€</td>
+        <td>${route.fares =! null ? (route.fares[0].cents != -1 ? `${route.fares[0].cents / 100}€` : "") : ""}</td>
         <td></td>
-        <td>${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
+        <td>${image.walk(15)} ${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
         </tr><tr>
         <td colspan="3">${routepreview}</td>
         </tr>
@@ -843,7 +847,6 @@ function route(route, i) {
     table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
     table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
     document.getElementById('routes').append(table)
-    console.log(`fares: ${route.fares}`)
     return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance, fares: route.fares != null ? route.fares.cents : "idk" }
     for (let i = 0; i < route.legs.length; i++) {
         const trip = route.legs[i];

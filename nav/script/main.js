@@ -24,9 +24,10 @@ const map = L.map('map', {
     ],
 }).setView([60.174706, 24.940376], 15);
 
-const stopPane = map.createPane('stops').style.zIndex = 651;
-const previewPane = map.createPane('preview')
-previewPane.style.zIndex = 650;
+const stopPane = map.createPane('stops').style.zIndex = 648;
+const transferMarkerPane = map.createPane('transfermarkers').style.zIndex = 649;
+const previewPane = map.createPane('preview');
+previewPane.style.zIndex = 647;
 const stopTiles = L.vectorGrid.protobuf("https://api.digitransit.fi/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { pane: "stops", interactive: true })
 stopTiles.addTo(map)
 map.on('zoomend', (e) => {
