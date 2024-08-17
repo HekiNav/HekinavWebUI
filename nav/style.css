@@ -125,9 +125,13 @@ h4{
   max-height: 100%;
   overflow-y: scroll;
 }
-#route td{
+.td{
   border: none;
   height: 80px;
+}
+.border_td{
+  border: none;
+  height: 54px;
 }
 /* LOADING ICON CONTAINER */
 .loading{
@@ -324,5 +328,3 @@ h4{
 [hidden]{
   display: none;
 }
-  
-	

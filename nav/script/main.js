@@ -1,5 +1,6 @@
 const canvasRenderer = L.canvas({ padding: 0.5, tolerance: 5 });
 const svgRenderer = L.svg({ padding: 0.5 })
+
 const osmTiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     preferCanvas: true,
     maxZoom: 19,
@@ -8,7 +9,7 @@ const hslTiles = L.tileLayer('https://cdn.digitransit.fi/map/v2/hsl-map/{z}/{x}/
     preferCanvas: true,
     maxZoom: 19,
     tileSize: 512,
-    zoomOffset: -1
+    zoomOffset: -1,
 })
 const satelliteTiles = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     preferCanvas: true,
@@ -20,16 +21,17 @@ const map = L.map('map', {
     preferCanvas: true,
     layers: [
         hslTiles
-    ]
+    ],
 }).setView([60.174706, 24.940376], 15);
 
-const stopPane = map.createPane('stops').style.zIndex = 650;
+const stopPane = map.createPane('stops').style.zIndex = 651;
 const previewPane = map.createPane('preview')
-previewPane.style.zIndex = 649;
+previewPane.style.zIndex = 650;
 const stopTiles = L.vectorGrid.protobuf("https://api.digitransit.fi/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { pane: "stops", interactive: true })
 stopTiles.addTo(map)
 map.on('zoomend', (e) => {
-    //setMarkerSizes(stopGroup)
+    //would be cool if this worked
+    setMarkerSizes(stopGroup)
     if (map.getZoom() >= 8 && !labelsOnMap) {
         labelsOnMap = true
         labelGroup.eachLayer(label => {
@@ -150,6 +152,8 @@ const sb2 = document.getElementsByClassName('sb2')
 const sb3 = document.getElementsByClassName('sb3')
 let mouseDown = false
 inputIds = [false, false]
+setValue(60.17664172012474, 24.656461728643194, "", 1)
+setValue(60.294005904697535, 25.040987683425318, "", 2)
 
 //getPreviousRoute()
 

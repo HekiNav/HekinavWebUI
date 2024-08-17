@@ -298,7 +298,7 @@ function renderPolyline(shape, color, draw = true, interactive = false) {
         color: color,
         interactive: interactive,
         dashArray: color == 'gray' ? [2, 3] : null,
-        renderer: canvasRenderer
+        renderer: canvasRenderer,
     })
     if (draw) {
         polyline.addTo(layerGroup);
@@ -596,15 +596,13 @@ function preAPI() {
     }
     input1 = JSON.stringify(input1)
     input2 = JSON.stringify(input2)
-
     const input3 = document.getElementById('input3').value
     const input4 = document.getElementById('input4').value
     values.time = input3
     values.date = input4
     if ((apiRunning == false && error == '') || random) {
         console.log('Getting route from ', input1, ' to ', input2, ' at ', input4, input3)
-        api(input1, input2, input3, input4)
-        sidebarMode('routepreview')
+        api()
     } else if (apiRunning == true) {
         console.log('Route process terminated because previous process is not complete')
         setError({ message: "Please wait for the previous route process to finish" }, 5000)
@@ -614,7 +612,7 @@ function preAPI() {
 }
 async function api() {
 
-    // document.getElementById('rph').innerHTML = `Loading routes from ${values.from.display} to ${values.to.display}`
+    document.getElementById('rph').innerHTML = `Loading routes from ${values.from.display} to ${values.to.display}`
     document.getElementById('routes').innerHTML = loadingHTML2
     routes.length = 0
     //Prevents API from getting too many requests
@@ -628,7 +626,7 @@ async function api() {
     //Finish JSON handling
     values.routes = data
     document.getElementById('routes').innerHTML = ""
-    //document.getElementById('rph').innerHTML = `Loaded ${data.length} routes from ${values.from.display} to ${values.to.display} in ${time > 1000 ? `${Math.round(time / 10) / 100}s` : `${time}ms`}`
+    document.getElementById('rph').innerHTML = `Loaded ${data.data.plan.itineraries.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
     if (!random) {
         localStorage.setItem('route', JSON.stringify(values))
     }
@@ -638,6 +636,7 @@ async function api() {
         map.flyToBounds(routes[0].bbox, 0.3)
         viewRoute(i, false)
     }
+    sidebarMode('routepreview')
     apiRunning = false
     if (repeat == true) {
         setTimeout(preAPI(), 10000)
@@ -670,7 +669,7 @@ function sidebarMode(mode) {
             "options options options map map"`
             break;
         case 'routepreview':
-            stopImportanceOffset = 0
+            stopImportanceOffset = 2
             clearMap()
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
@@ -720,14 +719,132 @@ function sidebarMode(mode) {
 function route(route, i) {
     clearMap()
     let routeHTML = '<table border="0" cellspacing="0" cellpadding="0">'
-    let colors = []
-    let transfers = []
-    let nonTransfers = []
-    let nextTransfer = {}
-    let previousTrip = { route_id: 0, stop_id: 0 }
-    let previousTripInfo = {}
-    let routepreview = '<span class="preview">'
 
+    let routepreview = '<span class="preview">'
+    let trips = []
+    let previousTrip
+    const dateInUnix = new Date().setHours(0, 0, 0, 0) / 1000
+
+    for (let i = 0; i < route.legs.length; i++) {
+        const leg = route.legs[i]
+        if (leg.mode == "WALK") {
+            const walktime = leg.endTime / 1000 - leg.startTime / 1000
+            const color = routeType("WALK").color
+            routepreview += walktime > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * walktime - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
+            if(i == 0){
+                const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
+                const img2 = `background-image:url("img/route/gray.png")`
+                routeHTML +=
+                    `<tr><td class = "td">${sToTime(leg.startTime / 1000 - dateInUnix)}</td>
+                <td class="td" id="img" style=${img1}></td>
+                <td class="td">${values.from.display}</td>
+                </tr><tr>
+                <td class="td"></td>
+                <td class="td" id="img" style=${img2}></td>
+                <td class="td">walk ${sToHMinS(walktime)}</td>`
+            } else if(i == route.legs.length - 1){
+                const img1 = `background-image:url("img/endmarker.svg"),url("img/route/endgray.png")`
+                const img2 = `background-image:url("img/route/gray.png")`
+
+                routeHTML +=
+                    `<tr><td></td>
+                    <td class="td" id="img" style=${img2}></td>
+                    <td>walk ${sToHMinS(walktime)}</td>
+                    </tr><tr>
+                    <td>${sToTime(leg.endTime / 1000 - dateInUnix)}</td>
+                    <td class="td" id="img" style=${img1}></td>
+                    <td>${values.to.display}</td>
+                    </tr>`
+            } else {
+                const img1 = `background-image:url("img/route/gray.png")`
+
+                routeHTML +=
+                `<tr><td class="td"></td>
+                <td id="img" style=${img1}></td>
+                <td class="td">walk ${sToHMinS(walktime)}</td></tr>`
+            }
+            trips.push({
+                routeType: "WALK",
+                color: color,
+                fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
+                toCoords: { lat: leg.to.lat, lon: leg.to.lon },
+                shape: leg.legGeometry.points,
+                popUpTime: walktime,
+                popUpType: "WALK",
+                startTime: sToTime(leg.startTime / 1000 - dateInUnix),
+                endTime: sToTime(leg.endTime / 1000 - dateInUnix),
+            })
+
+        } else {
+            const duration = leg.endTime / 1000 - leg.startTime / 1000
+            const waittime = leg.startTime / 1000 - previousTrip.endTime / 1000
+            const color = routeType(leg.mode).color
+            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
+            if(i == 0){
+
+            } else /* transit */ {
+                const img1 = `background-image:url("img/route/start${color}.png")`
+                const img2 = `background-image:url("img/route/${color}.png")`
+                const img3 = `background-image:url("img/route/end${color}.png")`
+                const img4 = `background-image:url("img/route/startgrey.png")`
+                const img5 = `background-image:url("img/route/grey.png")`
+                routeHTML +=
+                `${waittime > 0 ? `<tr><td></td>
+                <td class="td" id="img" style=${img5}></td>
+                <td class="td">wait ${sToHMinS(waittime)}</td>
+                </tr>` : ""}<tr>
+                <td class="border_td">${sToTime(leg.startTime / 1000 - dateInUnix)}</td>
+                <td class="border_td" id="img" style=${img1}></td>
+                <td class="border_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
+                </tr><tr>
+                <td class="td"></td>
+                <td class="td" id="img" style=${img2}></td>
+                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign.length < 25 ? leg.trip.tripHeadsign : `${leg.trip.tripHeadsign.slice(0, 25)}...`}</td>
+                </tr><tr>
+                <td class="border_td">${sToTime(leg.endTime / 1000 - dateInUnix)}</td>
+                <td class="border_td" id="img" style=${img3}></td>
+                <td class="border_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
+            }
+            trips.push({
+                routeType: leg.mode,
+                color: color,
+                fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
+                toCoords: { lat: leg.to.lat, lon: leg.to.lon },
+                shape: leg.legGeometry.points,
+                popUpTime: waittime,
+                popUpType: "WAIT",
+                routeName: leg.route.shortName,
+                startTime: sToTime(leg.startTime / 1000 - dateInUnix),
+                endTime: sToTime(leg.endTime / 1000 - dateInUnix),
+            })
+        }
+        previousTrip = leg
+    }
+
+    const bbox = [trips[0].fromCoords, trips[trips.length - 1].toCoords]
+    routeHTML += '</table>'
+    routepreview += '</span>'
+    const table = document.createElement('table')
+    table.classList.add('route-preview')
+    console.log(trips[0])
+    table.innerHTML = `
+        <tr>
+        <td>${trips[0].startTime} - ${trips[trips.length - 1].endTime}</td>
+        <td></td>
+        <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
+        </tr><tr>
+        <td>${route.fares != null ? route.fares.cents : "idk"}€</td>
+        <td></td>
+        <td>${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
+        </tr><tr>
+        <td colspan="3">${routepreview}</td>
+        </tr>
+    `
+    table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
+    table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
+    document.getElementById('routes').append(table)
+    console.log(`fares: ${route.fares}`)
+    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance, fares: route.fares != null ? route.fares.cents : "idk" }
     for (let i = 0; i < route.legs.length; i++) {
         const trip = route.legs[i];
         if (trip.route == null) {
@@ -803,7 +920,7 @@ function route(route, i) {
                 <td></td>
                 <td id="img" style=${img2}></td>
                 <td>walk ${sToHMinS(walktime)}${duration - walktime ? `, wait ${sToHMinS(duration - walktime)}` : ''}</td></tr>`
-            }/* Same stop transfer */ else if (previousTrip.route_type != 2) {
+            }/* Same stop transfer */ else if (previousTrip.route_type != "WALK") {
                 routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * (hhmmssToS(trip.endTime) - hhmmssToS(previousTrip.endTime)) - 1}%;background-color:gray">${image.wait(15)}</span>`
                 routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * duration - 1}%;background-color:${tripInfo.color}">${trip.route.shortName}</span>`
                 transfers.push({ wait: duration, walk: false })
@@ -853,30 +970,6 @@ function route(route, i) {
         previousTrip = trip
         previousTripInfo = tripInfo
     }
-    routeHTML += '</table>'
-    routepreview += '</span>'
-    const place1 = route.legs[0]
-    const place2 = route.legs[route.legs.length - 1]
-    const bbox = [[place1.from.lat, place1.from.lon], [place2.to.lat, place2.to.lon]]
-    const table = document.createElement('table')
-    table.classList.add('route-preview')
-    table.innerHTML = `
-        <tr>
-        <td>${place1.endTime} - ${place2.endTime}</td>
-        <td></td>
-        <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
-        </tr><tr>
-        <td>${route.fares != null ? route.fares.cents : "idk"}€</td>
-        <td></td>
-        <td>${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
-        </tr><tr>
-        <td colspan="3">${routepreview}</td>
-        </tr>
-    `
-    table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
-    table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
-    document.getElementById('routes').append(table)
-    return { html: routeHTML, bbox: bbox, transfers: transfers, colors: colors, trips: route.legs, duration: route.duration, walk_distance: route.walkDistance, fares: route.fares != null ? route.fares.cents : "idk" }
 }
 function setValue(lat, lon, display, field) {
     if (field == 1) {
@@ -1026,6 +1119,7 @@ function viewRoute(i, click) {
     clearMap()
     ///CLICK ONLY
     if (click) {
+        console.log("CLICK")
         document.getElementById('route').innerHTML = route.html
         sidebarMode('route')
         map.flyToBounds(route.bbox, 1)
@@ -1035,19 +1129,19 @@ function viewRoute(i, click) {
             if (r != route) {
                 for (let k = 0; k < r.trips.length; k++) {
                     const trip = r.trips[k];
-                    renderPolyline(L.Polyline.fromEncoded(trip.legGeometry.points).getLatLngs(), '#555')
+                    renderPolyline(L.Polyline.fromEncoded(trip.shape).getLatLngs(), '#555')
                 }
             }
         })
     }
     //BOTH
+    let direction = 'left'
     for (let j = 0; j < route.trips.length; j++) {
-        const isTransfer = route.transfers[j] ? true : false
         const trip = route.trips[j];
         //polyline
-        const polyline = renderPolyline(L.Polyline.fromEncoded(trip.legGeometry.points).getLatLngs(), route.colors[j])
+        const polyline = renderPolyline(L.Polyline.fromEncoded(trip.shape).getLatLngs(), trip.color)
         //Add route label
-        if (trip.route_type != 2) {
+        if (trip.routeType != "WALK") {
             let latlons = []
             polyline._latlngs.forEach(latlng => {
                 if (map.getBounds().contains(latlng)) {
@@ -1060,7 +1154,7 @@ function viewRoute(i, click) {
                     interactive: true,
                     icon: L.divIcon({
                         className: 'label',
-                        html: `<div height="20" style="width:${trip.route.shortName.length * 8 + 8}px;background-color:${routeType(trip.mode).color};" class="route-name"><h1>${trip.route.shortName}</h1></div>`
+                        html: `<div height="20" style="width:${trip.routeName.length * 8 + 8}px;background-color:${trip.color};" class="route-name"><h1>${trip.routeName}</h1></div>`
                     })
                 }).addTo(tempGroup)
             }
@@ -1068,20 +1162,38 @@ function viewRoute(i, click) {
         //CLICK ONLY
         if ((j == 0 || j == route.trips.length - 1) && click) {
             //Add start and end markers
-            L.marker({ lat: trip.lat, lon: trip.lon }, { icon: j == 0 ? greenIcon : redIcon }).addTo(layerGroup);
+            if (j == 0) {
+                L.marker({ lat: trip.fromCoords.lat, lon: trip.fromCoords.lon }, { icon: greenIcon }).addTo(layerGroup);
+            } else {
+                L.marker({ lat: trip.toCoords.lat, lon: trip.toCoords.lon }, { icon: redIcon }).addTo(layerGroup);
+            }
+
         }
         //Stops
-        const marker = renderCircle({ lat: trip.from.lat, lon: trip.from.lon }, route.colors[j], isTransfer, true)
-        if (isTransfer && (route.transfers[j].walk > 10 || route.transfers[j].wait > 10)) {
-            //Add a popup to tell walking and waiting times
-            const transfer = route.transfers[j]
-            marker.bindTooltip(`${transfer.walk ? `${image.walk(12)}${sToHMinS(transfer.walk)}` : ''} ${transfer.wait ? `${image.wait(12)}${sToHMinS(transfer.wait)}` : ''}`, {
+        const marker = renderCircle({ lat: trip.fromCoords.lat, lon: trip.fromCoords.lon }, trip.color, false, true)
+        //Add a popup to tell walking and waiting times
+        if (trip.popUpTime > 10) {
+            if (direction == 'right') {
+                direction = 'left'
+            } else if (direction == 'left') {
+                direction = 'right'
+            }
+            marker.bindTooltip(`${trip.popUpType == "WALK" ? `${image.walk(12)} ${sToHMinS(trip.popUpTime)}` : `${image.wait(12)} ${sToHMinS(trip.popUpTime)}`}`, {
                 opacity: 1.0,
-                sticky: false,
-                permanent: true
+                sticky: true,
+                permanent: true,
+                direction: direction,
             }).openTooltip()
-        } else if (click) {
-            renderCircle({ lat: trip.from.lat, lon: trip.from.lat }, route.colors[j], false)
+        }
+        /*const transfer = route.transfers[j]
+        console.log(transfer)
+        marker.bindTooltip(`${transfer.walk ? `${image.walk(12)}${sToHMinS(transfer.walk)}` : ''} ${transfer.wait ? `${image.wait(12)}${sToHMinS(transfer.wait)}` : ''}`, {
+            opacity: 1.0,
+            sticky: false,
+            permanent: true
+        }).openTooltip()*/
+        if (click) {
+            renderCircle({ lat: trip.toCoords.lat, lon: trip.toCoords.lat }, trip.color, false)
         }
     }
 }
@@ -1116,28 +1228,17 @@ function moveHandler(e, polyline) {
     labels += `</div>`
     polyline.openTooltip(e.latlng).setTooltipContent(labels)
 }
-
 function routeTypeToSortValue(routeType) {
     if (routeType == 102) return 110
     if (routeType == 702) return 699
     return routeType
 }
-
 async function digitransitRoute() {
-    if (values.from == undefined) {
-        fromLat = 60.17664172012474
-        fromLon = 24.656461728643194
-    } else {
-        fromLat = values.from.lat
-        fromLon = values.from.lon
-    }
-    if (values.to == undefined) {
-        toLat = 60.294005904697535
-        toLon = 25.040987683425318
-    } else {
-        toLat = values.to.lat
-        toLon = values.to.lon
-    }
+
+    fromLat = values.from.lat
+    fromLon = values.from.lon
+    toLat = values.to.lat
+    toLon = values.to.lon
 
     clearMap()
     const date = document.getElementById('input4').value
@@ -1206,19 +1307,3 @@ async function digitransitRoute() {
     const result = await rawdata.json()
     return result
 }
-
-function showRoute(route) {
-    console.log(route.legs.length)
-    for (var i = 0; i < route.legs.length; i++) {
-        const leg = route.legs[i]
-        var coordinates = L.Polyline.fromEncoded(leg.legGeometry.points).getLatLngs();
-        renderPolyline(coordinates, color = routeType(leg.mode).color)
-
-        renderCircle(stop = { lat: leg.from.lat, lon: leg.from.lon }, color = routeType(leg.mode).color)
-    }/*
-    const startCoords = L.latLng(route.legs[0].from.lat, route.legs[0].from.lon)
-    const endCoords = L.latLng(route.legs[route.legs.length-1].to.lat, route.legs[route.legs.length-1].to.lon)
-    L.fitToBounds(startCoords, endCoords)*/
-
-}
-
