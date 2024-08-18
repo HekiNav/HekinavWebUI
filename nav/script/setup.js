@@ -427,13 +427,13 @@ async function search(inputElement) {
             const element = recentSearches[i];
 
             const row = document.createElement('div')
-            row.classList.add('stopRow')
+            row.classList.add('resultRow')
 
-            const text = document.createElement('div')
-            text.classList.add('stopText')
-            text.textContent = element.name
+            const name = document.createElement('div')
+            name.classList.add('resultName')
+            name.textContent = element.name
 
-            row.append(text)
+            row.append(name)
             row.addEventListener('click', e => {
                 setValue(element.lat, element.lon, element.name, inputElement);
                 map.flyTo([element.lat, element.lon])
@@ -442,7 +442,7 @@ async function search(inputElement) {
         }
     } else {
         const row = document.createElement('div')
-        row.classList.add('stopRow')
+        row.classList.add('resultRow')
 
         const name = document.createElement('div')
         name.classList.add('TEMP')
@@ -452,56 +452,58 @@ async function search(inputElement) {
         autocorrect.append(row)
         for (let i = 0; i < features.length && i < 100; i++) {
             const element = features[i].properties;
-            /* element.city = element.city.replaceAll('ae','ä')
-            element.city = element.city.replaceAll('oe','ö') */
+            if (element.addendum && !element.addendum.GTFS) console.log(element.addendum)
 
             const row = document.createElement('div')
-            row.classList.add('stopRow')
+            row.classList.add('resultRow')
 
-            /*
-            const code = document.createElement('div')
-            code.classList.add('stopCode')
-            code.textContent = element.code
+            const type = document.createElement('div')
+            type.classList.add('resultType')
+            type.style.backgroundImage = `url(img/icons/${getIcon(element.layer, element.addendum)}.svg)`
 
-            const city = document.createElement('div')
-            city.classList.add('stopCity')
-            city.textContent = element.city
+            const name = document.createElement('div')
+            name.classList.add('resultName')
+            name.textContent = element.name
 
-            const text = document.createElement('div')
-            text.classList.add('stopText')
-            text.textContent = element.text
+            const area = document.createElement('div')
+            area.classList.add('resultArea')
+            area.textContent = (element.neighbourhood ? element.neighbourhood + ", " : "") + (element.localadmin ? element.localadmin : "") + (!element.neighbourhood ? ", " + element.region : "")
 
-            row.append(code)
-            row.append(city)
-            row.append(text)*/
 
-            const text = document.createElement('div')
-            text.classList.add('stopText')
-            text.textContent = element.name
-
-            const city = document.createElement('div')
-            city.classList.add('stopCity')
-            city.textContent = element.localadmin
-
-            row.append(text)
-            row.append(city)
+            row.append(type)
+            row.append(name)
+            row.append(area)
             element.lat = features[i].geometry.coordinates[1]
             element.lon = features[i].geometry.coordinates[0]
             row.addEventListener('click', e => {
                 setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
-                map.flyTo([element.lat, element.lon])
+                map.flyTo([element.lat, element.lon], 15, {duration: 0.5})
             })
             autocorrect.append(row)
         }
     }
 
 }
-async function getStops() {
-    document.querySelector('body').style.cursor = 'wait'
-    let localData = await fetch('/nav/data/stops.htv')
-    let localData2 = await fetch('/nav/data/stops2.htv')
-    loadStops(await localData.json(), await localData2.json())
+function getIcon(type, data) {
+    if (data) {
+        return `${type}.${data.GTFS.modes[0].toLowerCase()}`
+    } 
+    switch (type) {
+        case "address":
+            return "pin"
+        case "venue":
+            return "venue"
+        case "street":
+            return "street"
+        case "localadmin":
+        case "neighbourhood":
+        case "region":
+            return "area"
+        default:
+            console.log(type)
+            return "none"
+    }
 }
 function addStop(stop) {
     if (stop.position[0] == undefined || stop.position[1] == undefined) {

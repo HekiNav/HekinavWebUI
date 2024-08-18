@@ -1,0 +1,28 @@
+
+/* search result styling */
+  .resultType{
+    width: 10%;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+  .resultName {
+    width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .resultArea {
+    width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 80%;
+    color: lightslategrey;
+    text-align: right;
+  }
+  
+  .resultRow {
+    display: flex;
+    flex-direction: row;
+    height: 1.7vw;
+  }
+  
