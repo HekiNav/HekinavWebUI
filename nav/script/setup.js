@@ -732,7 +732,7 @@ function route(route, i) {
             const walktime = leg.endTime / 1000 - leg.startTime / 1000
             const color = routeType("WALK").color
             routepreview += walktime > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * walktime - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
-            if(i == 0){
+            if (i == 0) {
                 const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
                 routeHTML +=
@@ -743,7 +743,7 @@ function route(route, i) {
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
                 <td class="td">walk ${sToHMinS(walktime)}</td>`
-            } else if(i == route.legs.length - 1){
+            } else if (i == route.legs.length - 1) {
                 const img1 = `background-image:url("img/endmarker.svg"),url("img/route/endgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
 
@@ -760,7 +760,7 @@ function route(route, i) {
                 const img1 = `background-image:url("img/route/gray.png")`
 
                 routeHTML +=
-                `<tr><td class="td"></td>
+                    `<tr><td class="td"></td>
                 <td id="img" style=${img1}></td>
                 <td class="td">walk ${sToHMinS(walktime)}</td></tr>`
             }
@@ -781,15 +781,15 @@ function route(route, i) {
             const waittime = leg.startTime / 1000 - previousTrip.endTime / 1000
             const color = routeType(leg.mode).color
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
-            if(i == 0){
+            if (i == 0) {
 
-            } else  {
+            } else {
                 const img1 = `background-image:url("img/route/start${color}.png")`
                 const img2 = `background-image:url("img/route/${color}.png")`
                 const img3 = `background-image:url("img/route/end${color}.png")`
                 const img5 = `background-image:url("img/route/grey.png")`
                 routeHTML +=
-                `${waittime > 0 ? `<tr><td></td>
+                    `${waittime > 0 ? `<tr><td></td>
                 <td class="td" id="img" style=${img5}></td>
                 <td class="td">wait ${sToHMinS(waittime)}</td>
                 </tr>` : ""}<tr>
@@ -827,9 +827,11 @@ function route(route, i) {
     const table = document.createElement('table')
     table.classList.add('route-preview')
     console.log(trips[0])
-    let fare
-    if(route.fares != null & route.fares[0].cents != -1){
-        fare = route.fares[0].cents / 100
+    let fare = ""
+    if (route.fares) {
+        if (route.fares[0].cents != -1) {
+            fare = route.fares[0].cents / 100
+        }
     }
     table.innerHTML = `
         <tr>
@@ -837,7 +839,7 @@ function route(route, i) {
         <td></td>
         <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
         </tr><tr>
-        <td>${route.fares =! null ? (route.fares[0].cents != -1 ? `${route.fares[0].cents / 100}€` : "") : ""}</td>
+        <td>${fare}</td>
         <td></td>
         <td>${image.walk(15)} ${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
         </tr><tr>
@@ -847,7 +849,7 @@ function route(route, i) {
     table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
     table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
     document.getElementById('routes').append(table)
-    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance, fares: route.fares != null ? route.fares.cents : "idk" }
+    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance, fares: fare }
     for (let i = 0; i < route.legs.length; i++) {
         const trip = route.legs[i];
         if (trip.route == null) {
