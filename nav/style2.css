@@ -1,113 +1,129 @@
-
-#options{
-    grid-area: options;
-    border: 0px;
-    color: #ffffff;
-    font-size: var(--font-size);
+#options {
+  grid-area: options;
+  border: 0px;
+  color: #ffffff;
+  font-size: var(--font-size);
 }
+
 /* search button */
-#search{
-    border: var(--main-border);
-    margin-top: 0;
-    align-self: flex-start;
-    color: #001049;
-    font-size: var(--font-size);
-    grid-area: search;
-    background-color: #ffffff;
+#search {
+  border: var(--main-border);
+  margin-top: 0;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  grid-area: search;
+  background-color: #ffffff;
 }
-/* input fields and their labels */
-.cText{
-    align-self: flex-end;
-    color: white;
-    font-size: 300%;
-}
-.autocorrect{
-    font-size: 1.5vw;
-    max-height: 20vh; 
-    overflow-y: scroll;
-    margin: 0;
-    padding-left: 1%;
-}
-.input1{
-    position: relative;
-    z-index: 20;
-    border: var(--main-border);
-    margin-top: 0%;
-    position: relative;
-    align-self: flex-start;
-    color: #001049;
-    font-size: var(--font-size);
-    background:#ffffff;
-    grid-area: input1;
-    width: 99%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
-    .text1{
-        margin: 0;
-        align-self: flex-start;
-        color: #ffffff;
-        font-size: var(--font-size);
-        grid-area: text1;
-        text-wrap:nowrap;
-        width: 10%;
-    }
-    #input1{
-        border: none;
-        border-radius: var(--main-radius);
-        border-bottom: 1px ;
-        margin-top: 0%;
-        align-self: flex-start;
-        color: #001049;
-        font-size: var(--font-size);
-        background:#ffffff;
-        width: 100%;
-    }
-    #error1{
-        margin: 0;
-        font-size: 15px;
-        color: red;
-    }
-.input2{
-    position: relative;
-    z-index: 10;
-    border: var(--main-border);
-    margin-top: 0%;
-    position: relative;
-    align-self: flex-start;
-    color: #001049;
-    font-size: var(--font-size);
-    background:#ffffff;
-    grid-area: input2;
-    width: 99%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-}
-    .text2{
-        margin: 0;
-        align-self: flex-start;
-        color: #ffffff;
-        font-size: var(--font-size);
-        grid-area: text2;
-        width: 99%;
-    }
-    #input2{
-        border: none;
-        border-radius: var(--main-radius);
-        margin-top: 0%;
-        align-self: flex-start;
-        color: #001049;
-        font-size: var(--font-size);
-        background:#ffffff;
-        width: 100%;
-    }
-    #error2{
-    margin: 0;
-    font-size: 15px;
-    color: red;
-    }
 
-.text3{
+/* input fields and their labels */
+.cText {
+  align-self: flex-end;
+  color: white;
+  font-size: 300%;
+}
+
+.autocorrect {
+  font-size: 1.5vw;
+  max-height: 20vh;
+  overflow-y: scroll;
+  margin: 0;
+  padding-left: 1%;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.input1 {
+  position: relative;
+  z-index: 20;
+  border: var(--main-border);
+  margin-top: 0%;
+  position: relative;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  grid-area: input1;
+  width: 99%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.text1 {
+  margin: 0;
+  align-self: flex-start;
+  color: #ffffff;
+  font-size: var(--font-size);
+  grid-area: text1;
+  text-wrap: nowrap;
+  width: 10%;
+}
+
+#input1 {
+  border: none;
+  border-radius: var(--main-radius);
+  border-bottom: 1px;
+  margin-top: 0%;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  width: 100%;
+}
+
+#error1 {
+  margin: 0;
+  font-size: 15px;
+  color: red;
+}
+
+.input2 {
+  position: relative;
+  z-index: 10;
+  border: var(--main-border);
+  margin-top: 0%;
+  position: relative;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  grid-area: input2;
+  width: 99%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.text2 {
+  margin: 0;
+  align-self: flex-start;
+  color: #ffffff;
+  font-size: var(--font-size);
+  grid-area: text2;
+  width: 99%;
+}
+
+#input2 {
+  border: none;
+  border-radius: var(--main-radius);
+  margin-top: 0%;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  width: 100%;
+}
+
+#error2 {
+  margin: 0;
+  font-size: 15px;
+  color: red;
+}
+
+.text3 {
   margin: 0;
   align-self: flex-start;
   color: #ffffff;
@@ -115,18 +131,20 @@
   grid-area: text3;
   width: 99%;
 }
-#input3{
-    border: var(--main-border);
-    margin-top: 0%;
-    align-self: flex-start;
-    color: #001049;
-    font-size: var(--font-size);
-    background:#ffffff;
-    grid-area: input3;
-    width: auto;
-    height: 100%;
+
+#input3 {
+  border: var(--main-border);
+  margin-top: 0%;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  grid-area: input3;
+  width: auto;
+  height: 100%;
 }
-#input4{
+
+#input4 {
   border: var(--main-border);
   margin-top: 0%;
   align-self: flex-start;
@@ -136,41 +154,62 @@
   width: 95%;
   height: 99%;
 }
+
 /* search result styling */
-.stopCity{
+.stopCity {
   width: 20%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.stopCode{
+
+.stopCode {
   width: 15%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.stopText{
+
+.stopText {
   width: 65%;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.stopRow{
+
+.stopCity {
+  width: 65%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 80%;
+  color: lightslategrey;
+  text-align: right;
+}
+
+.stopRow {
   display: flex;
   flex-direction: row;
   height: 1.7vw;
 }
+
 /* buttons with images */
-.back{
+.back {
   grid-area: back;
   border: none;
   background-color: #fff0;
   background-image: url(img/back.svg);
-  background-size:contain;
-  background-repeat:no-repeat;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
 }
-  #img{
-    background-size:contain;
-    background-repeat:no-repeat;
-    background-position: center;
-    width: 40px;
-    padding: 0;
-  }
+
+#img {
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 40px;
+  padding: 0;
+}
+
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+  /* make scrollbar transparent */
+}
