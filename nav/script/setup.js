@@ -479,7 +479,12 @@ async function search(inputElement) {
             text.classList.add('stopText')
             text.textContent = element.name
 
+            const city = document.createElement('div')
+            city.classList.add('stopCity')
+            city.textContent = element.localadmin
+
             row.append(text)
+            row.append(city)
             element.lat = features[i].geometry.coordinates[1]
             element.lon = features[i].geometry.coordinates[0]
             row.addEventListener('click', e => {
