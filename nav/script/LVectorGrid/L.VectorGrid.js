@@ -2044,7 +2044,8 @@
               //Filter out stops with no deps
               if (!feat.properties.patterns || !JSON.parse(feat.properties.patterns).length > 0) continue
               //Filter out stop that have a smaller render zoom
-              if (routeType(feat.properties.type).importance > map.getZoom()) continue
+              console.log(stopImportanceOffset)
+              if (routeType(feat.properties.type).importance + stopImportanceOffset > map.getZoom()) continue
               //Filter out duplicate hsl stops with MATKA ids
               if (feat.properties)
               if (routeType(feat.properties.type).text == "tram" && /MATKA:.*/.test(feat.properties.gtfsId)) continue

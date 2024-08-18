@@ -684,7 +684,7 @@ function sidebarMode(mode) {
             "options options options map map"`
             break;
         case 'routepreview':
-            stopImportanceOffset = 2
+            stopImportanceOffset = 3
             clearMap()
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
@@ -706,7 +706,7 @@ function sidebarMode(mode) {
             "routes routes routes map map"`
             break;
         case 'route':
-            stopImportanceOffset = 4
+            stopImportanceOffset = 3
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
                 element.hidden = true
@@ -1324,7 +1324,7 @@ async function digitransitRoute() {
   }
 }`
     console.log(query)
-    const rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
+    const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
     return result
 }
