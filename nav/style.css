@@ -129,6 +129,14 @@ h4{
   border: none;
   height: 80px;
 }
+.bottom_td{
+  border: none;
+  vertical-align: bottom;
+}
+.top_td{
+  border: none;
+  vertical-align: top;
+}
 .border_td{
   border: none;
   height: 54px;

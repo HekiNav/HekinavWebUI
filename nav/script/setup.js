@@ -366,7 +366,7 @@ function routeType(code) {
         text = 'lightrail'
         color = 'darkgreen'
         importance = 13
-    } else if (code == 2) {
+    } else if (code == 2 | code == "WALK") {
         text = 'walk'
         color = 'gray'
         importance = null
@@ -842,10 +842,8 @@ function route(route, i) {
     table.classList.add('route-preview')
     console.log(trips[0])
     let fare = ""
-    if (route.fares) {
-        if (route.fares[0].cents != -1) {
-            fare = route.fares[0].cents / 100
-        }
+    if (route.fares.length != 0) {
+        fare = route.fares.cents / 100
     }
     table.innerHTML = `
         <tr>
@@ -1281,7 +1279,7 @@ async function digitransitRoute() {
       startTime
       endTime
       legs {
-        startTime
+        startime
         endTime
         departureDelay
         arrivalDelay
@@ -1328,3 +1326,65 @@ async function digitransitRoute() {
     const result = await rawdata.json()
     return result
 }
+
+// v1 query
+/*`{
+  plan(
+    from: {lat: ${fromLat}, lon: ${fromLon}}
+    to: {lat: ${toLat}, lon: ${toLon}}
+    date: "${document.getElementById('input4').value}",
+    time: "${document.getElementById('input3').value}",
+  ) {
+    itineraries {
+      duration
+      fares {
+        type
+        currency
+        cents
+      }
+      walkDistance
+      startTime
+      endTime
+      legs {
+        startTime
+        endTime
+        departureDelay
+        arrivalDelay
+        mode
+        duration
+        realTime
+        realtimeState
+        distance
+        transitLeg
+        from {
+          lat
+          lon
+          stop {
+            code
+            name
+          }
+        }
+        to {
+          lat
+          lon
+          stop {
+            code
+            name
+          }
+        }
+        trip {
+          gtfsId
+          tripHeadsign
+        }
+        route {
+          shortName
+          type
+        }
+        legGeometry {
+          length  
+          points
+        }
+      }
+    }
+  }
+}`*/
