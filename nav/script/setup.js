@@ -742,15 +742,22 @@ function route(route, i) {
 
     for (let i = 0; i < route.legs.length; i++) {
         const leg = route.legs[i]
-        if (leg.mode == "WALK") {
-            const walktime = leg.endTime / 1000 - leg.startTime / 1000
+        if ((leg.route ? leg.route.type : leg.mode) == "WALK") {
+            let start_time = new Date(leg.start.scheduledTime)
+            const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
+            const end_time = new Date(leg.end.scheduledTime)
+            const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
+            leg.startTime = startTime
+            leg.endTime = endTime
+            const walktime = endTime - startTime
             const color = routeType("WALK").color
+
             routepreview += walktime > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * walktime - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
             if (i == 0) {
                 const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
                 routeHTML +=
-                    `<tr><td class = "td">${sToTime(leg.startTime / 1000 - dateInUnix)}</td>
+                    `<tr><td class = "td">${sToTime(startTime)}</td>
                 <td class="td" id="img" style=${img1}></td>
                 <td class="td">${values.from.display}</td>
                 </tr><tr>
@@ -766,7 +773,7 @@ function route(route, i) {
                     <td class="td" id="img" style=${img2}></td>
                     <td>walk ${sToHMinS(walktime)}</td>
                     </tr><tr>
-                    <td>${sToTime(leg.endTime / 1000 - dateInUnix)}</td>
+                    <td>${sToTime(endTime)}</td>
                     <td class="td" id="img" style=${img1}></td>
                     <td>${values.to.display}</td>
                     </tr>`
@@ -786,14 +793,20 @@ function route(route, i) {
                 shape: leg.legGeometry.points,
                 popUpTime: walktime,
                 popUpType: "WALK",
-                startTime: sToTime(leg.startTime / 1000 - dateInUnix),
-                endTime: sToTime(leg.endTime / 1000 - dateInUnix),
+                startTime: sToTime(startTime),
+                endTime: sToTime(endTime),
             })
 
         } /* transit */ else {
-            const duration = leg.endTime / 1000 - leg.startTime / 1000
-            const waittime = leg.startTime / 1000 - previousTrip.endTime / 1000
-            const color = routeType(leg.mode).color
+            let start_time = new Date(leg.start.estimated ? leg.start.estimated.time : leg.start.scheduledTime)
+            const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
+            const end_time = new Date(leg.end.estimated ? leg.end.estimated.time : leg.end.scheduledTime)
+            const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
+            leg.startTime = startTime
+            leg.endTime = endTime
+            const duration = endTime - startTime
+            const waittime = startTime - previousTrip.endTime
+            const color = routeType(leg.route.type).color
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
@@ -802,22 +815,23 @@ function route(route, i) {
                 const img2 = `background-image:url("img/route/${color}.png")`
                 const img3 = `background-image:url("img/route/end${color}.png")`
                 const img5 = `background-image:url("img/route/grey.png")`
+
                 routeHTML +=
                     `${waittime > 0 ? `<tr><td></td>
                 <td class="td" id="img" style=${img5}></td>
                 <td class="td">wait ${sToHMinS(waittime)}</td>
                 </tr>` : ""}<tr>
-                <td class="border_td">${sToTime(leg.startTime / 1000 - dateInUnix)}\n${leg.mode.toLowerCase()}</td>
+                <td class="top_td">${sToTime(startTime)}\n${routeType(leg.route.type).text}</td>
                 <td class="border_td" id="img" style=${img1}></td>
-                <td class="border_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
+                <td class="top_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
                 </tr><tr>
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
                 <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign.length < 25 ? leg.trip.tripHeadsign : `${leg.trip.tripHeadsign.slice(0, 25)}...`}</td>
                 </tr><tr>
-                <td class="border_td">${sToTime(leg.endTime / 1000 - dateInUnix)}</td>
+                <td class="bottom_td">${sToTime(endTime)}</td>
                 <td class="border_td" id="img" style=${img3}></td>
-                <td class="border_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
+                <td class="bottom_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
             }
             trips.push({
                 routeType: leg.mode,
@@ -828,8 +842,8 @@ function route(route, i) {
                 popUpTime: waittime,
                 popUpType: "WAIT",
                 routeName: leg.route.shortName,
-                startTime: sToTime(leg.startTime / 1000 - dateInUnix),
-                endTime: sToTime(leg.endTime / 1000 - dateInUnix),
+                startTime: sToTime(startTime),
+                endTime: sToTime(endTime),
             })
         }
         previousTrip = leg
@@ -1279,10 +1293,20 @@ async function digitransitRoute() {
       startTime
       endTime
       legs {
-        startime
-        endTime
-        departureDelay
-        arrivalDelay
+        start {
+          scheduledTime
+          estimated {
+            time
+            delay
+          }
+        }
+        end {
+          scheduledTime
+          estimated {
+            time
+            delay
+          }
+        }
         mode
         duration
         realTime
@@ -1324,6 +1348,9 @@ async function digitransitRoute() {
     console.log(query)
     const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
+    if(result.errors){
+        setError({ code: (rawdata ? rawdata.status : ''), message: (result ? result.errors[0].message : 'Route could not be fetched') }, 10000)
+    }
     return result
 }
 
