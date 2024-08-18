@@ -54,7 +54,6 @@ async function getDepartures(stop, stopPopup) {
         console.time(`loading departures for ${stop.text}`)
         let rawdata = null
         const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign pattern{ geometry { lat lon}} route { type   longName     shortName        }      }      headsign    }  }}\"}`
-        console.log(query)
         try {
             rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/json", }, "body": query, "method": "POST", });
             data = await rawdata.json()
@@ -81,7 +80,7 @@ async function getDepartures(stop, stopPopup) {
                 if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
-
+                    
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
                     popupText += '<tr><th>Departures</th></tr>'
@@ -152,9 +151,9 @@ async function getDepartures(stop, stopPopup) {
                 }
             }
             console.timeEnd(`loading departures for ${stop.text}`)
-            if (isPopupOpen() && reload == true) {
+            if (isPopupOpen && reload == true) {
                 timeouts.push(setTimeout((stop, stopPopup, g) => {
-                    if (isPopupOpen() && gen == g) {
+                    if (isPopupOpen && gen == g) {
                         getDepartures(stop, stopPopup)
                     }
                 }, 30000, stop, stopPopup, gen))
@@ -208,8 +207,8 @@ function changeDepTime(dep_date, className, popup, stop, v) {
             element.innerHTML = `&nbsp${Math.floor(diff / 60)}&nbspmin ${Math.floor((diff % 60))}&nbsps&nbsp${sToTime(dep_date)}`
         }
     }
-    if (isPopupOpen() && v == gen) {
-        setTimeout(changeDepTime, 1000, dep_date, className, popup, stop, v)
+    if (isPopupOpen && v == gen) {
+        setTimeout(changeDepTime, 1000, dep_date, className, popup, stop, v)    
     } else {
         for (let i = 0; i < elementList.length; i++) {
             const element = elementList.item(i);
@@ -217,6 +216,25 @@ function changeDepTime(dep_date, className, popup, stop, v) {
         }
         return
     }
+}
+function realtime(route = "", callback, v) {
+    const isHsl = route.split(":")[0].toLowerCase() == "hsl"
+    const client = mqtt.connect(isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/");
+    client.on("connect", () => {
+        client.subscribe(isHsl ? `/hfp/v2/journey/ongoing/+/+/+/+/${route.split(":")[1]/* number part */}/#` :
+                       /* else */`/gtfsrt/vp/${route.split(":")[0]/* feed string part */}/+/+/+/${route.split(":")[1]/* number part */}/#`, (err) => {
+            if (err) console.log("MQTT Error:", err)
+            else console.log("Subscription succeeded to", isHsl ? "HSL" : "Digitransit")
+        });
+    });
+    client.on("message", (topic, message) => {
+        if (v != gen) {
+            client.end()
+            vehicleLayer.clearLayers()
+        }
+        const parts = topic.split("/")
+        callback(isHsl ? JSON.parse(message.toString()) : gtfsrt.decode(new Uint8Array(message)), parts, isHsl)
+    });
 }
 function renderShapes(shapes) {
     shapes.forEach(p => {
@@ -312,11 +330,7 @@ function routeType(code) {
     let text
     let color
     let importance
-    if (code == "WALK") {
-        text = 'walk'
-        color = 'grey'
-        importance = 0
-    } else if (code == 0 || code == "TRAM") {
+    if (code == 0 || code == "TRAM") {
         text = 'tram'
         color = 'green'
         importance = 13
@@ -1076,11 +1090,13 @@ function setMarkerSizes(LeafletGroup) {
 }
 function popup(open, stop) {
     if (open) {
+        isPopupOpen = true
         stopPopup.style.top = `${500}px`
         stopPopup.style.height = `${window.innerHeight - 500}px`
         stopPopupC.innerHTML = `<h3>${stop.code} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr><tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><div class="loading"><h4>Loading departures</h4>${loadingHTML}</div>`
     } else {
         gen++
+        isPopupOpen = false
         stopPopup.style.top = '100%'
         stopPopup.style.height = '0px'
     }
