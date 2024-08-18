@@ -31,7 +31,6 @@ previewPane.style.zIndex = 647;
 const stopTiles = L.vectorGrid.protobuf("https://digitransit-prod-cdn-origin.azureedge.net/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { pane: "stops", interactive: true })
 stopTiles.addTo(map)
 map.on('zoomend', (e) => {
-    //would be cool if this worked
     setMarkerSizes(stopGroup)
     if (map.getZoom() >= 8 && !labelsOnMap) {
         labelsOnMap = true
@@ -120,7 +119,7 @@ const labelGroup = L.layerGroup().addTo(map);
 const zones = L.layerGroup().addTo(map);
 const layerGroup = L.layerGroup().addTo(map);
 const tempGroup = L.layerGroup().addTo(map);
-const stopGroup = L.layerGroup().addTo(map);
+const stopGroup = L.layerGroup([],{pane: "stops"}).addTo(map);
 const previewGroup = L.layerGroup().addTo(map);
 
 const redIcon = new L.Icon({

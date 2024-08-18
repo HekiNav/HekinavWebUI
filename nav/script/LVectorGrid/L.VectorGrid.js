@@ -2196,12 +2196,15 @@
           stop.position = e.latlng
           getDepartures(stop, stopPopup)
         })
+
+        var tooltip = L.tooltip({
+          permanent: false,
+          direction: 'right',
+          className: 'stop-preview-container'
+        })
         
         layer.on("mouseover", (e) => {
-          L.tooltip({
-            permanent: false,
-            sticky: false,
-          })
+          tooltip
           .setLatLng(e.latlng)
           .setContent(layer.preview)
           .addTo(previewGroup)
@@ -2217,7 +2220,7 @@
           }).addTo(previewGroup)
         })*/
         layer.on("mouseout", (e) => {
-          previewGroup.clearLayers()
+          map.closeTooltip(tooltip)
         })
         break;
       case 2:
