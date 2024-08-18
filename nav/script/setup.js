@@ -417,50 +417,26 @@ async function search(inputElement) {
         autocorrect.append(header)
 
         const row = document.createElement('div')
-        row.classList.add('stopRow')
+        row.classList.add('hidden')
 
-        const code = document.createElement('div')
-        code.classList.add('stopCode')
-        code.textContent = 'Code'
-
-        const city = document.createElement('div')
-        city.classList.add('stopCity')
-        city.textContent = 'City'
-
-        const text = document.createElement('div')
-        text.classList.add('stopText')
-        text.textContent = 'Name(type)'
-
-        row.append(code)
-        row.append(city)
-        row.append(text)
         autocorrect.append(row)
 
-        for (let i = 0; i < recentSearches.length && i < 100; i++) {
+        console.log('recent')
+        console.log(recentSearches)
+        for (let i = recentSearches.length - 1; i > -1 && i < 100; i--) {
             const element = recentSearches[i];
-            /* element.city = element.city.replaceAll('ae','ä')
-            element.city = element.city.replaceAll('oe','ö') */
 
             const row = document.createElement('div')
             row.classList.add('stopRow')
 
-            const code = document.createElement('div')
-            code.classList.add('stopCode')
-            code.textContent = element.code
-
-            const city = document.createElement('div')
-            city.classList.add('stopCity')
-            city.textContent = element.city
-
             const text = document.createElement('div')
             text.classList.add('stopText')
-            text.textContent = element.text
+            text.textContent = element.name
 
-            row.append(code)
-            row.append(city)
             row.append(text)
             row.addEventListener('click', e => {
-                setValue(element.position, element.name, inputElement);
+                setValue(element.lat, element.lon, element.name, inputElement);
+                map.flyTo([element.lat, element.lon])
             })
             autocorrect.append(row)
         }
@@ -472,21 +448,6 @@ async function search(inputElement) {
         name.classList.add('TEMP')
         name.textContent = 'Name'
 
-        /*const code = document.createElement('div')
-        code.classList.add('stopCode')
-        code.textContent = 'Code'
-
-        const city = document.createElement('div')
-        city.classList.add('stopCity')
-        city.textContent = 'City'
-
-        const text = document.createElement('div')
-        text.classList.add('stopText')
-        text.textContent = 'Name(type)'
-
-        row.append(code)
-        row.append(city)
-        row.append(text)*/
         row.append(name)
         autocorrect.append(row)
         for (let i = 0; i < features.length && i < 100; i++) {
@@ -519,6 +480,8 @@ async function search(inputElement) {
             text.textContent = element.name
 
             row.append(text)
+            element.lat = features[i].geometry.coordinates[1]
+            element.lon = features[i].geometry.coordinates[0]
             row.addEventListener('click', e => {
                 setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
