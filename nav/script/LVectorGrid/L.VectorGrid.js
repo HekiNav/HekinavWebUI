@@ -2190,11 +2190,23 @@
         layer.preview = `<div class="stop-preview"><h1>${stop.name} (${routeType(type).text})</h1>
                         ${lineLabels}
                          </div>`
+                         
         layer.on("click", (e) => {
           popup(true, stop)
           stop.position = e.latlng
           getDepartures(stop, stopPopup)
         })
+        
+        layer.on("mouseover", (e) => {
+          L.tooltip({
+            permanent: false,
+            sticky: false,
+          })
+          .setLatLng(e.latlng)
+          .setContent(layer.preview)
+          .addTo(previewGroup)
+        })
+        /*
         layer.on("mouseover", (e) => {
           layer.marker = L.marker(e.latlng, {
             pane: previewPane,
@@ -2203,7 +2215,7 @@
               html: layer.preview,
             })
           }).addTo(previewGroup)
-        })
+        })*/
         layer.on("mouseout", (e) => {
           previewGroup.clearLayers()
         })

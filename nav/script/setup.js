@@ -490,6 +490,7 @@ async function search(inputElement) {
             row.addEventListener('click', e => {
                 setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
+                map.flyTo([element.lat, element.lon])
             })
             autocorrect.append(row)
         }
