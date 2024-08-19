@@ -53,7 +53,7 @@ async function getDepartures(stop, stopPopup) {
         let data
         console.time(`loading departures for ${stop.text}`)
         let rawdata = null
-        const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign pattern{ geometry { lat lon}} route { type   longName     shortName        }      }      headsign    }  }}\"}`
+        const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {routes{gtfsId}patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign pattern{ geometry { lat lon}} route { type   longName     shortName        }      }      headsign    }  }}\"}`
         try {
             rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/json", }, "body": query, "method": "POST", });
             data = await rawdata.json()
@@ -80,7 +80,54 @@ async function getDepartures(stop, stopPopup) {
                 if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
-                    
+                    data.data.stop.routes.forEach(r => {
+                        realtime(r.gtfsId, (data, topic, isHsl) => {
+                            if (isHsl) {
+                                const id = topic[7] + topic[8]
+                                const values = Object.values(data)[0]
+                                const pV = vehicles.find(e => id == e.id)
+                                if (!values.lat || !values.long) return
+                                if (!pV) {
+                                    const marker = L.marker([values.lat,values.long], {
+                                        pane: "vehiclePane",
+                                        icon: L.divIcon({
+                                            html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
+                                            iconSize: [25,25],
+                                            className: "vehicle-marker"
+                                        })
+                                    })
+                                    vehicles.push({data: values, marker: marker, id: id})
+                                    marker.addTo(vehicleLayer)
+                                } else {
+                                    pV.data = values
+                                    pV.marker.setLatLng([values.lat,values.long])
+                                }
+                            } else if (data.entity[0].vehicle) {
+                                const id = topic[10]
+                                const pV = vehicles.find(e => id == e.id)
+                                const veh = data.entity[0].vehicle
+                                const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+
+                                if (!pos.lat || !pos.lon) return
+                                if (!pV) {
+                                    console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
+                                    const marker = L.marker([pos.lat,pos.lon], {
+                                        pane: "vehiclePane",
+                                        icon: L.divIcon({
+                                            html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
+                                            iconSize: [25,25],
+                                            className: "vehicle-marker"
+                                        })
+                                    })
+                                    vehicles.push({data: data, marker: marker, id: id})
+                                    marker.addTo(vehicleLayer)
+                                } else {
+                                    pV.data = data
+                                    pV.marker.setLatLng([pos.lat,pos.lon])
+                                }
+                            } else console.log(data)
+                        }, gen)
+                    })
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
                     popupText += '<tr><th>Departures</th></tr>'
@@ -228,7 +275,7 @@ function realtime(route = "", callback, v) {
         });
     });
     client.on("message", (topic, message) => {
-        if (v != gen) {
+        if (v != gen && !isPopupOpen) {
             client.end()
             vehicleLayer.clearLayers()
         }
@@ -327,65 +374,97 @@ function renderPolyline(shape, color, draw = true, interactive = false) {
 }
 function routeType(code) {
     if (/.*,.*/.test(code)) code = code.split(",")[0]
-    let text
-    let color
-    let importance
-    if (code == 0 || code == "TRAM") {
-        text = 'tram'
-        color = 'green'
-        importance = 13
-    } else if (code == 1 || code == "SUBWAY") {
-        text = 'metro'
-        color = 'red'
-        importance = 12
-    } else if (code == 4 || code == "FERRY") {
-        text = 'ferry'
-        color = 'teal'
-        importance = 13
-    } else if (code == 109 || code == "RAIL") {
-        text = 'train'
-        color = 'purple'
-        importance = 9
-    } else if (code == 700 || code == 3 || code == 715 || code == "BUS") {
-        text = 'bus'
-        color = 'blue'
-        importance = 15
-    } else if (code == 701) {
-        text = 'regional bus'
-        color = 'blue'
-        importance = 15
-    } else if (code == 702) {
-        text = 'trunk bus'
-        color = '#EA7000'
-        importance = 13
-    } else if (code == 704 || code == 712) {
-        text = 'local bus'
-        color = 'cyan'
-        importance = 15
-    } else if (code == 900) {
-        text = 'lightrail'
-        color = 'darkgreen'
-        importance = 13
-    } else if (code == 2 | code == "WALK") {
-        text = 'walk'
-        color = 'gray'
-        importance = null
-    } else if (code == 1104 || code == "AIRPLANE") {
-        text = 'airplane'
-        color = 'darkblue'
-        importance = 0
-    } else if (code == 102) {
-        text = 'intercity train'
-        color = 'green'
-    } else if (code == '') {
-        text = 'none'
-        color = 'white'
-        importance = null
-    } else {
-        //If not any code
-        text = 'main'
-        color = 'pink'
-        console.trace('Unsupported vehicle type: ', code)
+    if (code instanceof String || typeof code == 'string') {
+        code = code.toUpperCase()
+    }
+    switch (code) {
+        case "TRAM":
+        case 0:
+            text = 'tram'
+            color = 'green'
+            importance = 13
+            break;
+        case 0:
+        case "TRAM":
+            text = 'tram'
+            color = 'green'
+            importance = 13
+            break;
+        case 1:
+        case "SUBWAY":
+        case "METRO":
+            text = 'metro'
+            color = 'red'
+            importance = 12
+            break;
+        case 4:
+        case "FERRY":
+            text = 'ferry'
+            color = 'teal'
+            importance = 13
+            break;
+        case 109:
+        case "RAIL":
+        case "TRAIN":
+            text = 'train'
+            color = 'purple'
+            importance = 9
+            break;
+        case 700:
+        case 3:
+        case 715:
+        case "BUS":
+            text = 'bus'
+            color = 'blue'
+            importance = 15
+            break;
+        case 701:
+            text = 'regional bus'
+            color = 'blue'
+            importance = 15
+            break;
+        case 702:
+            text = 'trunk bus'
+            color = '#EA7000'
+            importance = 13
+            break;
+        case 704:
+        case 712:
+            text = 'local bus'
+            color = 'cyan'
+            importance = 15
+            break;
+        case 900:
+            text = 'lightrail'
+            color = 'darkgreen'
+            importance = 13
+            break;
+        case 2:
+            text = 'walk'
+            color = 'gray'
+            importance = null
+            break;
+        case 1104:
+        case "AIRPLANE":
+            text = 'airplane'
+            color = 'darkblue'
+            importance = 0
+            break;
+        case 102:
+            text = 'intercity train'
+            color = 'green'
+            break;
+        case '':
+            text = 'none'
+            color = 'white'
+            importance = null
+            break;
+        default:
+            //If not any code
+            text = 'main'
+            color = 'pink'
+            importance = null
+            console.trace('Unsupported vehicle type: ', code)
     }
     //Return the information
     return { text: text, color: color, importance: importance }
@@ -538,7 +617,6 @@ function loadStops(data, data2) {
     }
     console.timeEnd('s2')
     console.time('s3')
-    setMarkerSizes(stopGroup)
     document.querySelector('body').style.cursor = ''
     console.timeEnd('s3')
     console.time('s4')
@@ -1054,22 +1132,6 @@ function getRecentSearches() {
 }
 function saveRecentSearches(data) {
     localStorage.setItem('search', JSON.stringify(data))
-}
-function setMarkerSizes(LeafletGroup) {
-    const zoom = map.getZoom()
-    console.time('zoom')
-    LeafletGroup.eachLayer((stop) => {
-        if (zoom < stop.show + stopImportanceOffset && stop.onMap == true) {
-            stop.onMap = false
-            stop.removeFrom(map)
-        } else if (zoom >= stop.show + stopImportanceOffset && stop.onMap == false) {
-            stop.onMap = true
-            stop.addTo(map)
-            stop.setStyle({ radius: 2 })
-            stop.bringToFront()
-        }
-    })
-    console.timeEnd('zoom')
 }
 function popup(open, stop) {
     if (open) {
