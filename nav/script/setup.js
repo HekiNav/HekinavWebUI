@@ -522,6 +522,7 @@ async function search(inputElement) {
             row.addEventListener('click', e => {
                 setValue(element.lat, element.lon, element.name, inputElement);
                 map.flyTo([element.lat, element.lon])
+                stopTiles.redraw()
             })
             autocorrect.append(row)
         }
@@ -563,7 +564,8 @@ async function search(inputElement) {
             row.addEventListener('click', e => {
                 setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
-                map.flyTo([element.lat, element.lon], 15, {duration: 0.5})
+                map.flyTo([element.lat, element.lon], map.getZoom(), {duration: 0.5})
+                stopTiles.redraw()
             })
             autocorrect.append(row)
         }
