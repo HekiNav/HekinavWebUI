@@ -703,13 +703,10 @@ async function api() {
         const r = data.data.plan.itineraries[i];
         routes.push(route(r, i))
         map.flyToBounds(routes[0].bbox, 0.3)
-        viewRoute(i, false)
     }
+    viewRoute(0, false)
     sidebarMode('routepreview')
     apiRunning = false
-    if (repeat == true) {
-        setTimeout(preAPI(), 10000)
-    }
 
 }
 function sidebarMode(mode) {
@@ -861,7 +858,6 @@ function route(route, i) {
             const duration = endTime - startTime
             const waittime = startTime - previousTrip.endTime
             const color = routeType(leg.route.type).color
-            console.log(color)
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
@@ -1514,6 +1510,14 @@ class SearchParameter {
         return container
     }
     get value(){
-        return parseInt(this.type == "checkbox" ? this.element.querySelector("input").checked : this.element.querySelector("input").value)
+        const input = this.element.querySelector("input")
+        switch (this.type) {
+            case "number":
+                return parseInt(input.value)
+            case "checkbox":
+                return input.checked
+            default:
+                return input.value
+        }
     }
 }
