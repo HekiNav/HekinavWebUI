@@ -1,0 +1,27 @@
+[
+    {
+        "label" : "Max transfers",
+        "type" : "number",
+        "min" : 0,
+        "max" : 100,
+        "default" : 3,
+        "graphqlName" : "maxTransfers"
+    },
+    {
+        "label" : "Walk speed (m/s)",
+        "type" : "number",
+        "min" : 0,
+        "max" : 100,
+        "default" : 1.33,
+        "graphqlName" : "walkSpeed"
+    },
+    {
+        "label" : "Ignore realtime",
+        "type" : "checkbox",
+        "min" : 0,
+        "max" : 100,
+        "default" : false,
+        "graphqlName" : "ignoreRealtimeUpdates"
+    }
+    
+]

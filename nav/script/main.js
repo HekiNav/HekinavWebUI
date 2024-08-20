@@ -131,7 +131,7 @@ const greenIcon = new L.Icon({
     iconSize: [20, 20],
     iconAnchor: [10, 20],
 });
-
+let parameters = []
 let vehicles = []
 let isPopupOpen = false
 let stopsOnMap = true
@@ -162,9 +162,9 @@ document.getElementById('input3').value = padNumber(date.getHours()) + ':' + pad
 document.getElementById('input4').value = date.getFullYear() + '-' + padNumber(date.getMonth() + 1) + '-' + padNumber(date.getDate())
 
 sidebarMode('main')
-//getStops()
 popup(false)
 importData('hsl.json', importedData => addZones(importedData))
+importData("searchParameters.json", data => addParameters(data))
 recentSearches.add(getRecentSearches())
 //Event listeners
 

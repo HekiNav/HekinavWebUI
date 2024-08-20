@@ -439,8 +439,14 @@ function routeType(code) {
             color = 'darkgreen'
             importance = 13
             break;
+        case "WALK":
         case 2:
             text = 'walk'
+            color = 'gray'
+            importance = null
+            break;
+        case "WAIT":
+            text = 'wait'
             color = 'gray'
             importance = null
             break;
@@ -681,8 +687,7 @@ async function api() {
     routes.length = 0
     //Prevents API from getting too many requests
     apiRunning = true
-    //Generate fetching address
-    let address
+
 
     //Fetch the data
     const data = await digitransitRoute()
@@ -856,6 +861,7 @@ function route(route, i) {
             const duration = endTime - startTime
             const waittime = startTime - previousTrip.endTime
             const color = routeType(leg.route.type).color
+            console.log(color)
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
@@ -890,7 +896,7 @@ function route(route, i) {
                 shape: leg.legGeometry.points,
                 popUpTime: waittime,
                 popUpType: "WAIT",
-                routeName: leg.route.shortName,
+                routeName: leg.route.shortName || leg.route.longName,
                 startTime: sToTime(startTime),
                 endTime: sToTime(endTime),
             })
@@ -903,7 +909,6 @@ function route(route, i) {
     routepreview += '</span>'
     const table = document.createElement('table')
     table.classList.add('route-preview')
-    console.log(trips[0])
     let fare = ""
     if (route.fares.length != 0) {
         fare = route.fares.cents / 100
@@ -1301,6 +1306,11 @@ function routeTypeToSortValue(routeType) {
 }
 async function digitransitRoute() {
 
+    let param = ""
+    parameters.forEach(p => {
+        param += ` ${p.graphqlName}:${p.value},`
+    })
+    console.log(param)
     fromLat = values.from.lat
     fromLon = values.from.lon
     toLat = values.to.lat
@@ -1314,6 +1324,7 @@ async function digitransitRoute() {
     to: {lat: ${toLat}, lon: ${toLon}}
     date: "${document.getElementById('input4').value}",
     time: "${document.getElementById('input3').value}",
+    ${param}
   ) {
     itineraries {
       duration
@@ -1368,6 +1379,7 @@ async function digitransitRoute() {
         }
         route {
           shortName
+          longName
           type
         }
         legGeometry {
@@ -1378,7 +1390,6 @@ async function digitransitRoute() {
     }
   }
 }`
-    console.log(query)
     const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
     if(result.errors){
@@ -1448,3 +1459,61 @@ async function digitransitRoute() {
     }
   }
 }`*/
+function addParameters(data) {
+    data.forEach(p => {
+        parameters.push(
+            new SearchParameter(p)
+        )
+    })
+    const container = document.getElementById("options")
+    parameters.forEach(p => {
+        container.appendChild(p.element)
+    })
+}
+class SearchParameter {
+    constructor(o) {
+        this.type = o.type
+        if (o.type == "number") {
+            this.min = o.min
+            this.max = o.max
+        }
+        this.label = o.label
+        this.default = o.default
+        this.graphqlName = o.graphqlName
+        this.id = encodeURIComponent(this.label.replaceAll(" ","").toLowerCase())
+        this.element = this.#createElements()
+    }
+    #createElements(){
+        const container = document.createElement("div")
+        const label = document.createElement("label")
+        label.setAttribute("for", this.id)
+        label.textContent = this.label + " "
+        const input = document.createElement("input")
+        input.id = this.id
+        input.setAttribute("type", this.type)
+        if (this.type == "number") {
+            input.value = this.default
+            input.setAttribute("min", this.min)
+            input.setAttribute("max", this.max)
+            input.addEventListener("change", function() {
+                let v = parseInt(this.value);
+                if (v < this.min) this.value = this.min
+                if (v > this.max) this.value = this.max
+            })
+            container.append(label, input)
+        }
+        if (this.type == "checkbox") {
+            input.checked = this.default
+            const slider = document.createElement("span")
+            slider.classList.add("slider")
+            const background = document.createElement("label")
+            background.classList.add("switch")
+            background.append(input, slider)
+            container.append(label, background)
+        }
+        return container
+    }
+    get value(){
+        return parseInt(this.type == "checkbox" ? this.element.querySelector("input").checked : this.element.querySelector("input").value)
+    }
+}
