@@ -2044,7 +2044,7 @@
               //Filter out stops with no deps
               if (!feat.properties.patterns || !JSON.parse(feat.properties.patterns).length > 0) continue
               //Filter out stop that have a smaller render zoom
-              if (routeType(feat.properties.type).importance > map.getZoom()) continue
+              if (routeType(feat.properties.type).importance + stopImportanceOffset > map.getZoom()) continue
               //Filter out duplicate hsl stops with MATKA ids
               if (feat.properties)
               if (routeType(feat.properties.type).text == "tram" && /MATKA:.*/.test(feat.properties.gtfsId)) continue
@@ -2190,11 +2190,26 @@
         layer.preview = `<div class="stop-preview"><h1>${stop.name} (${routeType(type).text})</h1>
                         ${lineLabels}
                          </div>`
+                         
         layer.on("click", (e) => {
           popup(true, stop)
           stop.position = e.latlng
           getDepartures(stop, stopPopup)
         })
+
+        var tooltip = L.tooltip({
+          permanent: false,
+          direction: 'right',
+          className: 'stop-preview-container'
+        })
+        
+        layer.on("mouseover", (e) => {
+          tooltip
+          .setLatLng(e.latlng)
+          .setContent(layer.preview)
+          .addTo(previewGroup)
+        })
+        /*
         layer.on("mouseover", (e) => {
           layer.marker = L.marker(e.latlng, {
             pane: previewPane,
@@ -2203,9 +2218,9 @@
               html: layer.preview,
             })
           }).addTo(previewGroup)
-        })
+        })*/
         layer.on("mouseout", (e) => {
-          previewGroup.clearLayers()
+          map.closeTooltip(tooltip)
         })
         break;
       case 2:

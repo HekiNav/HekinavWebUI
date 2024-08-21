@@ -37,7 +37,7 @@ h4{
   padding: 0.5%;
   height: 91vh;
   display: grid;
-  grid-template-columns: 0.05fr 0.3fr 0.25fr 0.25fr 1.25fr;
+  grid-template-columns: 0.05fr 0.3fr 0.25fr 0.25fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr 30fr;
   grid-template-areas: 
   "text1 input1 input1 map map"
@@ -125,9 +125,21 @@ h4{
   max-height: 100%;
   overflow-y: scroll;
 }
-#route td{
+.td{
   border: none;
   height: 80px;
+}
+.bottom_td{
+  border: none;
+  vertical-align: bottom;
+}
+.top_td{
+  border: none;
+  vertical-align: top;
+}
+.border_td{
+  border: none;
+  height: 54px;
 }
 /* LOADING ICON CONTAINER */
 .loading{
@@ -324,5 +336,3 @@ h4{
 [hidden]{
   display: none;
 }
-  
-	

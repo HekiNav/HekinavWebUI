@@ -1,4 +1,9 @@
-
+.vehicle-marker{
+  top: -7.5
+}
+.leaflet-vehicle-pane > *{
+  transition: linear 0.9s;
+}
 .route-tooltip{
   display: flex;
   flex-direction: row;
