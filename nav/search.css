@@ -85,4 +85,77 @@ input:checked + .slider:before {
 input[type=number]{
   border: var(--main-border);
 }
+
+
+/* preference setter */
+.preferrer{
+  width: 90%;
+  position: relative;
+  z-index: 20;
+  border: var(--main-border);
+  margin-top: 0%;
+  position: relative;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  grid-area: input1;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+#preferInput{
+  border: none;
+  border-radius: var(--main-radius);
+  border-bottom: 1px;
+  margin-top: 0%;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+  width: 100%;
+}
+#preferSearch{
+  font-size: 1.5vw;
+  max-height: 20vh;
+  overflow-y: scroll;
+  margin: 0;
+  padding-left: 1%;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.preferSearchRow{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  flex-direction: row;
+  height: 1.7vw;
+  margin-bottom: .1vw;
+}
+.preferrerButtons {
+  position: absolute;
+  right: 0;
+  margin-right: .1vw;
+}
+.preferrerButtons :last-child {
+  border-top-right-radius: 25%;
+  border-bottom-right-radius: 25%;
+}
+.preferrerButtons :first-child {
+  border-top-left-radius: 25%;
+  border-bottom-left-radius: 25%;
+}
+.preferrerButtons button {
+  height: 1.7vw;
+  width: 1.7vw;
+  border: black .15vw solid;
+  background-color: white;
+  padding: 0;
+}
+.preferrerButtons button svg {
+  width: 100%;
+}
+
   

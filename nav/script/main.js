@@ -131,6 +131,12 @@ const greenIcon = new L.Icon({
     iconSize: [20, 20],
     iconAnchor: [10, 20],
 });
+
+let banned = {}
+let preferred = {}
+let unpreferred = {}
+
+
 let parameters = []
 let vehicles = []
 let isPopupOpen = false
@@ -144,6 +150,7 @@ let routes = []
 const cooldown = 10000
 let autocorrect1 = document.getElementById('autocorrect1')
 let autocorrect2 = document.getElementById('autocorrect2')
+let preferList = document.getElementById('preferSearch')
 const searchButton = document.getElementById('search')
 const maincontent = document.getElementById('maincontent')
 const options = document.getElementById('options')
@@ -184,6 +191,12 @@ document.querySelector('.input2').addEventListener('mouseout', e => {
 document.querySelector('.input2').addEventListener('mouseover', e => {
     autocorrect2.hidden = false
 })
+document.querySelector('.preferrer').addEventListener('mouseout', e => {
+    preferList.hidden = true
+})
+document.querySelector('.preferrer').addEventListener('mouseover', e => {
+    preferList.hidden = false
+})
 window.addEventListener('keydown', event => {
     if (event.key == 'Enter') {
         api()
@@ -218,6 +231,11 @@ document.getElementById('input2').addEventListener('keyup', event => {
 document.getElementById('input2').addEventListener('click', event => {
     if (document.getElementById('input2').value.length > 1) {
         search(2)
+    }
+})
+document.getElementById('preferInput').addEventListener('keyup', event => {
+    if (document.getElementById('preferInput').value.length > 1) {
+        preferSearch()
     }
 })
 document.getElementById('resizer').addEventListener('mousedown', e => {

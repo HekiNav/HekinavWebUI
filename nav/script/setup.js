@@ -572,6 +572,75 @@ async function search(inputElement) {
     }
 
 }
+async function preferSearch() {
+    const input = document.getElementById('preferInput').value
+    const rawdata = await fetch('https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94', {
+        method: "POST",
+        headers: {
+            "content-type" : "application/graphql"
+        },
+        body : `
+{
+  stops(name: "${input}") {
+    cluster {
+      id
+      name
+    }
+  }
+}`
+    })
+    const result = await rawdata.json()
+
+    const clusters = result.data.stops.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+          t.cluster.id === value.cluster.id
+        ))
+    )
+    const container = document.getElementById("preferSearch")
+    container.innerHTML = ""
+    clusters.forEach(c => {
+        console.log(c)
+        const row = document.createElement("div")
+        row.classList.add("preferSearchRow")
+        const text = document.createElement("span")
+        text.textContent = c.cluster.name
+        const buttons = document.createElement("div")
+        buttons.classList.add("preferrerButtons")
+        const banButton = document.createElement("button")
+        banButton.classList.add("button")
+        banButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="red"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>`
+        banButton.addEventListener("click", e => {
+            console.log(banned[c.cluster.id])
+            if (!banned[c.cluster.id]) {
+                banned[c.cluster.id] = true
+                banButton.querySelector("svg").setAttribute("stroke","white")
+                banButton.style.background = "red"
+            } else {
+                banned[c.cluster.id] = false
+                banButton.querySelector("svg").setAttribute("stroke","red")
+                banButton.style.background = "white"
+            }
+        })
+        const preferButton = document.createElement("button")
+        preferButton.classList.add("button")
+        preferButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="green"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>`
+        preferButton.addEventListener("click", e => {
+            console.log(banned[c.cluster.id])
+            if (!preferred[c.cluster.id]) {
+                preferred[c.cluster.id] = true
+                preferButton.querySelector("svg").setAttribute("stroke","white")
+                preferButton.style.background = "green"
+            } else {
+                preferred[c.cluster.id] = false
+                preferButton.querySelector("svg").setAttribute("stroke","green")
+                preferButton.style.background = "white"
+            }
+        })
+        buttons.append(banButton, preferButton)
+        row.append(text, buttons)
+        container.append(row)
+    })
+}
 function getIcon(type, data) {
     if (data) {
         return `${type}.${data.GTFS.modes[0].toLowerCase()}`
