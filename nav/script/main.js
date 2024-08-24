@@ -131,11 +131,19 @@ const greenIcon = new L.Icon({
     iconSize: [20, 20],
     iconAnchor: [10, 20],
 });
+let banned = {stops: [], trips: [], routes: [], agencies: []}
+let preferred = {routes: [], agencies: []}
+let unpreferred = {routes: [], agencies: []}
 
-let banned = {}
-let preferred = {}
-let unpreferred = {}
-
+const searcher = new MiniSearch({
+    idField: "gtfsId",
+    fields: ['name'],
+    storeFields : ['name','gtfsId','__typename'],
+    searchOptions: {
+      boost: { title: 2 },
+      fuzzy: 0.2
+    }
+  })
 
 let parameters = []
 let vehicles = []

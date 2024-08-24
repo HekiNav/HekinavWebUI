@@ -50,8 +50,9 @@
             <div id="route" class="sb3"></div>
             <button class="sb2 sb3 back" onclick="sidebarMode(currentMode == 'route' ? 'routepreview' : 'main')"></button>
             <div id="options" class="sb1">
+                <label for="preferrer">Ban or prefer routes, agencies and stop</label>
                 <div class="preferrer">
-                    <input autocomplete="off" type="text" placeholder="Stop" id="preferInput"/>
+                    <input autocomplete="off" type="text" placeholder="Search stops" id="preferInput"/>
                     <div class="prefersearch" id="preferSearch"></div>
                 </div>
             </div>
@@ -66,6 +67,7 @@
             </div>
         </main>
     </div>
+    <!-- Search engine --> <script src="https://cdn.jsdelivr.net/npm/minisearch@7.1.0/dist/umd/index.min.js"></script>
     <!-- Protobuf decompiling --><script src="//cdn.jsdelivr.net/npm/protobufjs@7.X.X/dist/protobuf.min.js"></script>
     <!-- Mqtt handling --><script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.9.1/mqtt.min.js"></script>
     <!-- Leaflet map --><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>

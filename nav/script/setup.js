@@ -583,9 +583,21 @@ async function preferSearch() {
 {
   stops(name: "${input}") {
     cluster {
-      id
+      gtfsId
       name
+      __typename
     }
+  }
+  routes(name: "${input}") {
+    gtfsId
+    shortName
+    longName
+    __typename
+  }
+  agencies{
+    gtfsId
+    name
+    __typename
   }
 }`
     })
@@ -596,47 +608,93 @@ async function preferSearch() {
           t.cluster.id === value.cluster.id
         ))
     )
+    const results = [...clusters.map(c => c.cluster), ...result.data.routes.map(r => {r.name = r.shortName ? r.shortName + " " + r.longName : r.longName; return r}), ...result.data.agencies]
+    searcher.removeAll()
+    searcher.addAll(results)
+    const searched = searcher.search(input)
+    console.log(searched)
     const container = document.getElementById("preferSearch")
     container.innerHTML = ""
-    clusters.forEach(c => {
-        console.log(c)
+    searched.forEach(item => {
+        let type
+        switch (item.__typename.toLowerCase()) {
+            case "cluster":
+                type = "stops"
+                break;
+            case "route":
+                type = "routes"
+                break;
+            case "agency":
+                type = "agencies"
+                break;
+            default:
+                break;
+        }
         const row = document.createElement("div")
         row.classList.add("preferSearchRow")
         const text = document.createElement("span")
-        text.textContent = c.cluster.name
+        text.textContent = item.name
         const buttons = document.createElement("div")
         buttons.classList.add("preferrerButtons")
         const banButton = document.createElement("button")
         banButton.classList.add("button")
         banButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="red"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>`
         banButton.addEventListener("click", e => {
-            console.log(banned[c.cluster.id])
-            if (!banned[c.cluster.id]) {
-                banned[c.cluster.id] = true
-                banButton.querySelector("svg").setAttribute("stroke","white")
-                banButton.style.background = "red"
-            } else {
-                banned[c.cluster.id] = false
+            const i = banned[type].findIndex(e => e == item.gtfsId)
+            if (i >= 0) {
+                banned[type].splice(i,1)
                 banButton.querySelector("svg").setAttribute("stroke","red")
                 banButton.style.background = "white"
+            } else {
+                banned[type].push(item.gtfsId)
+                banButton.querySelector("svg").setAttribute("stroke","white")
+                banButton.style.background = "red"
             }
         })
+
+        const unPreferButton = document.createElement("button")
+        unPreferButton.classList.add("button")
+        unPreferButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="orange"> <path stroke-linecap="round" stroke-linejoin="round" d="M7.498 15.25H4.372c-1.026 0-1.945-.694-2.054-1.715a12.137 12.137 0 0 1-.068-1.285c0-2.848.992-5.464 2.649-7.521C5.287 4.247 5.886 4 6.504 4h4.016a4.5 4.5 0 0 1 1.423.23l3.114 1.04a4.5 4.5 0 0 0 1.423.23h1.294M7.498 15.25c.618 0 .991.724.725 1.282A7.471 7.471 0 0 0 7.5 19.75 2.25 2.25 0 0 0 9.75 22a.75.75 0 0 0 .75-.75v-.633c0-.573.11-1.14.322-1.672.304-.76.93-1.33 1.653-1.715a9.04 9.04 0 0 0 2.86-2.4c.498-.634 1.226-1.08 2.032-1.08h.384m-10.253 1.5H9.7m8.075-9.75c.01.05.027.1.05.148.593 1.2.925 2.55.925 3.977 0 1.487-.36 2.89-.999 4.125m.023-8.25c-.076-.365.183-.75.575-.75h.908c.889 0 1.713.518 1.972 1.368.339 1.11.521 2.287.521 3.507 0 1.553-.295 3.036-.831 4.398-.306.774-1.086 1.227-1.918 1.227h-1.053c-.472 0-.745-.556-.5-.96a8.95 8.95 0 0 0 .303-.54" /></svg>`
+        unPreferButton.addEventListener("click", e => {
+            const i = unpreferred[type].findIndex(e => e == item.gtfsId)
+            if (i >= 0) {
+                unpreferred[type].splice(i,1)
+                unPreferButton.querySelector("svg").setAttribute("stroke","orange")
+                unPreferButton.style.background = "white"
+            } else {
+                unpreferred[type].push(item.gtfsId)
+                unPreferButton.querySelector("svg").setAttribute("stroke","white")
+                unPreferButton.style.background = "orange"
+            }
+        })
+
         const preferButton = document.createElement("button")
         preferButton.classList.add("button")
-        preferButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="green"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>`
+        preferButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="green" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z" /></svg>`
         preferButton.addEventListener("click", e => {
-            console.log(banned[c.cluster.id])
-            if (!preferred[c.cluster.id]) {
-                preferred[c.cluster.id] = true
-                preferButton.querySelector("svg").setAttribute("stroke","white")
-                preferButton.style.background = "green"
-            } else {
-                preferred[c.cluster.id] = false
+            const i = preferred[type].findIndex(e => e == item.gtfsId)
+            if (i >= 0) {
+                preferred[type].splice(i,1)
                 preferButton.querySelector("svg").setAttribute("stroke","green")
                 preferButton.style.background = "white"
+            } else {
+                preferred[type].push(item.gtfsId)
+                preferButton.querySelector("svg").setAttribute("stroke","white")
+                preferButton.style.background = "green"
             }
         })
-        buttons.append(banButton, preferButton)
+
+        switch (type) {
+            case "stops":
+                buttons.append(banButton)
+                break;
+            case "agencies":
+            case "routes":
+                buttons.append(preferButton, unPreferButton, banButton)
+                break;
+            default:
+                break;
+        }
         row.append(text, buttons)
         container.append(row)
     })
@@ -1371,6 +1429,11 @@ function routeTypeToSortValue(routeType) {
     if (routeType == 702) return 699
     return routeType
 }
+function preferencesToOptions(obj) {
+    let opt = ""
+    Object.keys(obj).forEach(key => {if (obj[key].length) opt += `${key}:"${obj[key].toString()}",`})
+    return opt
+}
 async function digitransitRoute() {
 
     let param = ""
@@ -1378,20 +1441,24 @@ async function digitransitRoute() {
         param += ` ${p.graphqlName}:${p.value},`
     })
     console.log(param)
-    fromLat = values.from.lat
+    fromLat = values.from.lat 
     fromLon = values.from.lon
     toLat = values.to.lat
     toLon = values.to.lon
-
+    console.log()
     clearMap()
     const date = document.getElementById('input4').value
+    const time = document.getElementById('input3').value
     const query = `{
   plan(
     from: {lat: ${fromLat}, lon: ${fromLon}}
     to: {lat: ${toLat}, lon: ${toLon}}
-    date: "${document.getElementById('input4').value}",
-    time: "${document.getElementById('input3').value}",
-    ${param}
+    date: "${date}",
+    time: "${time}",
+    ${param},
+    banned: {${preferencesToOptions(banned)}}
+    preferred: {${preferencesToOptions(preferred)}}
+    unpreferred: {${preferencesToOptions(unpreferred)}}
   ) {
     itineraries {
       duration
@@ -1457,6 +1524,7 @@ async function digitransitRoute() {
     }
   }
 }`
+    console.log(preferencesToOptions(banned))
     const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
     if(result.errors){
