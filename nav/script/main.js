@@ -144,7 +144,8 @@ const searcher = new MiniSearch({
       fuzzy: 0.2
     }
   })
-
+let lines = []
+let agencies = []
 let parameters = []
 let vehicles = []
 let isPopupOpen = false

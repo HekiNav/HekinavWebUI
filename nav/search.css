@@ -127,16 +127,21 @@ input[type=number]{
   scrollbar-width: none;  /* Firefox */
 }
 .preferSearchRow{
-  overflow: hidden;
-  text-overflow: ellipsis;
   display: flex;
   flex-direction: row;
   height: 1.7vw;
   margin-bottom: .1vw;
 }
+.preferSearchRow span {
+  flex: 2 1;
+  overflow-x: scroll;
+  height: 1.7vw;
+  overflow-y: hidden;
+  text-overflow: clip;
+}
 .preferrerButtons {
-  position: absolute;
-  right: 0;
+  --e : 3;
+  flex: 0 calc(1.6vw * var(--e));
   margin-right: .1vw;
   border: black .15vw solid;
   border-radius: .6vw;
