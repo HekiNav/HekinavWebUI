@@ -53,7 +53,7 @@ async function getDepartures(stop, stopPopup) {
         let data
         console.time(`loading departures for ${stop.text}`)
         let rawdata = null
-        const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {routes{gtfsId}patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign pattern{ geometry { lat lon}} route { type   longName     shortName        }      }      headsign    }  }}\"}`
+        const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign route { type gtfsId  longName     shortName        }      }      headsign    }  }}\"}`
         try {
             rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/json", }, "body": query, "method": "POST", });
             data = await rawdata.json()
@@ -80,53 +80,23 @@ async function getDepartures(stop, stopPopup) {
                 if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
-                    data.data.stop.routes.forEach(r => {
-                        realtimeRoute(r.gtfsId, (data, topic, isHsl) => {
-                            if (isHsl) {
-                                const id = topic[7] + topic[8]
-                                const values = Object.values(data)[0]
-                                const pV = vehicles.find(e => id == e.id)
-                                if (!values.lat || !values.long) return
-                                if (!pV) {
-                                    const marker = L.marker([values.lat,values.long], {
-                                        pane: "vehiclePane",
-                                        icon: L.divIcon({
-                                            html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
-                                            iconSize: [25,25],
-                                            className: "vehicle-marker"
-                                        })
-                                    })
-                                    vehicles.push({data: values, marker: marker, id: id})
-                                    marker.addTo(vehicleLayer)
-                                } else {
-                                    pV.data = values
-                                    pV.marker.setLatLng([values.lat,values.long])
+                    vehicles.length = 0
+                    vehicleLayer.clearLayers()
+                    mqttInstances.forEach(i => i.end())
+                    deps.forEach(d => {
+                        const id = d.trip.route.gtfsId
+                        const isHsl = id.split(":")[0].toLowerCase() == "hsl"
+                        mqttInstances.push(
+                            new realtimeHandler(
+                                isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/",
+                                isHsl ? `/hfp/v2/journey/ongoing/+/+/+/+/${id.split(":")[1]/* number part */}/#` :
+                        /* digitransit */`/gtfsrt/vp/${id.split(":")[0]/* feed string part */}/+/+/+/${id.split(":")[1]/* number part */}/#`,
+                                isHsl ? "JSON" : "GTFSRT",
+                                (data, topic) => {
+                                    renderVehicle(isHsl, data, topic)
                                 }
-                            } else if (data.entity[0].vehicle) {
-                                const id = topic[10]
-                                const pV = vehicles.find(e => id == e.id)
-                                const veh = data.entity[0].vehicle
-                                const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
-
-                                if (!pos.lat || !pos.lon) return
-                                if (!pV) {
-                                    console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
-                                    const marker = L.marker([pos.lat,pos.lon], {
-                                        pane: "vehiclePane",
-                                        icon: L.divIcon({
-                                            html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
-                                            iconSize: [25,25],
-                                            className: "vehicle-marker"
-                                        })
-                                    })
-                                    vehicles.push({data: data, marker: marker, id: id})
-                                    marker.addTo(vehicleLayer)
-                                } else {
-                                    pV.data = data
-                                    pV.marker.setLatLng([pos.lat,pos.lon])
-                                }
-                            } else console.log(data)
-                        }, gen)
+                            )
+                        )
                     })
                     popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
                              <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
@@ -263,25 +233,6 @@ function changeDepTime(dep_date, className, popup, stop, v) {
         }
         return
     }
-}
-function realtimeRoute(route = "", callback, v) {
-    const isHsl = route.split(":")[0].toLowerCase() == "hsl"
-    const client = mqtt.connect(isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/");
-    client.on("connect", () => {
-        client.subscribe(isHsl ? `/hfp/v2/journey/ongoing/+/+/+/+/${route.split(":")[1]/* number part */}/#` :
-                       /* else */`/gtfsrt/vp/${route.split(":")[0]/* feed string part */}/+/+/+/${route.split(":")[1]/* number part */}/#`, (err) => {
-            if (err) console.log("MQTT Error:", err)
-            else console.log("Subscription succeeded to", isHsl ? "HSL" : "Digitransit")
-        });
-    });
-    client.on("message", (topic, message) => {
-        if (v != gen && !isPopupOpen) {
-            client.end()
-            vehicleLayer.clearLayers()
-        }
-        const parts = topic.split("/")
-        callback(isHsl ? JSON.parse(message.toString()) : gtfsrt.decode(new Uint8Array(message)), parts, isHsl)
-    });
 }
 function renderShapes(shapes) {
     shapes.forEach(p => {
@@ -1305,6 +1256,9 @@ function popup(open, stop) {
         stopPopup.style.height = `${window.innerHeight - 500}px`
         stopPopupC.innerHTML = `<h3>${stop.code} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr><tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><div class="loading"><h4>Loading departures</h4>${loadingHTML}</div>`
     } else {
+        vehicles.length = 0
+        vehicleLayer.clearLayers()
+        mqttInstances.forEach(i => i.end())
         gen++
         isPopupOpen = false
         stopPopup.style.top = '100%'
@@ -1373,6 +1327,53 @@ class realtimeHandler{
         this.client.end()
     }
 }
+function renderVehicle(isHsl, data, topic) {
+    if (isHsl) {
+        const id = topic[7] + topic[8]
+        const values = Object.values(data)[0]
+        const pV = vehicles.find(e => id == e.id)
+        if (!values.lat || !values.long) return
+        if (!pV) {
+            const marker = L.marker([values.lat,values.long], {
+                pane: "vehiclePane",
+                icon: L.divIcon({
+                    html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
+                    iconSize: [25,25],
+                    className: "vehicle-marker"
+                })
+            })
+            vehicles.push({data: values, marker: marker, id: id})
+            marker.addTo(vehicleLayer)
+        } else {
+            pV.data = values
+            pV.marker.setLatLng([values.lat,values.long])
+        }
+    } else /* Digitransit */ {
+        console.log(data, topic)
+        const id = topic[10]
+        const pV = vehicles.find(e => id == e.id)
+        const veh = data.entity[0].vehicle
+        const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+
+        if (!pos.lat || !pos.lon) return
+        if (!pV) {
+            console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
+            const marker = L.marker([pos.lat,pos.lon], {
+                pane: "vehiclePane",
+                icon: L.divIcon({
+                    html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
+                    iconSize: [25,25],
+                    className: "vehicle-marker"
+                })
+            })
+            vehicles.push({data: data, marker: marker, id: id})
+            marker.addTo(vehicleLayer)
+        } else {
+            pV.data = data
+            pV.marker.setLatLng([pos.lat,pos.lon])
+        }
+    }
+}
 function viewRoute(i, click) {
     popup(false)
     const route = routes[i]
@@ -1397,51 +1398,7 @@ function viewRoute(i, click) {
                       /* digitransit query*/`/gtfsrt/vp/${t.id.split(":")[0]/* feed string part */}/+/+/+/${t.routeId.split(":")[1]/* number part */}/+/+/+/+/${sToTime(t.tripStart)}/#`,
                     isHsl ? "JSON" : "GTFSRT",
                     (data, topic) => {
-                        if (isHsl) {
-                            const id = topic[7] + topic[8]
-                            const values = Object.values(data)[0]
-                            const pV = vehicles.find(e => id == e.id)
-                            if (!values.lat || !values.long) return
-                            if (!pV) {
-                                const marker = L.marker([values.lat,values.long], {
-                                    pane: "vehiclePane",
-                                    icon: L.divIcon({
-                                        html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
-                                        iconSize: [25,25],
-                                        className: "vehicle-marker"
-                                    })
-                                })
-                                vehicles.push({data: values, marker: marker, id: id})
-                                marker.addTo(vehicleLayer)
-                            } else {
-                                pV.data = values
-                                pV.marker.setLatLng([values.lat,values.long])
-                            }
-                        } else /* Digitransit */ {
-                            console.log(data, topic)
-                            const id = topic[10]
-                            const pV = vehicles.find(e => id == e.id)
-                            const veh = data.entity[0].vehicle
-                            const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
-
-                            if (!pos.lat || !pos.lon) return
-                            if (!pV) {
-                                console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
-                                const marker = L.marker([pos.lat,pos.lon], {
-                                    pane: "vehiclePane",
-                                    icon: L.divIcon({
-                                        html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
-                                        iconSize: [25,25],
-                                        className: "vehicle-marker"
-                                    })
-                                })
-                                vehicles.push({data: data, marker: marker, id: id})
-                                marker.addTo(vehicleLayer)
-                            } else {
-                                pV.data = data
-                                pV.marker.setLatLng([pos.lat,pos.lon])
-                            }
-                        }
+                        renderVehicle(isHsl, data, topic)
                     }
                 )
             )
