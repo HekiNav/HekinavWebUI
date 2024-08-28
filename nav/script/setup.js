@@ -1037,7 +1037,7 @@ function route(route, i) {
                 </tr><tr>
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
-                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign.length < 25 ? leg.trip.tripHeadsign : `${leg.trip.tripHeadsign.slice(0, 25)}...`}</td>
+                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign ? (`${leg.trip.tripHeadsign.slice(0, 25)} ${leg.trip.tripHeadsign.length > 25 ? '...' : ''}`) : ""}</td>
                 </tr><tr>
                 <td class="bottom_td">${sToTime(endTime)}</td>
                 <td class="border_td" id="img" style=${img3}></td>
