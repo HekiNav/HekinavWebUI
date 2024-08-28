@@ -91,7 +91,7 @@ input[type=number]{
 .preferrer{
   width: 90%;
   position: relative;
-  z-index: 19;
+  z-index: 20;
   border: var(--main-border);
   margin-top: 0%;
   position: relative;
@@ -108,6 +108,7 @@ input[type=number]{
 }
 #preferInput{
   border: none;
+  z-index: 20;
   border-radius: var(--main-radius);
   border-bottom: 1px;
   margin-top: 0%;
@@ -131,6 +132,8 @@ input[type=number]{
   flex-direction: row;
   height: 1.7vw;
   margin-bottom: .1vw;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 .preferSearchRow span {
   flex: 2 1;
@@ -167,5 +170,3 @@ input[type=number]{
 .preferrerType option {
   background-color: blue;
 }
-
-  
