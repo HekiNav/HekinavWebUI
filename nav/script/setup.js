@@ -81,7 +81,7 @@ async function getDepartures(stop, stopPopup) {
                     clearMap()
                     renderShapes(data.data.stop.patterns)
                     data.data.stop.routes.forEach(r => {
-                        realtime(r.gtfsId, (data, topic, isHsl) => {
+                        realtimeRoute(r.gtfsId, (data, topic, isHsl) => {
                             if (isHsl) {
                                 const id = topic[7] + topic[8]
                                 const values = Object.values(data)[0]
@@ -264,7 +264,7 @@ function changeDepTime(dep_date, className, popup, stop, v) {
         return
     }
 }
-function realtime(route = "", callback, v) {
+function realtimeRoute(route = "", callback, v) {
     const isHsl = route.split(":")[0].toLowerCase() == "hsl"
     const client = mqtt.connect(isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/");
     client.on("connect", () => {
@@ -991,6 +991,9 @@ function route(route, i) {
                 <td class="td">walk ${sToHMinS(walktime)}</td></tr>`
             }
             trips.push({
+                tripStart: null,
+                routeId: null,
+                id: null,
                 routeType: "WALK",
                 color: color,
                 fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
@@ -1038,7 +1041,12 @@ function route(route, i) {
                 <td class="border_td" id="img" style=${img3}></td>
                 <td class="bottom_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
             }
+            console.log(sToTime(leg.trip.departureStoptime.scheduledDeparture))
             trips.push({
+                tripStart: leg.trip.departureStoptime.scheduledDeparture,
+                routeId: leg.route.gtfsId,
+                direction: parseInt(leg.trip.directionId),
+                id: leg.trip.gtfsId,
                 routeType: leg.mode,
                 color: color,
                 fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
@@ -1334,6 +1342,35 @@ function sToTime(seconds) {
     if (seconds > 24 * 3600) seconds -= 24 * 3600
     return `${Math.floor(seconds / 3600)}:${padNumber(Math.floor(seconds % 3600 / 60))}${seconds % 60 ? `:${padNumber(seconds % 60)}` : ''}`
 }
+class realtimeHandler{
+    constructor(url, query, returnFormat, callback) {
+        this.callback = callback
+        this.returnFormat = returnFormat
+        this.client =  mqtt.connect(url)
+        this.client.on("connect", () => {
+            this.client.subscribe(query, (err) => {
+                if (err) console.log("MQTT Error:", err)
+                else console.log("Subscription succeeded to", url)
+            });
+        })
+        this.client.on("message", (topic, message) => {
+            switch (this.returnFormat) {
+                case "JSON":
+                    this.callback(JSON.parse(message.toString()), topic.split("/"))
+                    break
+                case "GTFSRT":
+                    this.callback(gtfsrt.decode(new Uint8Array(message)), topic.split("/"))
+                    break
+                default:
+                    this.callback(message, topic)
+                    break
+            }
+        });
+    } 
+    end() {
+        this.client.end()
+    }
+}
 function viewRoute(i, click) {
     popup(false)
     const route = routes[i]
@@ -1344,6 +1381,70 @@ function viewRoute(i, click) {
         document.getElementById('route').innerHTML = route.html
         sidebarMode('route')
         map.flyToBounds(route.bbox, 1)
+        vehicles.length = 0
+        vehicleLayer.clearLayers()
+        mqttInstances.forEach(i => i.end())
+        route.trips.forEach(t => {
+            if (!t.id) return
+            const isHsl = t.id.split(":")[0].toLowerCase() == "hsl"
+
+            mqttInstances.push(
+                new realtimeHandler(
+                    isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/",
+                    isHsl ?  /* HSL query */`/hfp/v2/journey/ongoing/+/+/+/+/${t.routeId.split(":")[1]}/${t.direction + 1}/+/${sToTime(t.tripStart)}/#` :
+                      /* digitransit query*/`/gtfsrt/vp/${t.id.split(":")[0]/* feed string part */}/+/+/+/${t.routeId.split(":")[1]/* number part */}/+/+/+/+/${sToTime(t.tripStart)}/#`,
+                    isHsl ? "JSON" : "GTFSRT",
+                    (data, topic) => {
+                        if (isHsl) {
+                            const id = topic[7] + topic[8]
+                            const values = Object.values(data)[0]
+                            const pV = vehicles.find(e => id == e.id)
+                            if (!values.lat || !values.long) return
+                            if (!pV) {
+                                const marker = L.marker([values.lat,values.long], {
+                                    pane: "vehiclePane",
+                                    icon: L.divIcon({
+                                        html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
+                                        iconSize: [25,25],
+                                        className: "vehicle-marker"
+                                    })
+                                })
+                                vehicles.push({data: values, marker: marker, id: id})
+                                marker.addTo(vehicleLayer)
+                            } else {
+                                pV.data = values
+                                pV.marker.setLatLng([values.lat,values.long])
+                            }
+                        } else /* Digitransit */ {
+                            console.log(data, topic)
+                            const id = topic[10]
+                            const pV = vehicles.find(e => id == e.id)
+                            const veh = data.entity[0].vehicle
+                            const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+
+                            if (!pos.lat || !pos.lon) return
+                            if (!pV) {
+                                console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
+                                const marker = L.marker([pos.lat,pos.lon], {
+                                    pane: "vehiclePane",
+                                    icon: L.divIcon({
+                                        html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
+                                        iconSize: [25,25],
+                                        className: "vehicle-marker"
+                                    })
+                                })
+                                vehicles.push({data: data, marker: marker, id: id})
+                                marker.addTo(vehicleLayer)
+                            } else {
+                                pV.data = data
+                                pV.marker.setLatLng([pos.lat,pos.lon])
+                            }
+                        }
+                    }
+                )
+            )
+        })
+        
     }//HOVER ONLY
     else {
         routes.forEach(r => {
@@ -1470,7 +1571,6 @@ async function digitransitRoute() {
     fromLon = values.from.lon
     toLat = values.to.lat
     toLon = values.to.lon
-    console.log()
     clearMap()
     const date = document.getElementById('input4').value
     const time = document.getElementById('input3').value
@@ -1533,6 +1633,10 @@ async function digitransitRoute() {
           }
         }
         trip {
+          departureStoptime{
+            scheduledDeparture
+          }
+          directionId
           gtfsId
           tripHeadsign
         }
@@ -1540,6 +1644,7 @@ async function digitransitRoute() {
           shortName
           longName
           type
+          gtfsId
         }
         legGeometry {
           length  
@@ -1549,7 +1654,6 @@ async function digitransitRoute() {
     }
   }
 }`
-    console.log(preferencesToOptions(banned))
     const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
     if(result.errors){

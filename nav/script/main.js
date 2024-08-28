@@ -148,6 +148,7 @@ let lines = []
 let agencies = []
 let parameters = []
 let vehicles = []
+let mqttInstances = []
 let isPopupOpen = false
 let stopsOnMap = true
 let apiRunning = false

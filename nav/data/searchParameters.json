@@ -4,7 +4,7 @@
         "type" : "number",
         "min" : 1,
         "max" : 100,
-        "default" : 10,
+        "default" : 1,
         "graphqlName" : "numItineraries"
     },
     {
@@ -36,9 +36,9 @@
         "graphqlName" : "wheelchair"
     },
     {
-        "label" : "Filter routes",
+        "label" : "Dont filter routes",
         "type" : "checkbox",
-        "default" : true,
+        "default" : false,
         "graphqlName" : "debugItineraryFilter"
     }
     
