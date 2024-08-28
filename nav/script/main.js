@@ -244,9 +244,7 @@ document.getElementById('input2').addEventListener('click', event => {
     }
 })
 document.getElementById('preferInput').addEventListener('keyup', event => {
-    if (document.getElementById('preferInput').value.length > 1) {
-        preferSearch()
-    }
+    preferSearch()
 })
 document.getElementById('resizer').addEventListener('mousedown', e => {
     mouseDown = true
