@@ -88,42 +88,42 @@ async function getDepartures(stop, stopPopup) {
                                 const pV = vehicles.find(e => id == e.id)
                                 if (!values.lat || !values.long) return
                                 if (!pV) {
-                                    const marker = L.marker([values.lat,values.long], {
+                                    const marker = L.marker([values.lat, values.long], {
                                         pane: "vehiclePane",
                                         icon: L.divIcon({
                                             html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
-                                            iconSize: [25,25],
+                                            iconSize: [25, 25],
                                             className: "vehicle-marker"
                                         })
                                     })
-                                    vehicles.push({data: values, marker: marker, id: id})
+                                    vehicles.push({ data: values, marker: marker, id: id })
                                     marker.addTo(vehicleLayer)
                                 } else {
                                     pV.data = values
-                                    pV.marker.setLatLng([values.lat,values.long])
+                                    pV.marker.setLatLng([values.lat, values.long])
                                 }
                             } else if (data.entity[0].vehicle) {
                                 const id = topic[10]
                                 const pV = vehicles.find(e => id == e.id)
                                 const veh = data.entity[0].vehicle
-                                const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+                                const pos = { lat: veh.position.latitude, lon: veh.position.longitude }
 
                                 if (!pos.lat || !pos.lon) return
                                 if (!pV) {
                                     console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
-                                    const marker = L.marker([pos.lat,pos.lon], {
+                                    const marker = L.marker([pos.lat, pos.lon], {
                                         pane: "vehiclePane",
                                         icon: L.divIcon({
                                             html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
-                                            iconSize: [25,25],
+                                            iconSize: [25, 25],
                                             className: "vehicle-marker"
                                         })
                                     })
-                                    vehicles.push({data: data, marker: marker, id: id})
+                                    vehicles.push({ data: data, marker: marker, id: id })
                                     marker.addTo(vehicleLayer)
                                 } else {
                                     pV.data = data
-                                    pV.marker.setLatLng([pos.lat,pos.lon])
+                                    pV.marker.setLatLng([pos.lat, pos.lon])
                                 }
                             } else console.log(data)
                         }, gen)
@@ -255,7 +255,7 @@ function changeDepTime(dep_date, className, popup, stop, v) {
         }
     }
     if (isPopupOpen && v == gen) {
-        setTimeout(changeDepTime, 1000, dep_date, className, popup, stop, v)    
+        setTimeout(changeDepTime, 1000, dep_date, className, popup, stop, v)
     } else {
         for (let i = 0; i < elementList.length; i++) {
             const element = elementList.item(i);
@@ -564,7 +564,7 @@ async function search(inputElement) {
             row.addEventListener('click', e => {
                 setValue(features[i].geometry.coordinates[1], features[i].geometry.coordinates[0], element.name, inputElement);
                 recentSearches.add(element)
-                map.flyTo([element.lat, element.lon], map.getZoom(), {duration: 0.5})
+                map.flyTo([element.lat, element.lon], map.getZoom(), { duration: 0.5 })
                 stopTiles.redraw()
             })
             autocorrect.append(row)
@@ -611,20 +611,20 @@ async function preferSearch() {
     const rawdata = await fetch('https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94', {
         method: "POST",
         headers: {
-            "content-type" : "application/graphql"
+            "content-type": "application/graphql"
         },
-        body : query
+        body: query
     })
     const result = await rawdata.json()
 
     const clusters = result.data.stops.filter((value, index, self) =>
         index === self.findIndex((t) => (
-          t.cluster.id === value.cluster.id
+            t.cluster.id === value.cluster.id
         ))
     )
     let results = clusters.map(c => c.cluster)
     results = results.concat(
-        lines.length ? lines : result.data.routes.map(r => {r.name = r.shortName ? (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.shortName + " " + r.longName :  (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.longName; return r}),
+        lines.length ? lines : result.data.routes.map(r => { r.name = r.shortName ? (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.shortName + " " + r.longName : (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.longName; return r }),
         agencies.length ? agencies : result.data.agencies
     )
     searcher.removeAll()
@@ -665,12 +665,12 @@ async function preferSearch() {
         banButton.addEventListener("click", e => {
             const i = banned[type].findIndex(e => e == item.gtfsId)
             if (i >= 0) {
-                banned[type].splice(i,1)
-                banButton.querySelector("svg").setAttribute("stroke","red")
+                banned[type].splice(i, 1)
+                banButton.querySelector("svg").setAttribute("stroke", "red")
                 banButton.style.background = "white"
             } else {
                 banned[type].push(item.gtfsId)
-                banButton.querySelector("svg").setAttribute("stroke","white")
+                banButton.querySelector("svg").setAttribute("stroke", "white")
                 banButton.style.background = "red"
             }
         })
@@ -680,12 +680,12 @@ async function preferSearch() {
         unPreferButton.addEventListener("click", e => {
             const i = unpreferred[type].findIndex(e => e == item.gtfsId)
             if (i >= 0) {
-                unpreferred[type].splice(i,1)
-                unPreferButton.querySelector("svg").setAttribute("stroke","orange")
+                unpreferred[type].splice(i, 1)
+                unPreferButton.querySelector("svg").setAttribute("stroke", "orange")
                 unPreferButton.style.background = "white"
             } else {
                 unpreferred[type].push(item.gtfsId)
-                unPreferButton.querySelector("svg").setAttribute("stroke","white")
+                unPreferButton.querySelector("svg").setAttribute("stroke", "white")
                 unPreferButton.style.background = "orange"
             }
         })
@@ -695,26 +695,26 @@ async function preferSearch() {
         preferButton.addEventListener("click", e => {
             const i = preferred[type].findIndex(e => e == item.gtfsId)
             if (i >= 0) {
-                preferred[type].splice(i,1)
-                preferButton.querySelector("svg").setAttribute("stroke","green")
+                preferred[type].splice(i, 1)
+                preferButton.querySelector("svg").setAttribute("stroke", "green")
                 preferButton.style.background = "white"
             } else {
                 preferred[type].push(item.gtfsId)
-                preferButton.querySelector("svg").setAttribute("stroke","white")
+                preferButton.querySelector("svg").setAttribute("stroke", "white")
                 preferButton.style.background = "green"
             }
         })
         switch (type) {
             case "stops":
-                if (banned[type].find(e => e == item.gtfsId)) {banButton.querySelector("svg").setAttribute("stroke","white");banButton.style.background = "red"}
+                if (banned[type].find(e => e == item.gtfsId)) { banButton.querySelector("svg").setAttribute("stroke", "white"); banButton.style.background = "red" }
                 buttons.append(banButton)
-                buttons.style.setProperty("--e",1)
+                buttons.style.setProperty("--e", 1)
                 break;
             case "agencies":
             case "routes":
-                if (banned[type].find(e => e == item.gtfsId)) {banButton.querySelector("svg").setAttribute("stroke","white");banButton.style.background = "red"}
-                if (unpreferred[type].find(e => e == item.gtfsId)) {unPreferButton.querySelector("svg").setAttribute("stroke","white");unPreferButton.style.background = "red"}
-                if (preferred[type].find(e => e == item.gtfsId)) {preferButton.querySelector("svg").setAttribute("stroke","white");preferButton.style.background = "red"}
+                if (banned[type].find(e => e == item.gtfsId)) { banButton.querySelector("svg").setAttribute("stroke", "white"); banButton.style.background = "red" }
+                if (unpreferred[type].find(e => e == item.gtfsId)) { unPreferButton.querySelector("svg").setAttribute("stroke", "white"); unPreferButton.style.background = "red" }
+                if (preferred[type].find(e => e == item.gtfsId)) { preferButton.querySelector("svg").setAttribute("stroke", "white"); preferButton.style.background = "red" }
                 buttons.append(preferButton, unPreferButton, banButton)
                 break;
             default:
@@ -727,7 +727,7 @@ async function preferSearch() {
 function getIcon(type, data) {
     if (data) {
         return `${type}.${data.GTFS.modes[0].toLowerCase()}`
-    } 
+    }
     switch (type) {
         case "address":
             return "pin"
@@ -947,17 +947,23 @@ function route(route, i) {
 
     for (let i = 0; i < route.legs.length; i++) {
         const leg = route.legs[i]
+
+        let start_time = new Date(leg.start.estimated ? leg.start.estimated.time : leg.start.scheduledTime)
+        const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
+        const end_time = new Date(leg.end.estimated ? leg.end.estimated.time : leg.end.scheduledTime)
+        const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
+        let legDuration
+        if (endTime < startTime) {
+            legDuration = endTime + 86400 - startTime
+        } else {
+            legDuration = endTime - startTime
+        }
+        leg.startTime = startTime
+        leg.endTime = endTime
         if ((leg.route ? leg.route.type : leg.mode) == "WALK") {
-            let start_time = new Date(leg.start.scheduledTime)
-            const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
-            const end_time = new Date(leg.end.scheduledTime)
-            const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
-            leg.startTime = startTime
-            leg.endTime = endTime
-            const walktime = endTime - startTime
             const color = routeType("WALK").color
 
-            routepreview += walktime > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * walktime - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
+            routepreview += legDuration > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * legDuration - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
             if (i == 0) {
                 const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
@@ -968,7 +974,7 @@ function route(route, i) {
                 </tr><tr>
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
-                <td class="td">walk ${sToHMinS(walktime)}</td>`
+                <td class="td">walk ${sToHMinS(legDuration)}</td>`
             } else if (i == route.legs.length - 1) {
                 const img1 = `background-image:url("img/endmarker.svg"),url("img/route/endgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
@@ -976,7 +982,7 @@ function route(route, i) {
                 routeHTML +=
                     `<tr><td></td>
                     <td class="td" id="img" style=${img2}></td>
-                    <td>walk ${sToHMinS(walktime)}</td>
+                    <td>walk ${sToHMinS(legDuration)}</td>
                     </tr><tr>
                     <td>${sToTime(endTime)}</td>
                     <td class="td" id="img" style=${img1}></td>
@@ -988,7 +994,7 @@ function route(route, i) {
                 routeHTML +=
                     `<tr><td class="td"></td>
                 <td id="img" style=${img1}></td>
-                <td class="td">walk ${sToHMinS(walktime)}</td></tr>`
+                <td class="td">walk ${sToHMinS(legDuration)}</td></tr>`
             }
             trips.push({
                 tripStart: null,
@@ -999,28 +1005,21 @@ function route(route, i) {
                 fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
                 toCoords: { lat: leg.to.lat, lon: leg.to.lon },
                 shape: leg.legGeometry.points,
-                popUpTime: walktime,
+                popUpTime: legDuration,
                 popUpType: "WALK",
                 startTime: sToTime(startTime),
                 endTime: sToTime(endTime),
             })
 
         } /* transit */ else {
-            let start_time = new Date(leg.start.estimated ? leg.start.estimated.time : leg.start.scheduledTime)
-            const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
-            const end_time = new Date(leg.end.estimated ? leg.end.estimated.time : leg.end.scheduledTime)
-            const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
-            leg.startTime = startTime
-            leg.endTime = endTime
-            const duration = endTime - startTime
             const waittime = startTime - previousTrip.endTime
             let color = routeType(leg.route.type).color
-            if(color == '#EA7000') color = 'orange'
-            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
+            if (color == '#EA7000') color = 'orange'
+            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * legDuration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
             } else {
-                
+
                 const img1 = `background-image:url("img/route/start${color}.png")`
                 const img2 = `background-image:url("img/route/${color}.png")`
                 const img3 = `background-image:url("img/route/end${color}.png")`
@@ -1344,11 +1343,11 @@ function sToTime(seconds) {
     if (seconds > 24 * 3600) seconds -= 24 * 3600
     return `${Math.floor(seconds / 3600)}:${padNumber(Math.floor(seconds % 3600 / 60))}${seconds % 60 ? `:${padNumber(seconds % 60)}` : ''}`
 }
-class realtimeHandler{
+class realtimeHandler {
     constructor(url, query, returnFormat, callback) {
         this.callback = callback
         this.returnFormat = returnFormat
-        this.client =  mqtt.connect(url)
+        this.client = mqtt.connect(url)
         this.client.on("connect", () => {
             this.client.subscribe(query, (err) => {
                 if (err) console.log("MQTT Error:", err)
@@ -1368,7 +1367,7 @@ class realtimeHandler{
                     break
             }
         });
-    } 
+    }
     end() {
         this.client.end()
     }
@@ -1403,50 +1402,50 @@ function viewRoute(i, click) {
                             const pV = vehicles.find(e => id == e.id)
                             if (!values.lat || !values.long) return
                             if (!pV) {
-                                const marker = L.marker([values.lat,values.long], {
+                                const marker = L.marker([values.lat, values.long], {
                                     pane: "vehiclePane",
                                     icon: L.divIcon({
                                         html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
-                                        iconSize: [25,25],
+                                        iconSize: [25, 25],
                                         className: "vehicle-marker"
                                     })
                                 })
-                                vehicles.push({data: values, marker: marker, id: id})
+                                vehicles.push({ data: values, marker: marker, id: id })
                                 marker.addTo(vehicleLayer)
                             } else {
                                 pV.data = values
-                                pV.marker.setLatLng([values.lat,values.long])
+                                pV.marker.setLatLng([values.lat, values.long])
                             }
                         } else /* Digitransit */ {
                             console.log(data, topic)
                             const id = topic[10]
                             const pV = vehicles.find(e => id == e.id)
                             const veh = data.entity[0].vehicle
-                            const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+                            const pos = { lat: veh.position.latitude, lon: veh.position.longitude }
 
                             if (!pos.lat || !pos.lon) return
                             if (!pV) {
                                 console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
-                                const marker = L.marker([pos.lat,pos.lon], {
+                                const marker = L.marker([pos.lat, pos.lon], {
                                     pane: "vehiclePane",
                                     icon: L.divIcon({
                                         html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
-                                        iconSize: [25,25],
+                                        iconSize: [25, 25],
                                         className: "vehicle-marker"
                                     })
                                 })
-                                vehicles.push({data: data, marker: marker, id: id})
+                                vehicles.push({ data: data, marker: marker, id: id })
                                 marker.addTo(vehicleLayer)
                             } else {
                                 pV.data = data
-                                pV.marker.setLatLng([pos.lat,pos.lon])
+                                pV.marker.setLatLng([pos.lat, pos.lon])
                             }
                         }
                     }
                 )
             )
         })
-        
+
     }//HOVER ONLY
     else {
         routes.forEach(r => {
@@ -1559,7 +1558,7 @@ function routeTypeToSortValue(routeType) {
 }
 function preferencesToOptions(obj) {
     let opt = ""
-    Object.keys(obj).forEach(key => {if (obj[key].length) opt += `${key}:"${obj[key].toString()}",`})
+    Object.keys(obj).forEach(key => { if (obj[key].length) opt += `${key}:"${obj[key].toString()}",` })
     return opt
 }
 async function digitransitRoute() {
@@ -1572,7 +1571,7 @@ async function digitransitRoute() {
     clearMap()
     const query = `{
   plan(
-    from: {lat: ${values.from.lat }, lon: ${values.from.lon}}
+    from: {lat: ${values.from.lat}, lon: ${values.from.lon}}
     to: {lat: ${values.to.lat}, lon: ${values.to.lon}}
     date: "${document.getElementById('input4').value}",
     time: "${document.getElementById('input3').value}",
@@ -1652,7 +1651,7 @@ async function digitransitRoute() {
 }`
     const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
-    if(result.errors){
+    if (result.errors) {
         setError({ code: (rawdata ? rawdata.status : ''), message: (result ? result.errors[0].message : 'Route could not be fetched') }, 10000)
     }
     return result
@@ -1740,10 +1739,10 @@ class SearchParameter {
         this.label = o.label
         this.default = o.default
         this.graphqlName = o.graphqlName
-        this.id = encodeURIComponent(this.label.replaceAll(" ","").toLowerCase())
+        this.id = encodeURIComponent(this.label.replaceAll(" ", "").toLowerCase())
         this.element = this.#createElements()
     }
-    #createElements(){
+    #createElements() {
         const container = document.createElement("div")
         const label = document.createElement("label")
         label.setAttribute("for", this.id)
@@ -1755,7 +1754,7 @@ class SearchParameter {
             input.value = this.default
             input.setAttribute("min", this.min)
             input.setAttribute("max", this.max)
-            input.addEventListener("change", function() {
+            input.addEventListener("change", function () {
                 let v = parseInt(this.value);
                 if (v < this.min) this.value = this.min
                 if (v > this.max) this.value = this.max
@@ -1773,7 +1772,7 @@ class SearchParameter {
         }
         return container
     }
-    get value(){
+    get value() {
         const input = this.element.querySelector("input")
         switch (this.type) {
             case "number":
