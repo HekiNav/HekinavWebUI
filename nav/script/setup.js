@@ -1014,11 +1014,13 @@ function route(route, i) {
             leg.endTime = endTime
             const duration = endTime - startTime
             const waittime = startTime - previousTrip.endTime
-            const color = routeType(leg.route.type).color
+            let color = routeType(leg.route.type).color
+            if(color == '#EA7000') color = 'orange'
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
             } else {
+                
                 const img1 = `background-image:url("img/route/start${color}.png")`
                 const img2 = `background-image:url("img/route/${color}.png")`
                 const img3 = `background-image:url("img/route/end${color}.png")`
