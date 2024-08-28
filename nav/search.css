@@ -91,7 +91,7 @@ input[type=number]{
 .preferrer{
   width: 90%;
   position: relative;
-  z-index: 20;
+  z-index: 19;
   border: var(--main-border);
   margin-top: 0%;
   position: relative;
