@@ -988,7 +988,7 @@ function route(route, i) {
                 </tr><tr>
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
-                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign.length < 25 ? leg.trip.tripHeadsign : `${leg.trip.tripHeadsign.slice(0, 25)}...`}</td>
+                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign ? (`${leg.trip.tripHeadsign.slice(0, 25)} ${leg.trip.tripHeadsign.length > 25 ? '...' : ''}`) : ""}</td>
                 </tr><tr>
                 <td class="bottom_td">${sToTime(endTime)}</td>
                 <td class="border_td" id="img" style=${img3}></td>
@@ -1526,19 +1526,13 @@ async function digitransitRoute() {
         param += ` ${p.graphqlName}:${p.value},`
     })
     console.log(param)
-    fromLat = values.from.lat 
-    fromLon = values.from.lon
-    toLat = values.to.lat
-    toLon = values.to.lon
     clearMap()
-    const date = document.getElementById('input4').value
-    const time = document.getElementById('input3').value
     const query = `{
   plan(
-    from: {lat: ${fromLat}, lon: ${fromLon}}
-    to: {lat: ${toLat}, lon: ${toLon}}
-    date: "${date}",
-    time: "${time}",
+    from: {lat: ${values.from.lat }, lon: ${values.from.lon}}
+    to: {lat: ${values.to.lat}, lon: ${values.to.lon}}
+    date: "${document.getElementById('input4').value}",
+    time: "${document.getElementById('input3').value}",
     ${param},
     banned: {${preferencesToOptions(banned)}}
     preferred: {${preferencesToOptions(preferred)}}
