@@ -426,7 +426,7 @@ function routeType(code) {
     //Return the information
     return { text: text, color: color, importance: importance }
 }
-async function search(inputElement) {
+async function search(inputElement, display = true) {
     const input = document.getElementById('input' + inputElement).value
     const rawdata = await fetch('https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94&text=' + input)
     const result = await rawdata.json()
@@ -442,7 +442,7 @@ async function search(inputElement) {
     }
     otherAutocorrect.innerHTML = ''
     autocorrect.innerHTML = ''
-    if (features.length < 1) {
+    if (features.length < 1 && display) {
 
         const header = document.createElement('div')
         header.classList.add('stopRow')
@@ -477,7 +477,7 @@ async function search(inputElement) {
             })
             autocorrect.append(row)
         }
-    } else {
+    } else if (display) {
         const row = document.createElement('div')
         row.classList.add('resultRow')
 
@@ -520,6 +520,8 @@ async function search(inputElement) {
             })
             autocorrect.append(row)
         }
+    } else {
+        setValue(features[0].geometry.coordinates[1], features[0].geometry.coordinates[0], features[0].properties.name, inputElement);
     }
 
 }
@@ -789,11 +791,13 @@ async function api() {
 
     document.getElementById('rph').innerHTML = `Loading routes from ${values.from.display} to ${values.to.display}`
     document.getElementById('routes').innerHTML = loadingHTML2
+
     routes.length = 0
     //Prevents API from getting too many requests
     apiRunning = true
 
-
+    if (values.from.display == "" && document.getElementById('input1').value.length > 1) search(1, false)
+    if (values.to.display == "" && document.getElementById('input2').value.length > 1) search(2, false)
     //Fetch the data
     const data = await digitransitRoute()
     console.log('Request OK')
@@ -1171,12 +1175,10 @@ function setValue(lat, lon, display, field) {
     if (field == 1) {
         values.from = { lat: lat, lon: lon, display: display }
         autocorrect1.hidden = true
-        //inputIds[0] = value
         document.getElementById('input1').value = display
     } else if (field == 2) {
         values.to = { lat: lat, lon: lon, display: display }
         autocorrect2.hidden = true
-        //inputIds[1] = value
         document.getElementById('input2').value = display
     }
 }
@@ -1520,7 +1522,7 @@ function preferencesToOptions(obj) {
     return opt
 }
 async function digitransitRoute() {
-
+    
     let param = ""
     parameters.forEach(p => {
         param += ` ${p.graphqlName}:${p.value},`
