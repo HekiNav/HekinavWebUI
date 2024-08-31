@@ -244,6 +244,7 @@ document.getElementById('input2').addEventListener('click', event => {
     }
 })
 document.getElementById('preferInput').addEventListener('keyup', event => {
+    preferList.hidden = false
     preferSearch()
 })
 document.getElementById('resizer').addEventListener('mousedown', e => {
