@@ -3,7 +3,6 @@
   --main-padding:5px;
   --main-border: 2px #001049 outset;
   --font-size: 2vw;
-  --nav-items: 6
 }
 html{
   -webkit-user-select: none;
@@ -146,53 +145,10 @@ h4{
   position: relative;
   left: 0;
 }
-/* NAVBAR */
-  nav{
-    grid-area: nav;
-    top: 0;
-    width: 100%;
-    height: 100%;
-  }
-  nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #fff;
-    height: 100%;
-  }
-  li{
-    float: left;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    height: 100%;
-  }
-  li a {
-    height: 3vh;
-    font-size: 2vh;
-    width: calc(100vw/var(--nav-items));
-    display: block;
-    color: #000;
-    text-align: center;
-    text-decoration: none;
-  }
-    
-  .navItem:hover {
-    background-color: #003ec4;
-    color: #ffffff;
-  }
-  .logo{  
-    height: 5vh;
-    background: white;   
-    padding-bottom: 2%;   
-  }
-.logo-link{
-  flex-wrap: wrap;
-  display: flex;
-  align-content: center;
+.navbar{
+  width: 100vw;
   height: 100%;
-    padding: 0;
+  grid-area: nav;
 }
 .lds {
   display: inline-block;
