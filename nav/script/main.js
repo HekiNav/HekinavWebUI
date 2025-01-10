@@ -15,6 +15,18 @@ const satelliteTiles = L.tileLayer('https://services.arcgisonline.com/ArcGIS/res
     preferCanvas: true,
     maxZoom: 19,
 })
+const satelliteTiles2 = L.tileLayer('https://api.tomtom.com/map/1/tile/sat/main/{z}/{x}/{y}.jpg?key=l2jEJ3QuyQdG7rBkjTb5GdWedmu2hNB8', {
+    preferCanvas: true,
+    maxZoom: 19,
+})
+const satelliteTiles3 = L.tileLayer('https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=3hocw1xzVGbXb2H0EyeX', {
+    preferCanvas: true,
+    maxZoom: 19,
+})
+const hillShadeTiles = L.tileLayer('https://api.tomtom.com/map/1/tile/hill/main/{z}/{x}/{y}.png?key=l2jEJ3QuyQdG7rBkjTb5GdWedmu2hNB8', {
+    preferCanvas: true,
+    maxZoom: 13,
+})
 const map = L.map('map', {
     minZoom: 5,
     maxZoom: 20,
@@ -59,7 +71,10 @@ L.control.locate({
 const baseLayers = {
     "HSL Map": hslTiles,
     "OSM": osmTiles,
-    "Satellite": satelliteTiles
+    "Satellite": satelliteTiles,
+    "Satellite 2": satelliteTiles2,
+    "Satellite 3": satelliteTiles3,
+    "Hillshade" : hillShadeTiles
 }
 L.control.layers(baseLayers).addTo(map)
 let recentSearches = []
@@ -101,7 +116,6 @@ let invalidStops = []
 let stopPopup = document.getElementById('stopPopup')
 let stopPopupC = document.getElementById('popupContent')
 let stopImportanceOffset = 0
-const domain = 'https://hekinavv.loophole.site'
 let values = {}
 const image = {
     walk(size, color = '#000') { return `<svg fill="${color}" height="${size}px" width="${size}px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 128 128" xml:space="preserve"><path d="M67.9,22.6c5.7,0.4,10.8-3.8,11.3-9.7c0.4-5.7-3.8-10.8-9.7-11.3c-5.7-0.4-10.8,3.8-11.3,9.7C57.8,17.1,62.2,22.2,67.9,22.6"/><path d="M59,26.9c2-1.5,4.5-2.3,7.3-2.2c3.5,0.3,6.6,2.5,8.3,5.1l10.5,20.9l14.3,10c1.2,1,2,2.5,1.9,4.1c-0.1,2.6-2.5,4.5-5.1,4.2c-0.7,0-1.5-0.3-2.2-0.7L78.6,57.8c-0.4-0.4-0.9-0.9-1.2-1.5l-4-7.8l-4.7,20.8l18.6,22c0.4,0.7,0.7,1.5,0.9,2.2l5,26.5c0,0.6,0,1,0,1.5c-0.3,4-3.7,6.7-7.6,6.6c-3.2-0.3-5.6-2.6-6.4-5.6l-4.7-24.7L59.4,81l-3.5,16.1c-0.1,0.7-1.2,2.3-1.5,2.9L40,124.5c-1.5,2.2-3.8,3.7-6.6,3.4c-4-0.3-6.9-3.7-6.6-7.6c0.1-1.2,0.6-2.2,1-3.1l13.5-22.5L52.5,45l-7.3,5.9l-4,17.7c-0.4,2.2-2.6,4.1-5,4c-2.6-0.1-4.5-2.5-4.4-5.1c0-0.1,0-0.4,0.1-0.6l4.5-20.6c0.3-0.9,0.7-1.6,1.5-2.2L59,26.9z"/></svg>` },
