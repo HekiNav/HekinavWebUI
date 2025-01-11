@@ -181,3 +181,11 @@
   background: transparent;
   /* make scrollbar transparent */
 }
+
+.apiSelect {
+  position: relative;
+  border: var(--main-border);
+  color: #001049;
+  font-size: var(--font-size);
+  background: #ffffff;
+}

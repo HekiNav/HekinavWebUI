@@ -1,4 +1,4 @@
-fetch("img/TRANSIT_MAP_2024_v72-OPTIMISED.svg").then(async e => {
+fetch("img/OPTIMIZED_TRANSIT_MAP_2024_DAY_v133.svg").then(async e => {
     const htmlString = await e.text()
     var div = document.createElement('div');
     div.innerHTML = htmlString.trim();
