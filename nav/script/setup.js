@@ -583,8 +583,15 @@ async function preferSearch() {
     //remove Pori:1001 cuz that is a duplicate blame digitransit
     results = results.filter(element => { return element.gtfsId != "Pori:1001" })
     searcher.removeAll()
+    console.log(results)
+    results = results.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+          t.gtfsId === value.gtfsId
+        ))
+    )
     searcher.addAll(results)
-    const searched = searcher.search(input)
+        const searched = searcher.search(input)
+    console.log(searched)
     if (!lines.length && !agencies.length) {
         agencies = result.data.agencies
         lines = result.data.routes
@@ -923,7 +930,7 @@ function preAPI() {
     }
 }
 async function api() {
-
+    sidebarMode('routepreview')
     document.getElementById('rph').innerHTML = `Loading routes from ${values.from.display} to ${values.to.display}`
     document.getElementById('routes').innerHTML = loadingHTML2
 
@@ -950,7 +957,6 @@ async function api() {
         map.flyToBounds(routes[0].bbox, 0.3)
     }
     viewRoute(0, false)
-    sidebarMode('routepreview')
     apiRunning = false
 
 }
