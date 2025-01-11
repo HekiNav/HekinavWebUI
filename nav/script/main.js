@@ -181,6 +181,7 @@ let repeat = false
 let currentMode = 'main'
 let viaStop = {"id": "", "type": ""}
 let routes = []
+let modes = ["BUS", "RAIL", "TRAM", "FERRY", "SUBWAY", "AIRPLANE", "COACH"]
 const cooldown = 10000
 let autocorrect1 = document.getElementById('autocorrect1')
 let autocorrect2 = document.getElementById('autocorrect2')
@@ -192,6 +193,7 @@ const options = document.getElementById('options')
 const sb1 = document.getElementsByClassName('sb1')
 const sb2 = document.getElementsByClassName('sb2')
 const sb3 = document.getElementsByClassName('sb3')
+const modePopup = document.getElementById("modePopup")
 let mouseDown = false
 inputIds = [false, false]
 setValue(60.17664172012474, 24.656461728643194, "", 1)
@@ -307,6 +309,67 @@ document.getElementById('apiSelect').addEventListener('change', async e => {
         document.getElementById("preferrercontainer").style.display = 'block'
     }
     importData("searchParameters.json", data => addParameters(data[document.getElementById("apiSelect").value]))
+})
+document.getElementById("bussvgContainer").addEventListener("click", e => {
+    if(modes.includes("BUS")){
+        modes.splice(modes.indexOf("BUS"), 1)
+        document.getElementById("bussvg").style.fill = "#a7a7a7"
+    }
+    else {
+        modes.push("BUS")
+        document.getElementById("bussvg").style.fill = "#007ac9"
+    }
+})
+document.getElementById("trainsvgContainer").addEventListener("click", e => {
+    if(modes.includes("RAIL")){
+        modes.splice(modes.indexOf("RAIL"), 1)
+        document.getElementById("trainsvg").style.fill = "#a7a7a7"
+    }
+    else {
+        modes.push("RAIL")
+        document.getElementById("trainsvg").style.fill = "#007ac9"
+    }
+})
+document.getElementById("metrosvgContainer").addEventListener("click", e => {
+    if(modes.includes("SUBWAY")){
+        modes.splice(modes.indexOf("SUBWAY"), 1)
+        document.getElementById("metrosvg").style.fill = "#a7a7a7"
+    }
+    else {
+        modes.push("SUBWAY")
+        document.getElementById("metrosvg").style.fill = "#ff6319"
+    }
+})
+document.getElementById("tramsvgContainer").addEventListener("click", e => {
+    if(modes.includes("TRAM")){
+        modes.splice(modes.indexOf("TRAM"), 1)
+        document.getElementById("tramsvg").style.fill = "#a7a7a7"
+    }
+    else {
+        modes.push("TRAM")
+        document.getElementById("tramsvg").style.fill = "#00985f"
+    }
+})
+document.getElementById("ferrysvgContainer").addEventListener("click", e => {
+    if(modes.includes("FERRY")){
+        modes.splice(modes.indexOf("FERRY"), 1)
+        document.getElementById("ferrysvg").style.fill = "#a7a7a7"
+    }
+    else {
+        modes.push("FERRY")
+        document.getElementById("ferrysvg").style.fill = "#00b9e4"
+    }
+})
+document.getElementById("modesButton").addEventListener("click", e => {
+    if(modePopup.classList.contains("hidden")){
+        modePopup.classList.remove("hidden")
+    }
+    else {
+        modePopup.classList.add("hidden")
+    }
+})
+document.getElementById("closeModePopup").addEventListener("click", e => {
+    modePopup.classList.add("hidden")
 })
 window.addEventListener('mouseup', e => {
     mouseDown = false

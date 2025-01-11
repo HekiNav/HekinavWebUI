@@ -581,14 +581,17 @@ async function preferSearch() {
         agencies.length ? agencies : result.data.agencies
     )
     //remove Pori:1001 cuz that is a duplicate blame digitransit
+    //its just a lot faster to just manually remove that one as its the only duplicate
+    //if there appear more then ig just uncomment the bottom one
     results = results.filter(element => { return element.gtfsId != "Pori:1001" })
-    searcher.removeAll()
-    console.log(results)
-    results = results.filter((value, index, self) =>
+    /*results = results.filter((value, index, self) =>
         index === self.findIndex((t) => (
           t.gtfsId === value.gtfsId
         ))
-    )
+    )*/
+    searcher.removeAll()
+    console.log(results)
+
     searcher.addAll(results)
         const searched = searcher.search(input)
     console.log(searched)
@@ -761,6 +764,12 @@ async function viaSearch() {
                 viaStop.id = item.gtfsId
                 viaStop.type = "via"
             }
+            if (viaStop.type == "visit" && viaStop.id != "") {
+                document.getElementById("timeforvisit(s)Container").style.display = "block"
+            }
+            else {
+                document.getElementById("timeforvisit(s)Container").style.display = "none"
+            }
         })
         const visitButton = document.createElement("p")
         visitButton.classList.add("visitButton")
@@ -804,7 +813,7 @@ async function viaSearch() {
                 viaStop.id = item.gtfsId
                 viaStop.type = "visit"
             }
-            if (viaStop.id != "") {
+            if (viaStop.type == "visit" && viaStop.id != "") {
                 document.getElementById("timeforvisit(s)Container").style.display = "block"
             }
             else {
@@ -1753,7 +1762,7 @@ function addParameters(data) {
     //this stuff could be somewhere else
     if (document.getElementById("apiSelect").value == "hslv2" || document.getElementById("apiSelect").value == "finlandv2") {
         document.getElementById("preferrercontainer").style.display = 'none'
-        if (viaStop == "") {
+        if (viaStop.type != "visit" || viaStop.id == "") {
             document.getElementById("timeforvisit(s)Container").style.display = "none"
         }
         else {

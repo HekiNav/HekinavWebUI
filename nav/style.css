@@ -1,82 +1,93 @@
-:root{
-  --main-radius:0px;
-  --main-padding:5px;
+:root {
+  --main-radius: 0px;
+  --main-padding: 5px;
   --main-border: 2px #001049 outset;
   --font-size: 2vw;
 }
-html{
+
+html {
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
   padding: 0;
   font-family: 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
-body{
-	margin: 0;
+
+body {
+  margin: 0;
   overflow: hidden;
 }
-h3{
+
+h3 {
   margin: 0;
 }
-h4{
+
+h4 {
   margin: 0;
 }
-.container{
+
+.container {
   margin: 0;
   display: grid;
   height: 100vh;
   gap: 0;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr 12fr;
-  grid-template-areas: 
-  "nav nav"
-  "main main";
+  grid-template-areas:
+    "nav nav"
+    "main main";
 }
-#maincontent{
+
+#maincontent {
   padding: 0.5%;
   height: 91vh;
   display: grid;
   grid-template-columns: 0.05fr 0.3fr 0.25fr 0.25fr 1fr;
   grid-template-rows: 1fr 1fr 1fr 1fr 30fr;
-  grid-template-areas: 
-  "text1 input1 input1 map map"
-  "text2 input2 input2 map map"
-  "text3 weekday input3 map map"
-  "search search search map map"
-  "options options options map map";
+  grid-template-areas:
+    "text1 input1 input1 map map"
+    "text2 input2 input2 map map"
+    "text3 weekday input3 map map"
+    "search search search map map"
+    "options options options map map";
   gap: 0.2rem;
   background: #0028b7;
   grid-area: main;
-    
+
 }
-#rph{
+
+#rph {
   grid-area: rph;
   color: #fff;
   padding-left: 10%;
   font-weight: normal;
   font-size: 3vh;
 }
-#routes{
+
+#routes {
   grid-area: routes;
   overflow-y: scroll;
   width: 100%;
   height: 100%;
   margin-bottom: 20px;
 }
-.route-preview{
+
+.route-preview {
   height: 80px;
   width: 99%;
   background-color: #fff;
   margin: 2px;
   border-radius: 5px;
 }
-.preview{
+
+.preview {
   height: 20px;
   display: flex;
   flex-direction: row;
   width: 100%;
 }
-.preview-cell{
+
+.preview-cell {
   display: flex;
   height: 20px;
   padding-left: 1px;
@@ -87,7 +98,8 @@ h4{
   align-items: center;
   width: 0px;
 }
-#error{
+
+#error {
   position: absolute;
   top: -10%;
   width: 100vw;
@@ -96,12 +108,14 @@ h4{
   height: 5vh;
   overflow: hidden;
 }
-#errorMessage{
+
+#errorMessage {
   font-size: 4vh;
   color: #fff;
   padding-left: 8vh;
 }
-#result{
+
+#result {
   font-size: 150%;
   grid-area: result;
   margin: 0;
@@ -112,8 +126,9 @@ h4{
   max-height: 100%;
   overflow-y: scroll;
 }
+
 /* route styling */
-#route{
+#route {
   font-size: 150%;
   grid-area: route;
   margin: 0;
@@ -124,39 +139,48 @@ h4{
   max-height: 100%;
   overflow-y: scroll;
 }
-.td{
+
+.td {
   border: none;
   height: 80px;
 }
-.bottom_td{
+
+.bottom_td {
   border: none;
   vertical-align: bottom;
 }
-.top_td{
+
+.top_td {
   border: none;
   vertical-align: top;
 }
-.border_td{
+
+.border_td {
   border: none;
   height: 54px;
 }
+
 /* LOADING ICON CONTAINER */
-.loading{
+.loading {
   position: relative;
   left: 0;
 }
-.navbar{
+
+.navbar {
   width: 100vw;
   height: 100%;
   grid-area: nav;
 }
+
 .lds {
   display: inline-block;
   position: relative;
   margin: 0 15%;
   width: 20%;
-  height: 20%;;
+  height: 20%;
+  ;
 }
+
 .lds div {
   position: absolute;
   top: 33px;
@@ -166,22 +190,27 @@ h4{
   background: #00f;
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
+
 .lds-ellipsis div:nth-child(1) {
   left: -8px;
   animation: lds-ellipsis1 0.6s infinite;
 }
+
 .lds-ellipsis div:nth-child(2) {
   left: -8px;
   animation: lds-ellipsis2 0.6s infinite;
 }
+
 .lds-ellipsis div:nth-child(3) {
   left: 16px;
   animation: lds-ellipsis2 0.6s infinite;
 }
+
 .lds-ellipsis div:nth-child(4) {
   left: 40px;
   animation: lds-ellipsis2 0.6s infinite;
 }
+
 .lds-ellipsis div:nth-child(5) {
   left: 64px;
   animation: lds-ellipsis3 0.6s infinite;
@@ -191,54 +220,67 @@ h4{
   left: -8px;
   animation: lds-ellipsis3 0.6s infinite;
 }
+
 .lds-ellipsis-reverse div:nth-child(2) {
   left: 16px;
   animation: lds-ellipsis4 0.6s infinite;
 }
+
 .lds-ellipsis-reverse div:nth-child(3) {
   left: 40px;
   animation: lds-ellipsis4 0.6s infinite;
 }
+
 .lds-ellipsis-reverse div:nth-child(4) {
   left: 64px;
   animation: lds-ellipsis4 0.6s infinite;
 }
+
 .lds-ellipsis-reverse div:nth-child(5) {
   left: 64px;
   animation: lds-ellipsis1 0.6s infinite;
 }
+
 @keyframes lds-ellipsis1 {
   0% {
     transform: scale(0);
   }
+
   100% {
     transform: scale(1);
   }
 }
+
 @keyframes lds-ellipsis3 {
   0% {
     transform: scale(1);
   }
+
   100% {
     transform: scale(0);
   }
 }
+
 @keyframes lds-ellipsis2 {
   0% {
     transform: translate(0, 0);
   }
+
   100% {
     transform: translate(24px, 0);
   }
 }
+
 @keyframes lds-ellipsis4 {
   0% {
     transform: translate(0, 0);
   }
+
   100% {
     transform: translate(-24px, 0);
   }
 }
+
 .lds-ring {
   display: flex;
   position: relative;
@@ -247,6 +289,7 @@ h4{
   width: 100%;
   height: 40%;
 }
+
 .lds-ring div {
   box-sizing: border-box;
   display: block;
@@ -259,24 +302,30 @@ h4{
   animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   border-color: #fff transparent transparent transparent;
 }
+
 .lds-ring div:nth-child(1) {
   animation-delay: -0.45s;
 }
+
 .lds-ring div:nth-child(2) {
   animation-delay: -0.3s;
 }
+
 .lds-ring div:nth-child(3) {
   animation-delay: -0.15s;
 }
+
 @keyframes lds-ring {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
-#popup{
+
+#popup {
   width: 25%;
   padding: 2.5%;
   position: absolute;
@@ -286,9 +335,49 @@ h4{
   left: -30%;
   bottom: 5%;
 }
-.apiSelect
 
+#modePopup {
+  z-index: 10000000;
+  font-family: Arial, sans-serif;
+  position: absolute;
+  top: 10vh;
+  left: 35vw;
+  width: 10vw;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  transition-duration: 0s;
+}
 
-[hidden]{
+#modePopup.hidden {
+  left: 20vw;
+  z-index: -1;
+}
+
+#modesButton {
+  border: var(--main-border);
+  margin-top: 1vh;
+  width: 40%;
+  align-self: flex-start;
+  color: #001049;
+  font-size: var(--font-size);
+  background-color: #ffffff;
+}
+
+#modePopupContent svg {
+  width: 6vh;
+  display: flex;
+  flex-direction: column;
+  height: 8vh;
+}
+
+#modePopupContent div {
+  display: flex;
+  gap: 5%;
+  cursor: pointer;
+}
+
+[hidden] {
   display: none;
 }

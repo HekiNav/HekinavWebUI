@@ -21,7 +21,8 @@ function getQuery() {
             via[p.graphqlCategory2] = {}
           }
           if(!Object.keys(via[p.graphqlCategory2]).includes(p.graphqlName)){
-            via[p.graphqlCategory2][p.graphqlName] = p.graphqlName == "minimumWaitTime" ? `§${p.value}s§` : p.value
+            console.log(p.value)
+            via[p.graphqlCategory2][p.graphqlName] = p.graphqlName == "minimumWaitTime" ? `§PT${p.value}s§` : p.value
           }
           continue
         }
@@ -38,12 +39,22 @@ function getQuery() {
       if(viaStop.id != "" && viaStop.type == "via"){
         if(!via.passThrough) via.passThrough = {}
         via.passThrough.stopLocationIds = [`§${viaStop.id}§`]
+        delete via['visit']
       }
-      if(viaStop.id != "" && viaStop.type == "visit"){
+      else if(viaStop.id != "" && viaStop.type == "visit"){
         if(!via.visit) via.visit = {}
         via.visit.stopLocationIds = [`§${viaStop.id}§`]
       }
-      delete via['visit']
+      else {
+        //cuz one of the params implements itself even if theres no viastop
+        delete via['visit']
+      }
+
+      modeString = ""
+      modes.forEach(mode => {
+        modeString += `{mode: ${mode}},`
+      })
+
       //remove quotes for graphql
       pref = JSON.stringify(pref).replaceAll(/"/g, "")
       console.log(via)
@@ -58,6 +69,7 @@ function getQuery() {
     preferences: ${pref}
     ${option}
     ${viaStop.id != "" ? `via: ${via}` : ""}
+    modes: {transit: {transit: [${modeString}]}}
   ) {
     pageInfo {
       endCursor
