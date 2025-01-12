@@ -2,6 +2,7 @@ nav{
     top: 0;
     width: 100vw;
     height: 10vh;
+    font-family: var(--f-normal);
   }
   nav ul {
     list-style-type: none;

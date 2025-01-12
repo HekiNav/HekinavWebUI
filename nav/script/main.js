@@ -327,7 +327,7 @@ document.getElementById("trainsvgContainer").addEventListener("click", e => {
     }
     else {
         modes.push("RAIL")
-        document.getElementById("trainsvg").style.fill = "#007ac9"
+        document.getElementById("trainsvg").style.fill = "#8C4799"
     }
 })
 document.getElementById("metrosvgContainer").addEventListener("click", e => {
