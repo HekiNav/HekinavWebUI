@@ -62,18 +62,18 @@
                 <select id="apiSelect" class="apiSelect">
                     <option value="finlandv2" selected>Finland V2</option>
                     <option value="hslv2">HSL V2</option>
-                    <!--<option value="finlandv1">Finland V1</option>
-                    <option value="hslv1">HSL V1</option>-->
+                    <option value="finlandv1">Finland V1</option>
+                    <option value="hslv1">HSL V1</option>
                 </select>
                 <br>
+                <button id="modesButton">Modes</button>
                 <div id="preferrercontainer">
-                    <label for="preferrer">Ban or prefer routes, agencies and stop</label>
+                    <label for="preferrer">Ban or prefer routes, agencies & stops</label>
                     <div class="preferrer">
                         <input autocomplete="off" type="text" placeholder="Search stops" id="preferInput" />
                         <div class="prefersearch" id="preferSearch"></div>
                     </div>
                 </div>
-                <button id="modesButton">Modes</button>
                 <div id="viacontainer">
                     <label for="preferrer">Go via a stop</label>
                     <div class="via">
@@ -83,7 +83,7 @@
                 </div>
                 <div id="parameters"></div>
             </div>
-            <div id="modePopup" class="sb1">
+            <div id="modePopup" class="sb1 hidden">
                 <span class="close" id="closeModePopup" style="float: right; font-size: 200%;">&times;</span>
                 <div id="modePopupContent">
                     <!--bus-->

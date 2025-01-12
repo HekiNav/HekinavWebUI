@@ -593,7 +593,7 @@ async function preferSearch() {
     console.log(results)
 
     searcher.addAll(results)
-        const searched = searcher.search(input)
+    const searched = searcher.search(input)
     console.log(searched)
     if (!lines.length && !agencies.length) {
         agencies = result.data.agencies
@@ -956,15 +956,27 @@ async function api() {
     values.routes = data
     document.getElementById('routes').innerHTML = ""
     console.log(data)
-    document.getElementById('rph').innerHTML = `Loaded ${data.data.planConnection.edges.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
     if (!random) {
         localStorage.setItem('route', JSON.stringify(values))
     }
-    for (let i = 0; i < data.data.planConnection.edges.length; i++) {
-        const r = data.data.planConnection.edges[i];
-        routes.push(route(r, i))
-        map.flyToBounds(routes[0].bbox, 0.3)
+    endpoint = document.getElementById("apiSelect").value
+    if (endpoint == "hslv2" || endpoint == "finlandv2") {
+        document.getElementById('rph').innerHTML = `Loaded ${data.data.planConnection.edges.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
+        for (let i = 0; i < data.data.planConnection.edges.length; i++) {
+            const r = data.data.planConnection.edges[i];
+            routes.push(v2Route(r, i))
+            map.flyToBounds(routes[0].bbox, 0.3)
+        }
     }
+    else {
+        document.getElementById('rph').innerHTML = `Loaded ${data.data.plan.itineraries.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
+        for (let i = 0; i < data.data.plan.itineraries.length; i++) {
+            const r = data.data.plan.itineraries[i];
+            routes.push(v1Route(r, i))
+            map.flyToBounds(routes[0].bbox, 0.3)
+        }
+    }
+
     viewRoute(0, false)
     apiRunning = false
 
@@ -1042,7 +1054,8 @@ function sidebarMode(mode) {
             break;
     }
 }
-function route(route, i) {
+
+function v2Route(route, i) {
     clearMap()
     route = route.node
     console.log(route)
@@ -1051,7 +1064,6 @@ function route(route, i) {
     let routepreview = '<span class="preview">'
     let trips = []
     let previousTrip
-    const dateInUnix = new Date().setHours(0, 0, 0, 0) / 1000
 
     for (let i = 0; i < route.legs.length; i++) {
         const leg = route.legs[i]
@@ -1143,7 +1155,7 @@ function route(route, i) {
                 <td class="border_td" id="img" style=${img3}></td>
                 <td class="bottom_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
             }
-            console.log(sToTime(leg.trip.departureStoptime.scheduledDeparture))
+            //console.log(sToTime(leg.trip.departureStoptime.scheduledDeparture))
             trips.push({
                 tripStart: leg.trip.departureStoptime.scheduledDeparture,
                 routeId: leg.route.gtfsId,
@@ -1188,132 +1200,152 @@ function route(route, i) {
     table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
     document.getElementById('routes').append(table)
     return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance }
+}
+
+function v1Route(route, i) {
+    clearMap()
+    console.log(route)
+    let routeHTML = '<table border="0" cellspacing="0" cellpadding="0">'
+
+    let routepreview = '<span class="preview">'
+    let trips = []
+    let previousTrip
+    const dateInUnix = new Date(document.getElementById("input4").value).setHours(0, 0, 0, 0) / 1000
+    console.log(dateInUnix)
+
     for (let i = 0; i < route.legs.length; i++) {
-        const trip = route.legs[i];
-        if (trip.route == null) {
-            trip.route = ''
-            trip.route.shortName = ''
-            trip.trip = ''
-            trip.trip.tripHeadsign = 'Walk to destination'
-        }
-        let nextTrip
-        if (i < route.legs.length - 1) {
-            nextTrip = route.legs[i + 1]
-        } else {
-            nextTrip = "NONE"
-        }
-        const tripInfo = routeType(trip.mode)
-        console.log(`trip start ${trip.startTime} end ${trip.endTime} next start ${nextTrip.startTime}`)
-        trip.startTime = trip.startTime / 1000
-        trip.endTime = trip.endTime / 1000
-        let duration = (nextTrip == "NONE" ? trip.endTime - trip.startTime : nextTrip.startTime / 1000 - trip.startTime)
-        console.log(`duration ${duration}`)
-        //Start
-        if (i == 0) {
-            if /* Walking */(trip.mode == "WALK") {
-                const walktime = trip.endTime - trip.startTime
-                transfers.push({ wait: duration - walktime, walk: walktime })
-                routepreview += walktime > 10 ? `<span class="preview-cell" style="width:${100 / route.duration[0] * walktime - 1}%;background-color:${tripInfo.color}">${image.walk(15)}</span>` : ''
-                routepreview += duration - walktime > 10 ? `<span class="preview-cell" style="width:${100 / route.duration[0] * (duration - walktime) - 1}%;background-color:${tripInfo.color}">${image.wait(15)}</span>` : ''
-                const img1 = `background-image:url("img/startmarker.svg"),url("img/route/start${tripInfo.color}.png")`
-                const img2 = `background-image:url("img/route/${tripInfo.color}.png")`
+        const leg = route.legs[i]
+        //change date formatting from unix timestamp to seconds
+        leg.startTime = leg.startTime / 1000 - dateInUnix
+        leg.endTime = leg.endTime / 1000 - dateInUnix
+        if ((leg.route ? leg.route.type : leg.mode) == "WALK") {
+            const color = routeType("WALK").color
+            routepreview += leg.duration > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
+            if (i == 0) {
+                const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
+                const img2 = `background-image:url("img/route/gray.png")`
                 routeHTML +=
-                    `<tr><td>${trip.endTime}</td>
-                <td id="img" style=${img1}></td>
-                <td>Origin</td>
+                    `<tr><td class = "td">${sToTime(leg.startTime)}</td>
+                <td class="td" id="img" style=${img1}></td>
+                <td class="td">${values.from.display}</td>
                 </tr><tr>
-                <td></td>
-                <td id="img" style=${img2}></td>
-                <td>walk ${sToHMinS(walktime)}${duration - walktime ? `, wait ${sToHMinS(duration - walktime)}` : ''}</td></tr>`
+                <td class="td"></td>
+                <td class="td" id="img" style=${img2}></td>
+                <td class="td">walk ${sToHMinS(leg.duration)}</td>`
+            } else if (i == route.legs.length - 1) {
+                const img1 = `background-image:url("img/endmarker.svg"),url("img/route/endgray.png")`
+                const img2 = `background-image:url("img/route/gray.png")`
+
+                routeHTML +=
+                    `<tr><td></td>
+                    <td class="td" id="img" style=${img2}></td>
+                    <td>walk ${sToHMinS(leg.duration)}</td>
+                    </tr><tr>
+                    <td>${sToTime(leg.endTime)}</td>
+                    <td class="td" id="img" style=${img1}></td>
+                    <td>${values.to.display}</td>
+                    </tr>`
+            } else {
+                const img1 = `background-image:url("img/route/gray.png")`
+
+                routeHTML +=
+                    `<tr><td class="td"></td>
+                <td id="img" style=${img1}></td>
+                <td class="td">walk ${sToHMinS(leg.duration)}</td></tr>`
+            }
+            trips.push({
+                tripStart: null,
+                routeId: null,
+                id: null,
+                routeType: "WALK",
+                color: color,
+                fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
+                toCoords: { lat: leg.to.lat, lon: leg.to.lon },
+                shape: leg.legGeometry.points,
+                popUpTime: leg.duration,
+                popUpType: "WALK",
+                startTime: sToTime(leg.startTime),
+                endTime: sToTime(leg.endTime),
+            })
+
+        } /* transit */ else {
+            const waittime = leg.startTime - previousTrip.endTime
+            let color = routeType(leg.route.type).color
+            if (color == '#EA7000') color = 'orange'
+            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
+            if (i == 0) {
 
             } else {
-                transfers.push(false)
-                routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * duration - 1}%;background-color:${tripInfo.color}">${trip.route_name}</span>`
-                const img1 = `background-image:url("img/route/start${tripInfo.color}.png")`
-                const img2 = `background-image:url("img/route/${tripInfo.color}.png")`
+
+                const img1 = `background-image:url("img/route/start${color}.png")`
+                const img2 = `background-image:url("img/route/${color}.png")`
+                const img3 = `background-image:url("img/route/end${color}.png")`
+                const img5 = `background-image:url("img/route/grey.png")`
+
                 routeHTML +=
-                    `<tr><td>${trip.endTime}</td>
-                <td id="img" style=${img1}></td>
-                <td>${trip.from.stop.name} ${trip.from.stop.code}</td>
+                    `${waittime > 0 ? `<tr><td></td>
+                <td class="td" id="img" style=${img5}></td>
+                <td class="td">wait ${sToHMinS(waittime)}</td>
+                </tr>` : ""}<tr>
+                <td class="top_td">${sToTime(leg.startTime)}\n${routeType(leg.route.type).text}</td>
+                <td class="border_td" id="img" style=${img1}></td>
+                <td class="top_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
                 </tr><tr>
-                <td></td>
-                <td id="img" style=${img2}></td>
-                <td>${trip.route.shortName} ${trip.tripHeadsign}</td></tr>`
+                <td class="td"></td>
+                <td class="td" id="img" style=${img2}></td>
+                <td class="td">${leg.route.shortName} ${leg.trip.tripHeadsign ? (`${leg.trip.tripHeadsign.slice(0, 25)} ${leg.trip.tripHeadsign.length > 25 ? '...' : ''}`) : ""}</td>
+                </tr><tr>
+                <td class="bottom_td">${sToTime(leg.endTime)}</td>
+                <td class="border_td" id="img" style=${img3}></td>
+                <td class="bottom_td">${leg.to.stop.name} ${leg.to.stop.code ? leg.to.stop.code : ""}</td></tr>`
             }
-        } else /* End */ if (i == route.legs.length - 1) {
-            //Route
-            const img = `background-image:url('img/endmarker.svg'),url('img/route/end${tripInfo.color}.png')`
-            routeHTML +=
-                `<tr><td>${trip.endTime}</td>
-            <td id="img" style="${img}"></td>
-            <td>Destination</tr>`
-        } else /* Transfer */if (trip.trip.gtfsId != previousTrip.trip.gtfsId) {
-            /* Walking transfer 1st*/if (trip.mode == "WALK") {
-                const walktime = trip.endTime - trip.startTime
-                routepreview += walktime > 10 ? `<span class="preview-cell" style="width:${100 / route.duration[0] * walktime - 1}%;background-color:${tripInfo.color}">${image.walk(15)}</span>` : ''
-                routepreview += duration - walktime > 10 ? `<span class="preview-cell" style="width:${100 / route.duration[0] * (duration - walktime) - 1}%;background-color:${tripInfo.color}">${image.wait(15)}</span>` : ''
-                transfers.push({ wait: duration - walktime, walk: walktime })
-                const img1 = `background-image:url("img/route/end${previousTripInfo.color}.png"),url("img/route/start${tripInfo.color}.png")`
-                const img2 = `background-image:url("img/route/${tripInfo.color}.png")`
-                routeHTML +=
-                    `<tr><td>${trip.endTime}</td>
-                <td id="img" style=${img1}></td>
-                <td>${trip.route.shortName} ${trip.trip.tripHeadsign}</td>
-                </tr><tr>
-                <td></td>
-                <td id="img" style=${img2}></td>
-                <td>walk ${sToHMinS(walktime)}${duration - walktime ? `, wait ${sToHMinS(duration - walktime)}` : ''}</td></tr>`
-            }/* Same stop transfer */ else if (previousTrip.route_type != "WALK") {
-                routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * (hhmmssToS(trip.endTime) - hhmmssToS(previousTrip.endTime)) - 1}%;background-color:gray">${image.wait(15)}</span>`
-                routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * duration - 1}%;background-color:${tripInfo.color}">${trip.route.shortName}</span>`
-                transfers.push({ wait: duration, walk: false })
-                routeName = ``
-                const img1 = `background-image:url("img/route/end${previousTripInfo.color}.png"),url("img/route/startgrey.png")`
-                const img2 = `background-image:url("img/route/grey.png")`
-                const img3 = `background-image:url("img/route/endgrey.png"),url("img/route/start${tripInfo.color}.png")`
-                const img4 = `background-image:url("img/route/${tripInfo.color}.png")`
-                routeHTML +=
-                    `<tr><td>${previousTrip.endTime}</td>
-                <td id="img" style=${img1}></td>
-                <td>${previousTrip.to.stop.name} ${previousTrip.to.stop.code}</td>
-                </tr><tr>
-                <td></td>
-                <td id="img" style=${img2}></td>
-                <td>wait ${sToHMinS(hhmmssToS(trip.endTime) - hhmmssToS(previousTrip.endTime))}</td>
-                </tr><tr>
-                <td>${trip.startTime}</td>
-                <td id="img" style=${img3}></td>
-                <td>${trip.from.stop.name} ${trip.from.stop.code}</td>
-                </tr><tr>
-                <td></td>
-                <td id="img" style=${img4}></td>
-                <td><span class="depRoute" style="background-color:${tripInfo.color}">${trip.route.shortName}</span> ${trip.trip.tripHeadsign} (${sToHMinS(duration)})</td>
-                </tr>`
-            } /* Walking transfer 2nd half */else {
-                routepreview += `<span class="preview-cell" style="width:${100 / route.duration[0] * duration - 1}%;background-color:${tripInfo.color}">${trip.route.shortName}</span>`
-                transfers.push(false)
-                routeName = `<span class="depRoute" style="background-color:${tripInfo.color}">${trip.route.shortName}</span> `
-                const img1 = `background-image:url("img/route/end${previousTripInfo.color}.png"),url("img/route/start${tripInfo.color}.png")`
-                const img2 = `background-image:url("img/route/${tripInfo.color}.png")`
-                routeHTML +=
-                    `<tr><td>${trip.endTime}</td>
-                <td id="img" style=${img1}></td>
-                <td>${trip.from.stop.name} ${trip.from.stop.code}</td>
-                </tr><tr>
-                <td></td>
-                <td id="img" style=${img2}></td>
-                <td><span class="depRoute" style="background-color:${tripInfo.color}">${trip.route.shortName}</span> ${trip.trip.tripHeadsign} (${sToHMinS(duration)})</td></tr>`
-            }
-            nonTransfers = []
-        } else {
-            nonTransfers.push(trip)
-            transfers.push(false)
+            //console.log(sToTime(leg.trip.departureStoptime.scheduledDeparture))
+            trips.push({
+                tripStart: leg.trip.departureStoptime.scheduledDeparture,
+                routeId: leg.route.gtfsId,
+                direction: parseInt(leg.trip.directionId),
+                id: leg.trip.gtfsId,
+                routeType: leg.mode,
+                color: color,
+                fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
+                toCoords: { lat: leg.to.lat, lon: leg.to.lon },
+                shape: leg.legGeometry.points,
+                popUpTime: waittime,
+                popUpType: "WAIT",
+                routeName: leg.route.shortName || leg.route.longName,
+                startTime: sToTime(leg.startTime),
+                endTime: sToTime(leg.endTime),
+            })
         }
-        colors.push(tripInfo.color)
-        previousTrip = trip
-        previousTripInfo = tripInfo
+        previousTrip = leg
     }
+
+    const bbox = [trips[0].fromCoords, trips[trips.length - 1].toCoords]
+    routeHTML += '</table>'
+    routepreview += '</span>'
+    const table = document.createElement('table')
+    table.classList.add('route-preview')
+    /*let fare = ""
+    if (route.fares.length != 0) {
+        fare = route.fares.cents / 100
+    }*/
+    table.innerHTML = `
+        <tr>
+        <td>${trips[0].startTime} - ${trips[trips.length - 1].endTime}</td>
+        <td></td>
+        <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
+        <td></td>
+        <td>${image.walk(15)} ${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
+        </tr><tr>
+        <td colspan="3">${routepreview}</td>
+        </tr>
+    `
+    table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
+    table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
+    document.getElementById('routes').append(table)
+    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance }
 }
+
 function setValue(lat, lon, display, field) {
     if (field == 1) {
         values.from = { lat: lat, lon: lon, display: display }
@@ -1688,67 +1720,6 @@ function apiNameToUrl(apiName) {
     }
 }
 
-// v1 query
-/*`{
-  plan(
-    from: {lat: ${fromLat}, lon: ${fromLon}}
-    to: {lat: ${toLat}, lon: ${toLon}}
-    date: "${document.getElementById('input4').value}",
-    time: "${document.getElementById('input3').value}",
-  ) {
-    itineraries {
-      duration
-      fares {
-        type
-        currency
-        cents
-      }
-      walkDistance
-      startTime
-      endTime
-      legs {
-        startTime
-        endTime
-        departureDelay
-        arrivalDelay
-        mode
-        duration
-        realTime
-        realtimeState
-        distance
-        transitLeg
-        from {
-          lat
-          lon
-          stop {
-            code
-            name
-          }
-        }
-        to {
-          lat
-          lon
-          stop {
-            code
-            name
-          }
-        }
-        trip {
-          gtfsId
-          tripHeadsign
-        }
-        route {
-          shortName
-          type
-        }
-        legGeometry {
-          length  
-          points
-        }
-      }
-    }
-  }
-}`*/
 function addParameters(data) {
     data.forEach(p => {
         parameters.push(
@@ -1760,8 +1731,10 @@ function addParameters(data) {
         container.appendChild(p.element)
     })
     //this stuff could be somewhere else
-    if (document.getElementById("apiSelect").value == "hslv2" || document.getElementById("apiSelect").value == "finlandv2") {
+    const value = document.getElementById("apiSelect").value
+    if (value == "hslv2" || value == "finlandv2") {
         document.getElementById("preferrercontainer").style.display = 'none'
+        document.getElementById("viacontainer").style.display = 'block'
         if (viaStop.type != "visit" || viaStop.id == "") {
             document.getElementById("timeforvisit(s)Container").style.display = "none"
         }
@@ -1771,6 +1744,7 @@ function addParameters(data) {
     }
     else {
         document.getElementById("preferrercontainer").style.display = 'block'
+        document.getElementById("viacontainer").style.display = 'none'
     }
 }
 class SearchParameter {
@@ -1803,7 +1777,7 @@ class SearchParameter {
             input.setAttribute("min", this.min)
             input.setAttribute("max", this.max)
             input.addEventListener("change", function () {
-                let v = parseInt(this.value);
+                let v = parseFloat(this.value);
                 if (v < this.min) this.value = this.min
                 if (v > this.max) this.value = this.max
             })
@@ -1824,7 +1798,7 @@ class SearchParameter {
         const input = this.element.querySelector("input")
         switch (this.type) {
             case "number":
-                return parseInt(input.value)
+                return parseFloat(input.value)
             case "checkbox":
                 return input.checked
             default:

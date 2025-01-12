@@ -1,10 +1,88 @@
 function getQuery() {
 
   switch (document.getElementById("apiSelect").value) {
-    case "v1/routers/hsl":
-      return ""
-    case "v1/routers/finland":
-      return ""
+    case "hslv1":
+    case "finlandv1":
+      let options = ""
+      for (let i = 0; i < parameters.length; i++) {
+        p = parameters[i]
+        if (p.graphqlCategory1 == "option") {
+          options += ` ${p.graphqlName}:${p.value},`
+          continue
+        }
+      }
+
+      modeString = ""
+      modes.forEach(mode => {
+        modeString += `{mode: ${mode}},`
+      })
+
+      return `{
+  plan(
+    from: {lat: ${values.from.lat}, lon: ${values.from.lon}}
+    to: {lat: ${values.to.lat}, lon: ${values.to.lon}}
+    date: "${document.getElementById('input4').value}",
+    time: "${document.getElementById('input3').value}",
+    transportModes: [{mode: WALK}, ${modeString}]
+    ${options}
+  ) {
+    itineraries {
+      duration
+      fares {
+        type
+        currency
+        cents
+      }
+      walkDistance
+      startTime
+      endTime
+      legs {
+        startTime
+        endTime
+        departureDelay
+        arrivalDelay
+        mode
+        duration
+        realTime
+        realtimeState
+        distance
+        transitLeg
+        from {
+          lat
+          lon
+          stop {
+            code
+            name
+          }
+        }
+        to {
+          lat
+          lon
+          stop {
+            code
+            name
+          }
+        }
+        trip {
+          gtfsId
+          tripHeadsign
+          departureStoptime {
+            scheduledDeparture
+          }
+        }
+        route {
+          shortName
+          gtfsId
+          type
+        }
+        legGeometry {
+          length  
+          points
+        }
+      }
+    }
+  }
+}`
     case "hslv2":
     case "finlandv2":
       let option = ""
@@ -16,33 +94,33 @@ function getQuery() {
           option += ` ${p.graphqlName}:${p.value},`
           continue
         }
-        if(p.graphqlCategory1 == "via") {
-          if(!Object.keys(via).includes(p.graphqlCategory2)){
+        if (p.graphqlCategory1 == "via") {
+          if (!Object.keys(via).includes(p.graphqlCategory2)) {
             via[p.graphqlCategory2] = {}
           }
-          if(!Object.keys(via[p.graphqlCategory2]).includes(p.graphqlName)){
+          if (!Object.keys(via[p.graphqlCategory2]).includes(p.graphqlName)) {
             console.log(p.value)
             via[p.graphqlCategory2][p.graphqlName] = p.graphqlName == "minimumWaitTime" ? `§PT${p.value}s§` : p.value
           }
           continue
         }
 
-        if(!Object.keys(pref).includes(p.graphqlCategory2)){
+        if (!Object.keys(pref).includes(p.graphqlCategory2)) {
           pref[p.graphqlCategory2] = {}
         }
-        if(!Object.keys(pref[p.graphqlCategory2]).includes(p.graphqlCategory3)){
+        if (!Object.keys(pref[p.graphqlCategory2]).includes(p.graphqlCategory3)) {
           pref[p.graphqlCategory2][p.graphqlCategory3] = {}
         }
         pref[p.graphqlCategory2][p.graphqlCategory3][p.graphqlName] = p.value
       }
 
-      if(viaStop.id != "" && viaStop.type == "via"){
-        if(!via.passThrough) via.passThrough = {}
+      if (viaStop.id != "" && viaStop.type == "via") {
+        if (!via.passThrough) via.passThrough = {}
         via.passThrough.stopLocationIds = [`§${viaStop.id}§`]
         delete via['visit']
       }
-      else if(viaStop.id != "" && viaStop.type == "visit"){
-        if(!via.visit) via.visit = {}
+      else if (viaStop.id != "" && viaStop.type == "visit") {
+        if (!via.visit) via.visit = {}
         via.visit.stopLocationIds = [`§${viaStop.id}§`]
       }
       else {

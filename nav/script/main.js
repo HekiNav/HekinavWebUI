@@ -299,15 +299,10 @@ document.getElementById('closeError').addEventListener('click', e => {
     document.getElementById('error').style.top = '-10%'
 })
 document.getElementById('apiSelect').addEventListener('change', async e => {
-    let value = document.getElementById('apiSelect').value
+    //remove params
     document.getElementById('parameters').innerHTML = ""
     parameters = []
-    if (value == "hslv2" || value == "finlandv2") {
-        document.getElementById("preferrercontainer").style.display = 'none'
-    }
-    else {
-        document.getElementById("preferrercontainer").style.display = 'block'
-    }
+    //add params back
     importData("searchParameters.json", data => addParameters(data[document.getElementById("apiSelect").value]))
 })
 document.getElementById("bussvgContainer").addEventListener("click", e => {
