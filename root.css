@@ -1,0 +1,25 @@
+:root {
+    --f-header: "GothamXNarrow";
+    --f-normal: "Yu Gothic UI","Gill Sans MT";
+
+    --c-primary: #173cf2;
+    --c-secondary: #0b1f84;
+    --c-background: #d6f0ff;
+    --c-white: #EEEEEE;
+    --c-warning: #fbff15;
+    --c-error: #ff2e2e;
+    --c-text: #060613;
+    --c-text-white: #f5f5ff;
+
+    --fs-h1: 5rem;
+    --fs-h2: 3rem;
+    --fs-h3: 1.5rem;
+    --fs-h4: 1.2rem;
+    --fs: 1rem
+
+
+}
+@font-face {
+    font-family: "GothamXNarrow";
+    src: url("/Gotham XNarrow Bold.woff") format("woff");
+}

@@ -2,7 +2,8 @@
   grid-area: options;
   border: 0px;
   color: #ffffff;
-  font-size: var(--font-size);
+  font-size: var(--fs);
+  background-color: var(--c-secondary);
   padding: 0 1%;
 }
 

@@ -496,7 +496,7 @@ async function search(inputElement, display = true) {
 
             const type = document.createElement('div')
             type.classList.add('resultType')
-            type.style.backgroundImage = `url(img/icons/${getIcon(element.layer, element.addendum)}.svg)`
+            type.style.backgroundImage = `url(img/icons/${getIcon(element.layer == "stop" ? "station" : element.layer, element.addendum)}.svg)`
 
             const name = document.createElement('div')
             name.classList.add('resultName')

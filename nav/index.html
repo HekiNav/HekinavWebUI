@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+    <link rel="stylesheet" href="../navbar.css">
+    <link rel="stylesheet" href="../root.css">
 </head>
 
 <body>
@@ -36,7 +38,7 @@
                 </g>
             </svg>
         </div>
-        <iframe src="/navbar.html" frameborder="0" class="navbar"></iframe>
+        <script id="replace_with_navbar" src="../navbar.js"></script>
         <main id="maincontent">
             <button id="search" class="sb1">Search</button>
             <h1 class="text1 sb1">from</h1>
@@ -101,30 +103,24 @@
                     </div>
                     <!--train-->
                     <div id="trainsvgContainer">
-                        <svg id="trainsvg" style="fill: #007ac9;" id="Layer_1"
-                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                            y="0px" viewBox="0 0 283.46 283.46" style="enable-background:new 0 0 283.46 283.46;"
-                            xml:space="preserve">
-                            <style type="text/css">
-                                .st1 {
-                                    fill: #FFFFFF;
-                                }
-                            </style>
+                        <svg version="1.1" style='fill:#8C4799'  id="trainsvg" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 283.46 283.46"
+                            style="enable-background:new 0 0 283.46 283.46;" xml:space="preserve">
                             <g>
-                                <path class="st0"
-                                    d="M0,247.94c0,19.65,15.87,35.53,35.53,35.53h212.79c19.28,0,35.15-15.88,35.15-35.53V35.15C283.46,15.87,267.59,0,248.31,0H35.52C15.87,0,0,15.87,0,35.15V247.94z" />
-                                <path class="st1"
-                                    d="M244.34,168.66c1.7,5.95-4.54,10.21-9.35,10.21h-7.65c-2.55,0-4.25-1.42-5.1-3.4l-2.55-5.95c-1.13-3.12,0-4.82,3.4-4.82h15.88C241.51,164.69,243.21,165.54,244.34,168.66 M159.87,169.51c-0.57-3.12,0-4.82,3.4-4.82h15.31c2.84,0,4.25,1.42,5.1,3.69l2.27,5.38c1.13,3.12,0,5.1-2.55,5.1h-6.24C167.24,178.87,161.29,174.33,159.87,169.51 M154.2,150.23l-9.36-39.4c-1.13-4.82,0.28-7.09,5.38-7.09l70.02,0.28c3.97,0,6.52,1.7,7.65,4.82l11.06,41.39c1.13,3.12-1.42,4.82-4.54,4.82h-74.84C156.19,155.05,155.34,153.35,154.2,150.23 M106.3,112.82v34.58c0,3.12-2.83,4.82-5.67,3.12l-12.19-7.37c-2.55-1.7-3.4-3.4-3.4-5.95l-0.28-32.03c0-3.68,2.27-5.67,5.1-4.54l11.91,5.1C104.31,106.86,106.3,109.13,106.3,112.82M71.43,132.66l-9.64-5.95c-2.27-1.42-3.12-3.4-3.12-6.52V91.84c0-2.84,1.7-3.97,4.25-2.84l8.79,3.69c3.69,1.42,4.82,3.69,4.82,7.94l0.28,28.63C76.82,132.66,74.55,134.64,71.43,132.66 M172.91,81.35h12.19c2.27,0,3.97,0.85,5.1,3.4l1.7,4.82c1.13,3.68,0,4.82-2.84,4.82h-12.76c-1.98,0-3.97-1.13-4.54-3.12l-1.98-5.95C168.66,82.77,169.79,81.35,172.91,81.35M252.92,248.03l-47.01-29.48h24.54c26.08,0,33.16-18.42,27.21-40.54l-18.42-69.73c-7.08-26.08-16.16-35.15-67.75-45.64L35.43,35.43v41.95l12.47,5.1c1.98,0.85,2.83,2.27,2.83,5.39v26.65c0,3.12-1.98,3.97-4.54,2.55l-10.77-6.8v27.97l86.94,67.83c15.59,12.19,26.73,12.48,42.04,12.48h19.98l14.68,9.92h-68.6l-95.05-79.65v13.32l94.68,85.89h23.57l-12.08-10.21h71.55l15.11,10.21H252.92z" />
+                                <path d="M0,248.03c0,19.49,15.94,35.43,35.43,35.43h212.6c19.49,0,35.43-15.95,35.43-35.43V35.43
+		C283.46,15.94,267.52,0,248.03,0H35.43C15.94,0,0,15.94,0,35.43V248.03z" />
+                            </g>
+                            <g>
+                                <path fill="#fff" d="M224.69,251.72c3.78,0,6.8,3.02,6.8,6.8c0,3.78-3.03,6.8-6.8,6.8H59.15c-3.78,0-6.8-3.03-6.8-6.8c0-3.78,3.02-6.8,6.8-6.8h16.63V236.6H89v15.12h105.83V236.6h13.22v15.12H224.69z M234.14,64.63c-6.42-13.61-11.34-24.19-16.63-28.72c-7.94-7.18-41.58-15.12-75.97-15.12c-33.26,0-67.66,7.94-75.22,15.12c-5.29,4.54-10.58,15.12-17.01,28.72c-5.29,11.71-9.45,22.68-9.45,29.1v102.42c0,8.31,2.64,11.71,13.61,20.41c8.31,6.43,11.71,9.07,24.19,9.07h23.44v15.5h82.01v-15.5h23.06c12.47,0,15.87-2.64,23.81-9.07c10.96-9.07,13.61-12.1,13.61-20.41V93.73C243.59,87.31,239.06,76.34,234.14,64.63 M87.87,48.38h107.72v6.04c0,4.54-3.78,8.31-8.31,8.31H96.56c-4.54,0-8.7-3.78-8.7-8.31V48.38z M96.56,206.74c-4.91,0-8.7-3.78-8.7-8.69c0-4.92,3.78-8.7,8.7-8.7c4.91,0,9.07,3.78,9.07,8.7C105.63,202.96,101.48,206.74,96.56,206.74 M187.27,205.6c-4.91,0-8.7-3.78-8.7-8.69c0-4.92,3.78-8.7,8.7-8.7c4.91,0,9.07,3.78,9.07,8.7C196.34,201.83,192.18,205.6,187.27,205.6 M216.75,90.71l-16.25,70.3c-1.13,6.05-7.19,10.96-13.23,10.96H96.56c-6.04,0-12.1-4.92-13.23-10.96l-16.63-70.3c-1.13-6.04,3.02-10.96,9.07-10.96h132.28C214.11,79.74,218.26,84.66,216.75,90.71" />
                             </g>
                         </svg>
                         <p>Train</p>
                     </div>
                     <!--metro-->
                     <div id="metrosvgContainer">
-                        <svg id="metrosvg" style="fill: #ff6319;" id="Layer_1"
-                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                            y="0px" viewBox="0 0 283.46 283.46" style="enable-background:new 0 0 283.46 283.46;"
-                            xml:space="preserve">
+                        <svg id="metrosvg" style="fill: #ff6319;" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 283.46 283.46"
+                            style="enable-background:new 0 0 283.46 283.46;" xml:space="preserve">
                             <style type="text/css">
                                 .st1 {
                                     fill: #FFFFFF;
@@ -143,10 +139,9 @@
                     </div>
                     <!--tram-->
                     <div id="tramsvgContainer">
-                        <svg id="tramsvg" style="fill: #00985f;" id="Layer_1"
-                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                            y="0px" viewBox="0 0 283.46 283.46" style="enable-background:new 0 0 283.46 283.46;"
-                            xml:space="preserve">
+                        <svg id="tramsvg" style="fill: #00985f;" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 283.46 283.46"
+                            style="enable-background:new 0 0 283.46 283.46;" xml:space="preserve">
                             <style type="text/css">
                                 .st1 {
                                     clip-path: url(#SVGID_4_);
@@ -178,10 +173,9 @@
                     </div>
                     <!--ferry-->
                     <div id="ferrysvgContainer">
-                        <svg id="ferrysvg" style="fill: #00b9e4;" id="Layer_1"
-                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-                            y="0px" viewBox="0 0 283.46 283.46" style="enable-background:new 0 0 283.46 283.46;"
-                            xml:space="preserve">
+                        <svg id="ferrysvg" style="fill: #00b9e4;" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 283.46 283.46"
+                            style="enable-background:new 0 0 283.46 283.46;" xml:space="preserve">
                             <style type="text/css">
                                 .st1 {
                                     fill: #FFFFFF;
