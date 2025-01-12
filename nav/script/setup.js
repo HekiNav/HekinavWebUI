@@ -569,7 +569,7 @@ async function preferSearch() {
         body: query
     })
     const result = await rawdata.json()
-
+    console.log(result)
     const clusters = result.data.stops.filter((value, index, self) =>
         index === self.findIndex((t) => (
             t.cluster.id === value.cluster.id
@@ -580,13 +580,18 @@ async function preferSearch() {
         lines.length ? lines : result.data.routes.map(r => { r.name = r.shortName ? (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.shortName + " " + r.longName : (r.agency.name == "Helsingin seudun liikenne" ? "HSL" : r.agency.name) + " " + r.longName; return r }),
         agencies.length ? agencies : result.data.agencies
     )
-    searcher.removeAll()
-    console.log(results)
-    results = results.filter((value, index, self) =>
+    //remove Pori:1001 cuz that is a duplicate blame digitransit
+    //its just a lot faster to just manually remove that one as its the only duplicate
+    //if there appear more then ig just uncomment the bottom one
+    results = results.filter(element => { return element.gtfsId != "Pori:1001" })
+    /*results = results.filter((value, index, self) =>
         index === self.findIndex((t) => (
           t.gtfsId === value.gtfsId
         ))
-    )
+    )*/
+    searcher.removeAll()
+    console.log(results)
+
     searcher.addAll(results)
         const searched = searcher.search(input)
     console.log(searched)
@@ -681,6 +686,147 @@ async function preferSearch() {
         row.append(text, buttons)
         container.append(row)
     })
+}
+async function viaSearch() {
+    const input = document.getElementById('viaInput').value
+    const query = `{
+    stops(name: "${input}") {
+    gtfsId
+    name
+    platformCode
+    vehicleMode
+    code
+    }
+    }`
+
+    const result = await fetch('https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94', {
+        method: "POST",
+        headers: {
+            "content-type": "application/graphql"
+        },
+        body: query
+    }).then(result => result.json())
+        .then(result => result.data.stops)
+
+    viaSearcher.removeAll()
+    viaSearcher.addAll(result)
+    const searched = viaSearcher.search(input)
+
+    const container = document.getElementById("viaSearch")
+    container.innerHTML = ""
+    searched.forEach(item => {
+        const row = document.createElement("div")
+        row.classList.add("viaSearchRow")
+        const text = document.createElement("span")
+        text.textContent = item.name
+        const buttons = document.createElement("div")
+        buttons.classList.add("viaButtons")
+        const viaButton = document.createElement("p")
+        viaButton.classList.add("viaButton")
+        viaButton.textContent = "VIA"
+        if (viaStop.id == item.gtfsId && viaStop.type == "via") {
+            viaButton.style.color = "#000000"
+            viaButton.style.backgroundColor = "#d2d2d2"
+        }
+        viaButton.addEventListener("click", e => {
+            if (viaStop.id == item.gtfsId) {
+                if (viaStop.type == "via") {
+                    viaButton.style.color = '#818181'
+                    viaButton.style.backgroundColor = ""
+                    viaStop.id = ""
+                }
+                else {
+                    Array.from(document.getElementsByClassName("viaButton")).forEach(via => {
+                        via.style.color = "#818181"
+                        via.style.backgroundColor = ""
+                    })
+                    Array.from(document.getElementsByClassName("visitButton")).forEach(visit => {
+                        visit.style.color = "#818181"
+                        visit.style.backgroundColor = ""
+                    })
+                    viaButton.style.color = "#000000"
+                    viaButton.style.backgroundColor = "#d2d2d2"
+                    viaStop.type = "via"
+                }
+
+            }
+            else {
+                Array.from(document.getElementsByClassName("viaButton")).forEach(via => {
+                    via.style.color = "#818181"
+                    via.style.backgroundColor = ""
+                })
+                Array.from(document.getElementsByClassName("visitButton")).forEach(visit => {
+                    visit.style.color = "#818181"
+                    visit.style.backgroundColor = ""
+                })
+                viaButton.style.color = "#000000"
+                viaButton.style.backgroundColor = "#d2d2d2"
+                viaStop.id = item.gtfsId
+                viaStop.type = "via"
+            }
+            if (viaStop.type == "visit" && viaStop.id != "") {
+                document.getElementById("timeforvisit(s)Container").style.display = "block"
+            }
+            else {
+                document.getElementById("timeforvisit(s)Container").style.display = "none"
+            }
+        })
+        const visitButton = document.createElement("p")
+        visitButton.classList.add("visitButton")
+        visitButton.textContent = "VISIT"
+        if (viaStop.id == item.gtfsId && viaStop.type == "visit") {
+            visitButton.style.color = "#000000"
+            visitButton.style.backgroundColor = "#d2d2d2"
+        }
+        visitButton.addEventListener("click", e => {
+            if (viaStop.id == item.gtfsId) {
+                if (viaStop.type == "visit") {
+                    visitButton.style.color = '#818181'
+                    visitButton.style.backgroundColor = ""
+                    viaStop.id = ""
+                }
+                else {
+                    Array.from(document.getElementsByClassName("viaButton")).forEach(via => {
+                        via.style.color = "#818181"
+                        via.style.backgroundColor = ""
+                    })
+                    Array.from(document.getElementsByClassName("visitButton")).forEach(visit => {
+                        visit.style.color = "#818181"
+                        visit.style.backgroundColor = ""
+                    })
+                    visitButton.style.color = "#000000"
+                    visitButton.style.backgroundColor = "#d2d2d2"
+                    viaStop.type = "visit"
+                }
+            }
+            else {
+                Array.from(document.getElementsByClassName("viaButton")).forEach(via => {
+                    via.style.color = "#818181"
+                    via.style.backgroundColor = ""
+                })
+                Array.from(document.getElementsByClassName("visitButton")).forEach(visit => {
+                    visit.style.color = "#818181"
+                    visit.style.backgroundColor = ""
+                })
+                visitButton.style.color = "#000000"
+                visitButton.style.backgroundColor = "#d2d2d2"
+                viaStop.id = item.gtfsId
+                viaStop.type = "visit"
+            }
+            if (viaStop.type == "visit" && viaStop.id != "") {
+                document.getElementById("timeforvisit(s)Container").style.display = "block"
+            }
+            else {
+                document.getElementById("timeforvisit(s)Container").style.display = "none"
+            }
+        })
+
+        buttons.append(viaButton)
+        buttons.append(visitButton)
+        row.append(text, buttons)
+        container.append(row)
+    })
+
 }
 function getIcon(type, data) {
     if (data) {
@@ -809,12 +955,13 @@ async function api() {
     //Finish JSON handling
     values.routes = data
     document.getElementById('routes').innerHTML = ""
-    document.getElementById('rph').innerHTML = `Loaded ${data.data.plan.itineraries.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
+    console.log(data)
+    document.getElementById('rph').innerHTML = `Loaded ${data.data.planConnection.edges.length} routes from ${values.from.display ? values.from.display : "DEFAULT"} to ${values.to.display ? values.to.display : "DEFAULT"}`
     if (!random) {
         localStorage.setItem('route', JSON.stringify(values))
     }
-    for (let i = 0; i < data.data.plan.itineraries.length; i++) {
-        const r = data.data.plan.itineraries[i];
+    for (let i = 0; i < data.data.planConnection.edges.length; i++) {
+        const r = data.data.planConnection.edges[i];
         routes.push(route(r, i))
         map.flyToBounds(routes[0].bbox, 0.3)
     }
@@ -897,6 +1044,8 @@ function sidebarMode(mode) {
 }
 function route(route, i) {
     clearMap()
+    route = route.node
+    console.log(route)
     let routeHTML = '<table border="0" cellspacing="0" cellpadding="0">'
 
     let routepreview = '<span class="preview">'
@@ -911,18 +1060,11 @@ function route(route, i) {
         const startTime = start_time.getHours() * 3600 + start_time.getMinutes() * 60 + start_time.getSeconds()
         const end_time = new Date(leg.end.estimated ? leg.end.estimated.time : leg.end.scheduledTime)
         const endTime = end_time.getHours() * 3600 + end_time.getMinutes() * 60 + end_time.getSeconds()
-        let legDuration
-        if (endTime < startTime) {
-            legDuration = endTime + 86400 - startTime
-        } else {
-            legDuration = endTime - startTime
-        }
         leg.startTime = startTime
         leg.endTime = endTime
         if ((leg.route ? leg.route.type : leg.mode) == "WALK") {
             const color = routeType("WALK").color
-
-            routepreview += legDuration > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * legDuration - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
+            routepreview += leg.duration > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
             if (i == 0) {
                 const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
@@ -933,7 +1075,7 @@ function route(route, i) {
                 </tr><tr>
                 <td class="td"></td>
                 <td class="td" id="img" style=${img2}></td>
-                <td class="td">walk ${sToHMinS(legDuration)}</td>`
+                <td class="td">walk ${sToHMinS(leg.duration)}</td>`
             } else if (i == route.legs.length - 1) {
                 const img1 = `background-image:url("img/endmarker.svg"),url("img/route/endgray.png")`
                 const img2 = `background-image:url("img/route/gray.png")`
@@ -941,7 +1083,7 @@ function route(route, i) {
                 routeHTML +=
                     `<tr><td></td>
                     <td class="td" id="img" style=${img2}></td>
-                    <td>walk ${sToHMinS(legDuration)}</td>
+                    <td>walk ${sToHMinS(leg.duration)}</td>
                     </tr><tr>
                     <td>${sToTime(endTime)}</td>
                     <td class="td" id="img" style=${img1}></td>
@@ -953,7 +1095,7 @@ function route(route, i) {
                 routeHTML +=
                     `<tr><td class="td"></td>
                 <td id="img" style=${img1}></td>
-                <td class="td">walk ${sToHMinS(legDuration)}</td></tr>`
+                <td class="td">walk ${sToHMinS(leg.duration)}</td></tr>`
             }
             trips.push({
                 tripStart: null,
@@ -964,7 +1106,7 @@ function route(route, i) {
                 fromCoords: { lat: leg.from.lat, lon: leg.from.lon },
                 toCoords: { lat: leg.to.lat, lon: leg.to.lon },
                 shape: leg.legGeometry.points,
-                popUpTime: legDuration,
+                popUpTime: leg.duration,
                 popUpType: "WALK",
                 startTime: sToTime(startTime),
                 endTime: sToTime(endTime),
@@ -974,7 +1116,7 @@ function route(route, i) {
             const waittime = startTime - previousTrip.endTime
             let color = routeType(leg.route.type).color
             if (color == '#EA7000') color = 'orange'
-            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * legDuration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
+            routepreview += `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
 
             } else {
@@ -1027,17 +1169,15 @@ function route(route, i) {
     routepreview += '</span>'
     const table = document.createElement('table')
     table.classList.add('route-preview')
-    let fare = ""
+    /*let fare = ""
     if (route.fares.length != 0) {
         fare = route.fares.cents / 100
-    }
+    }*/
     table.innerHTML = `
         <tr>
         <td>${trips[0].startTime} - ${trips[trips.length - 1].endTime}</td>
         <td></td>
         <td>${route.duration >= 3600 ? `${Math.floor(route.duration / 3600)}h ` : ''}${Math.floor(route.duration % 3600 / 60)}min</td>
-        </tr><tr>
-        <td>${fare}</td>
         <td></td>
         <td>${image.walk(15)} ${route.walkDistance >= 1000 ? `${Math.round(route.walkDistance / 10) / 100}km` : `${Math.round(route.walkDistance)}m`}</td>
         </tr><tr>
@@ -1047,7 +1187,7 @@ function route(route, i) {
     table.addEventListener('mouseover', e => eval(`viewRoute(${i},false)`))
     table.addEventListener('click', e => eval(`viewRoute(${i},true)`))
     document.getElementById('routes').append(table)
-    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance, fares: fare }
+    return { html: routeHTML, bbox: bbox, trips: trips, duration: route.duration, walk_distance: route.walkDistance }
     for (let i = 0; i < route.legs.length; i++) {
         const trip = route.legs[i];
         if (trip.route == null) {
@@ -1339,43 +1479,43 @@ function renderVehicle(isHsl, data, topic) {
         const pV = vehicles.find(e => id == e.id)
         if (!values.lat || !values.long) return
         if (!pV) {
-            const marker = L.marker([values.lat,values.long], {
+            const marker = L.marker([values.lat, values.long], {
                 pane: "vehiclePane",
                 icon: L.divIcon({
                     html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
-                    iconSize: [25,25],
+                    iconSize: [25, 25],
                     className: "vehicle-marker"
                 })
             })
-            vehicles.push({data: values, marker: marker, id: id})
+            vehicles.push({ data: values, marker: marker, id: id })
             marker.addTo(vehicleLayer)
         } else {
             pV.data = values
-            pV.marker.setLatLng([values.lat,values.long])
+            pV.marker.setLatLng([values.lat, values.long])
         }
     } else /* Digitransit */ {
         console.log(data, topic)
         const id = topic[10]
         const pV = vehicles.find(e => id == e.id)
         const veh = data.entity[0].vehicle
-        const pos = {lat: veh.position.latitude, lon: veh.position.longitude}
+        const pos = { lat: veh.position.latitude, lon: veh.position.longitude }
 
         if (!pos.lat || !pos.lon) return
         if (!pV) {
             console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
-            const marker = L.marker([pos.lat,pos.lon], {
+            const marker = L.marker([pos.lat, pos.lon], {
                 pane: "vehiclePane",
                 icon: L.divIcon({
                     html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
-                    iconSize: [25,25],
+                    iconSize: [25, 25],
                     className: "vehicle-marker"
                 })
             })
-            vehicles.push({data: data, marker: marker, id: id})
+            vehicles.push({ data: data, marker: marker, id: id })
             marker.addTo(vehicleLayer)
         } else {
             pV.data = data
-            pV.marker.setLatLng([pos.lat,pos.lon])
+            pV.marker.setLatLng([pos.lat, pos.lon])
         }
     }
 }
@@ -1524,100 +1664,28 @@ function preferencesToOptions(obj) {
     Object.keys(obj).forEach(key => { if (obj[key].length) opt += `${key}:"${obj[key].toString()}",` })
     return opt
 }
+
 async function digitransitRoute() {
-    
-    let param = ""
-    parameters.forEach(p => {
-        param += ` ${p.graphqlName}:${p.value},`
-    })
-    console.log(param)
     clearMap()
-    const query = `{
-  plan(
-    from: {lat: ${values.from.lat}, lon: ${values.from.lon}}
-    to: {lat: ${values.to.lat}, lon: ${values.to.lon}}
-    date: "${document.getElementById('input4').value}",
-    time: "${document.getElementById('input3').value}",
-    ${param},
-    banned: {${preferencesToOptions(banned)}}
-    preferred: {${preferencesToOptions(preferred)}}
-    unpreferred: {${preferencesToOptions(unpreferred)}}
-  ) {
-    itineraries {
-      duration
-      fares {
-        type
-        currency
-        cents
-      }
-      walkDistance
-      startTime
-      endTime
-      legs {
-        start {
-          scheduledTime
-          estimated {
-            time
-            delay
-          }
-        }
-        end {
-          scheduledTime
-          estimated {
-            time
-            delay
-          }
-        }
-        mode
-        duration
-        realTime
-        realtimeState
-        distance
-        transitLeg
-        from {
-          lat
-          lon
-          stop {
-            code
-            name
-          }
-        }
-        to {
-          lat
-          lon
-          stop {
-            code
-            name
-          }
-        }
-        trip {
-          departureStoptime{
-            scheduledDeparture
-          }
-          directionId
-          gtfsId
-          tripHeadsign
-        }
-        route {
-          shortName
-          longName
-          type
-          gtfsId
-        }
-        legGeometry {
-          length  
-          points
-        }
-      }
-    }
-  }
-}`
-    const rawdata = await fetch("https://api.digitransit.fi/routing/v2/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
+    query = getQuery()
+    const rawdata = await fetch(`https://api.digitransit.fi/routing/${apiNameToUrl(document.getElementById("apiSelect").value)}?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94`, { "credentials": "omit", "headers": { "Content-Type": "application/graphql", }, "body": query, "method": "POST", });
     const result = await rawdata.json()
     if (result.errors) {
         setError({ code: (rawdata ? rawdata.status : ''), message: (result ? result.errors[0].message : 'Route could not be fetched') }, 10000)
     }
     return result
+}
+function apiNameToUrl(apiName) {
+    switch (apiName) {
+        case "hslv2":
+            return "v2/hsl/gtfs/v1"
+        case "finlandv2":
+            return "v2/finland/gtfs/v1"
+        case "hslv1":
+            return "v2/hsl/gtfs/v1"
+        case "finlandv1":
+            return "v2/hsl/gtfs/v1"
+    }
 }
 
 // v1 query
@@ -1687,10 +1755,23 @@ function addParameters(data) {
             new SearchParameter(p)
         )
     })
-    const container = document.getElementById("options")
+    const container = document.getElementById("parameters")
     parameters.forEach(p => {
         container.appendChild(p.element)
     })
+    //this stuff could be somewhere else
+    if (document.getElementById("apiSelect").value == "hslv2" || document.getElementById("apiSelect").value == "finlandv2") {
+        document.getElementById("preferrercontainer").style.display = 'none'
+        if (viaStop.type != "visit" || viaStop.id == "") {
+            document.getElementById("timeforvisit(s)Container").style.display = "none"
+        }
+        else {
+            document.getElementById("timeforvisit(s)Container").style.display = "block"
+        }
+    }
+    else {
+        document.getElementById("preferrercontainer").style.display = 'block'
+    }
 }
 class SearchParameter {
     constructor(o) {
@@ -1702,11 +1783,15 @@ class SearchParameter {
         this.label = o.label
         this.default = o.default
         this.graphqlName = o.graphqlName
+        this.graphqlCategory1 = o.graphqlCategory1
+        this.graphqlCategory2 = o.graphqlCategory2
+        this.graphqlCategory3 = o.graphqlCategory3
         this.id = encodeURIComponent(this.label.replaceAll(" ", "").toLowerCase())
         this.element = this.#createElements()
     }
     #createElements() {
         const container = document.createElement("div")
+        container.id = this.id + "Container"
         const label = document.createElement("label")
         label.setAttribute("for", this.id)
         label.textContent = this.label + " "
