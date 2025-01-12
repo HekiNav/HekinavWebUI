@@ -166,7 +166,7 @@ input[type=number]{
 }
 
 .preferrerType{
-  font-size: 1.7vw;
+  font-size: var(--fs-h4);
   color: white;
   background-color: transparent;
 }

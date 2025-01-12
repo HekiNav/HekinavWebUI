@@ -36,7 +36,7 @@
         "graphqlName" : "wheelchair"
     },
     {
-        "label" : "Dont filter routes",
+        "label" : "Disable unoptimal route filtering",
         "type" : "checkbox",
         "default" : false,
         "graphqlName" : "debugItineraryFilter"

@@ -1,9 +1,3 @@
-
-body{
-    font-family: 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  --nav-items: 6;
-    margin: 0;
-}
 nav{
     top: 0;
     width: 100vw;
@@ -15,7 +9,7 @@ nav{
     padding: 0;
     overflow: hidden;
     background-color: #fff;
-    height: 100vh;
+    height: 100%;
   }
   li{
     float: left;
@@ -26,7 +20,7 @@ nav{
   }
   li a {
     height: 100%;
-    font-size: 40vh;
+    font-size: var(--fs-h4);
     width: calc(100vw/var(--nav-items));
     display: flex;
     color: #000;
@@ -40,10 +34,10 @@ nav{
     color: #ffffff;
   }
   .logo{  
-    height: 70vh;
+    height: 4vw;
     background: white;   
     padding-bottom: 2%;   
-    padding-left: 5%;
+    padding-left: 20%;
   }
 .logo-link{
   flex-wrap: wrap;
@@ -51,4 +45,7 @@ nav{
   align-content: center;
   height: 100%;
     padding: 0;
+}
+*[hidden] {
+  display: none !important;
 }
