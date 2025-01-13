@@ -7,5 +7,5 @@
     "start": "webpack serve --open",
     "test": "echo \"No tests configured\" && exit 0",
     "lint": "eslint src/**/*.js"
-  },
+  }
 }
