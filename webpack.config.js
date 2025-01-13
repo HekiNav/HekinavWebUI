@@ -2,31 +2,38 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './script.js', // Main JavaScript entry point
-  output: {
-    filename: 'bundle.js', // Output file name
-    path: path.resolve(__dirname, 'dist'), // Output directory
-    clean: true, // Clean 'dist/' folder before every build
+  entry: {
+    main: './script.js',  // Entry point for the main bundle
+    admin: './nav/main.js' // Entry point for the admin bundle
   },
-  mode: 'production', // Set mode to 'production' or 'development'
+  output: {
+    filename: '[name].bundle.js', // Dynamic filenames based on entry keys
+    path: path.resolve(__dirname, 'dist'),
+    clean: true, // Clean the output directory before every build
+  },
+  mode: 'production',
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './index.html',
+      chunks: ['main'], // Include only the 'main' bundle
+      filename: 'index.html' // Output file name
+    }),
+    new HtmlWebpackPlugin({
+      template: './nav/index.html',
+      chunks: ['admin'], // Include only the 'admin' bundle
+      filename: 'index.html' // Output file name
+    })
+  ],
   module: {
     rules: [
       {
-        test: /\.css$/i, // Rule for processing CSS files
-        use: ['style-loader', 'css-loader'],
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'], // Handle CSS files
       },
       {
-        test: /\.(png|jpg|gif)$/i, // Rule for handling images
-        type: 'asset/resource',
+        test: /\.(png|jpg|gif)$/i,
+        type: 'asset/resource', // Handle image files
       },
     ],
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: 'index.html', // HTML template file
-      minify: {
-        collapseWhitespace: true,
-      },
-    }),
-  ],
 };
