@@ -19,11 +19,8 @@ jobs:
         password: ${{ secrets.ftppassword }}
         protocol: ftp
         server-dir: ./prod.hekinav42web.io/htdocs/
-    - name: minify code
-      uses: nizarmah/auto-minify@v3
-      with:
-        output: ./minify/
-        overwrite: true
+    - name: Minify Action
+      uses: anthonyftwang/minify-action@v1.0.1
     - name: Upload to hekinav main website
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
@@ -31,5 +28,4 @@ jobs:
         username: if0_35306213
         password: ${{ secrets.ftppassword }}
         protocol: ftp
-        local-dir: ./minify/
         server-dir: ./htdocs/
