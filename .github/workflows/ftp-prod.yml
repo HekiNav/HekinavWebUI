@@ -29,7 +29,7 @@ jobs:
         server-dir: ./prod.hekinav.42web.io/htdocs/
 
     - name: Install Dependencies
-      run: npm ci
+      run: npm install
 
     - name: Build website
       run: npm run build
