@@ -3,7 +3,7 @@ import SearchParameters from "./handlers/SearchParameters.js";
 import setSidebarMode from "./handlers/setSidebar.js"
 import getRoutes from "./handlers/GetRoutes.js";
 
-getRoutes()
+//getRoutes()
 
 const canvasRenderer = L.canvas({ padding: 0.5, tolerance: 5 });
 const svgRenderer = L.svg({ padding: 0.5 })
