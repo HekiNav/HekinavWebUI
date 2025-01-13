@@ -1,17 +1,10 @@
 {
-  "name": "hekinav",
+  "name": "your-project",
   "version": "1.0.0",
-  "main": "script.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack serve --open",
-    "test": "echo \"No tests configured\" && exit 0",
-    "lint": "eslint src/**/*.js"
+    "build": "parcel build index.html"
   },
-  "dependencies": {
-    "webpack-cli": "^5.1.4",
-    "style-loader": "^3.3.2",
-    "css-loader": "^6.8.1",   
-  "html-webpack-plugin": "^5.5.3"
+  "devDependencies": {
+    "parcel": "^2.0.0"
   }
 }
