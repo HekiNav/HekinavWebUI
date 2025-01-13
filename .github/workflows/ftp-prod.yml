@@ -29,7 +29,7 @@ jobs:
         server-dir: ./prod.hekinav.42web.io/htdocs/
 
     - name: Install Dependencies
-      run: npm install @vitejs/plugin-legacy --save-dev
+      run: npm install
 
     # Step 4: Build the Website
     - name: Build Website
