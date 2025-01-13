@@ -29,24 +29,15 @@ jobs:
         username: if0_35306213
         password: ${{ secrets.ftppassword }}
         protocol: ftp
-        server-dir: ./prod.hekinav42web.io/htdocs/
+        server-dir: ./prod.hekinav.42web.io/htdocs/
         
-    # Step to minify HTML, CSS, and JS
-    - name: Minify HTML, CSS, and JS
+    - name: Minify
       run: |
-        # Install minification tools
         npm install -g html-minifier-terser clean-css-cli terser
-        
-        # Minify HTML files (use the correct command for html-minifier)
         find ./ -name "*.html" -exec html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true {} -o {} \;
-        
-        # Minify CSS files
         find ./ -name "*.css" -exec cleancss -o {} {} \;
-        
-        # Minify JS files
         find ./ -name "*.js" -exec terser {} --compress --mangle -o {} \;
 
-    # Step to upload to main website
     - name: Upload to hekinav main website
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
