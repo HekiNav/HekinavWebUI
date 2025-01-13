@@ -2,6 +2,6 @@
   "name": "my-website",
   "version": "1.0.0",
   "scripts": {
-    "build": "esbuild src/script.js --bundle --outdir=dist --splitting --format=esm"
+    "build": "esbuild script.js --bundle --outdir=dist --splitting --format=esm"
   }
 }
