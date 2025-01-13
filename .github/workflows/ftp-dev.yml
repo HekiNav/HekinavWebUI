@@ -1,7 +1,7 @@
 on: 
   push:
     branches:
-      - "dev"
+      - "development"
 
 name: Deploy to dev.hekinav
 
