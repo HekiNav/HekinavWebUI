@@ -99,7 +99,7 @@ h4 {
   position: absolute;
   top: -10%;
   width: 100vw;
-  background-color: #f00;
+  background-color: var(--c-error);
   transition: 0.5s cubic-bezier(0.95, 0.05, 0.05, 0.95);
   height: 5vh;
   overflow: hidden;
@@ -183,7 +183,7 @@ h4 {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: #00f;
+  background: var(-c--primary);
   animation-timing-function: cubic-bezier(0, 1, 1, 0);
 }
 
@@ -326,7 +326,7 @@ h4 {
   padding: 2.5%;
   position: absolute;
   z-index: 1000000;
-  background-color: var(--c-background);
+  background-color: var(--c-white);
   transition: 0.5s cubic-bezier(0.95, 0.05, 0.05, 0.95);
   left: -30%;
   bottom: 5%;
@@ -339,7 +339,7 @@ h4 {
   top: 10vh;
   left: 35vw;
   width: 10vw;
-  background: #fff;
+  background: var(--c-white);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -356,9 +356,9 @@ h4 {
   margin-top: 1vh;
   width: 40%;
   align-self: flex-start;
-  color: #001049;
+  color: var(--c-secondary);
   font-size: var(--font-size);
-  background-color: #ffffff;
+  background-color: var(--c-white);
 }
 
 #modePopupContent svg {

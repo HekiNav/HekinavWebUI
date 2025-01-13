@@ -1,3 +1,4 @@
+
 (function () {
   'use strict';
   
@@ -2014,9 +2015,9 @@
               var feat = layer.features[i];
               var id; 
               var styleOptions = {
-                color: routeType(feat.properties.type).color,
+                color: Util.routeType(feat.properties.type).color,
                 radius: 2,
-                fill: routeType(feat.properties.type).color,
+                fill: Util.routeType(feat.properties.type).color,
                 fillOpacity: 1}
               if (storeFeatures) {
                 id = this.options.getFeatureId(feat);
@@ -2044,10 +2045,10 @@
               //Filter out stops with no deps
               if (!feat.properties.patterns || !JSON.parse(feat.properties.patterns).length > 0) continue
               //Filter out stop that have a smaller render zoom
-              if (routeType(feat.properties.type).importance + stopImportanceOffset > map.getZoom()) continue
+              if (Util.routeType(feat.properties.type).importance > this._map.getZoom()) continue
               //Filter out duplicate hsl stops with MATKA ids
               if (feat.properties)
-              if (routeType(feat.properties.type).text == "tram" && /MATKA:.*/.test(feat.properties.gtfsId)) continue
+              if (Util.routeType(feat.properties.type).text == "tram" && /MATKA:.*/.test(feat.properties.gtfsId)) continue
               var featureLayer = this._createLayer(feat, pxPerExtent);
   
               for (var j = 0; j < styleOptions.length; j++) {
@@ -2152,9 +2153,9 @@
       var layer;
       const type = (feat.properties.patterns && JSON.parse(feat.properties.patterns).length > 0)? JSON.parse(feat.properties.patterns)[0].gtfsType : feat.properties.type
       feat.properties.style = {
-        color: routeType(type).color,
+        color: Util.routeType(type).color,
         radius: 2,
-        fill: routeType(type).color,
+        fill: Util.routeType(type).color,
         fillOpacity: 1}
       switch (feat.type) {
       case 1:
@@ -2169,30 +2170,31 @@
         const patterns = JSON.parse(layer.stop.properties.patterns)
         //sort first by routetype then name (issue #4)
         patterns.sort((a, b) => {
-          if (routeTypeToSortValue(a.gtfsType) < routeTypeToSortValue(b.gtfsType)) return -1;
-          if (routeTypeToSortValue(a.gtfsType) > routeTypeToSortValue(b.gtfsType)) return 1;
+          if (Util.routeTypeToSortValue(a.gtfsType) < Util.routeTypeToSortValue(b.gtfsType)) return -1;
+          if (Util.routeTypeToSortValue(a.gtfsType) > Util.routeTypeToSortValue(b.gtfsType)) return 1;
 
+          //like this cuz you cant really substract strings
           if (a.shortName < b.shortName) return -1;
           if (a.shortName > b.shortName) return 1;
-          // Both idential, return 0
           return 0;
         });
         
         patterns.forEach(p => {
-          const name = p.shortName || routeType(p.gtfsType).text
+          const name = p.shortName || Util.routeType(p.gtfsType).text
           if (lines.find(e => {return (e.name == name)})) return
-          lines.push({headsign: p.headsign, name: name, color: routeType(p.gtfsType).color, o: p})
-          lineLabels += `<div class="route-name-container"><span height="20" style="width:${name ? name.length * 8 + 8 : routeType(p.gtfsType).text.length * 8 + 8}px;background-color:${routeType(p.gtfsType).color};" class="route-name"><h1>${name}</h1></span><span class="route-headsign">${p.headsign}</h1></div>`
-          linelabels2 += `<span height="20" style="width:${name ? name.length * 8 + 8 : routeType(p.gtfsType).text.length * 8 + 8}px;border-color:${routeType(p.gtfsType).color};background-color:${routeType(p.gtfsType).color};" class="stop-route"><h1>${name}</h1></span>&nbsp`
+          lines.push({headsign: p.headsign, name: name, color: Util.routeType(p.gtfsType).color, o: p})
+          lineLabels += `<div class="route-name-container"><span height="20" style="width:${name ? name.length * 8 + 8 : Util.routeType(p.gtfsType).text.length * 8 + 8}px;background-color:${Util.routeType(p.gtfsType).color};" class="route-name"><h1>${name}</h1></span><span class="route-headsign">${p.headsign}</h1></div>`
+          linelabels2 += `<span height="20" style="width:${name ? name.length * 8 + 8 : Util.routeType(p.gtfsType).text.length * 8 + 8}px;border-color:${Util.routeType(p.gtfsType).color};background-color:${Util.routeType(p.gtfsType).color};" class="stop-route"><h1>${name}</h1></span>&nbsp`
         })
 
-        const stop = {gtfsId: layer.stop.properties.gtfsId ,code: layer.stop.properties.code, text: `${layer.stop.properties.name} (${routeType(type).text})`,labels: linelabels2, position: null, name: layer.stop.properties.name}
-        layer.preview = `<div class="stop-preview"><h1>${stop.name} (${routeType(type).text})</h1>
+        const stop = {gtfsId: layer.stop.properties.gtfsId ,code: layer.stop.properties.code, text: `${layer.stop.properties.name} (${Util.routeType(type).text})`,labels: linelabels2, position: null, name: layer.stop.properties.name}
+        layer.preview = `<div class="stop-preview"><h1>${stop.name} (${Util.routeType(type).text})</h1>
                         ${lineLabels}
                          </div>`
                          
         layer.on("click", (e) => {
-          popup(true, stop)
+          console.log(this._map.stopPopup)
+          this._map.stopPopup.open(stop)
           stop.position = e.latlng
           getDepartures(stop, stopPopup)
         })
@@ -2207,7 +2209,7 @@
           tooltip
           .setLatLng(e.latlng)
           .setContent(layer.preview)
-          .addTo(previewGroup)
+          .addTo(this._map)
         })
         /*
         layer.on("mouseover", (e) => {
@@ -2220,7 +2222,7 @@
           }).addTo(previewGroup)
         })*/
         layer.on("mouseout", (e) => {
-          map.closeTooltip(tooltip)
+          this._map.closeTooltip(tooltip)
         })
         break;
       case 2:
@@ -2634,3 +2636,151 @@
   
   }());
   //# sourceMappingURL=Leaflet.VectorGrid.bundled.js.map
+
+  class Util {
+    static sToHMinS(seconds) {
+        return `${seconds >= 3600 ? `${Math.floor(seconds / 3600)}h ` : ''}${Math.floor(seconds % 3600 / 60)}min ${seconds % 60 ? `${seconds % 60}s` : ''}`
+    }
+    static sToTime(seconds) {
+        if (seconds > 24 * 3600) seconds -= 24 * 3600
+        return `${Math.floor(seconds / 3600)}:${padNumber(Math.floor(seconds % 3600 / 60))}${seconds % 60 ? `:${padNumber(seconds % 60)}` : ''}`
+    }
+    static parseHTML(string) {
+        const div = document.createElement("div")
+        div.innerHTML = string
+        return div.children
+    }
+    static polylineIntersects(latlons, bbox) {
+        for (let i = 1; i < latlons.length; i++) {
+            if (L.polyline([latlons[i - 1], latlons[i]]).getBounds().intersects(bbox)) return true
+        }
+        return false
+    }
+    static hhmmssToS(text) {
+        const parsed = String(text).match(/^(?<hours>\d+):(?<minutes>\d+):(?<seconds>\d+)$/);
+        if (parsed !== null) {
+            const hours = parseInt(parsed.groups.hours, 10);
+            const minutes = parseInt(parsed.groups.minutes, 10);
+            const seconds = parseInt(parsed.groups.seconds, 10);
+            const totalSeconds = 3600 * hours + 60 * minutes + seconds;
+            return totalSeconds
+        }
+    }
+    static routeTypeToSortValue(routeType) {
+        if (routeType == 102) return 110
+        if (routeType == 702) return 699
+        return routeType
+    }
+    static preferencesToOptions(obj) {
+        let opt = ""
+        Object.keys(obj).forEach(key => { if (obj[key].length) opt += `${key}:"${obj[key].toString()}",` })
+        return opt
+    }
+    static routeType(code) {
+        let text, color, importance
+        if (/.*,.*/.test(code)) code = code.split(",")[0]
+        if (code instanceof String || typeof code == 'string') {
+            code = code.toUpperCase()
+        }
+        switch (code) {
+            case "TRAM":
+            case 0:
+                text = 'tram'
+                color = 'green'
+                importance = 13
+                break;
+            case 0:
+            case "TRAM":
+                text = 'tram'
+                color = 'green'
+                importance = 13
+                break;
+            case 1:
+            case "SUBWAY":
+            case "METRO":
+                text = 'metro'
+                color = 'red'
+                importance = 12
+                break;
+            case 4:
+            case "FERRY":
+                text = 'ferry'
+                color = 'teal'
+                importance = 13
+                break;
+            case 109:
+            case "RAIL":
+            case "TRAIN":
+                text = 'train'
+                color = 'purple'
+                importance = 9
+                break;
+            case 700:
+            case 3:
+            case 715:
+            case "BUS":
+                text = 'bus'
+                color = 'blue'
+                importance = 15
+                break;
+            case 701:
+                text = 'regional bus'
+                color = 'blue'
+                importance = 15
+                break;
+            case 702:
+                text = 'trunk bus'
+                color = '#EA7000'
+                importance = 13
+                break;
+            case 704:
+            case 712:
+                text = 'local bus'
+                color = 'cyan'
+                importance = 15
+                break;
+            case 900:
+                text = 'lightrail'
+                color = 'darkgreen'
+                importance = 13
+                break;
+            case "WALK":
+            case 2:
+                text = 'walk'
+                color = 'gray'
+                importance = null
+                break;
+            case "WAIT":
+                text = 'wait'
+                color = 'gray'
+                importance = null
+                break;
+            case 1104:
+            case "AIRPLANE":
+                text = 'airplane'
+                color = 'darkblue'
+                importance = 0
+                break;
+            case 102:
+                text = 'intercity train'
+                color = 'green'
+                break;
+            case '':
+                text = 'none'
+                color = 'white'
+                importance = null
+                break;
+            default:
+                //If not any code
+                text = 'main'
+                color = 'pink'
+                importance = null
+                console.trace('Unsupported vehicle type: ', code)
+        }
+        //Return the information
+        return { text: text, color: color, importance: importance }
+    }
+    static padNumber(d) {
+        return (d < 10) ? '0' + d.toString() : d.toString();
+    }
+}

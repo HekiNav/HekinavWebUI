@@ -1,431 +1,8 @@
-function padNumber(d) {
-    return (d < 10) ? '0' + d.toString() : d.toString();
-}
-async function importData(jsonFile, fn) {
-    const data = await fetch('./data/' + jsonFile)
-    fn(await data.json())
-}
-function addZones(json) {
-    let labels = json.labels
-    labels.forEach(label => {
-        var label = L.marker({ lat: label.lat, lon: label.lng }, {
-            interactive: false,
-            icon: L.divIcon({
-                className: 'label',
-                html: '<div width="20" height="20" class="labels"><h1>' + label.zone + '</h1></div>'
-            })
-        }).addTo(labelGroup)
-    })
-    //Thicker transparent line
-    L.geoJSON(json, {
-        interactive: false,
-        style: function () {
-            return {
-                fillColor: '#0000',
-                stroke: true,
-                weight: 6,
-                fill: true,
-                color: 'rgba(0,0,0,0.2)'
-            };
-        }
-    }).addTo(zones)
-    //Thinner line
-    L.geoJSON(json, {
-        interactive: false,
-        style: function () {
-            return {
-                fillColor: '#0000',
-                stroke: true,
-                weight: 1,
-                fill: true,
-                color: 'rgba(0,0,0,1)'
-            };
-        }
-    }).addTo(zones)
-}
-async function getDepartures(stop, stopPopup) {
-    if (!depsRunning) {
-        timeouts.forEach(timeout => {
-            clearTimeout(timeout)
-        })
-        gen++
-        depsRunning = true
-        let data
-        console.time(`loading departures for ${stop.text}`)
-        let rawdata = null
-        const query = `{\"query\":\"{  stop(id: \\\"${stop.gtfsId}\\\") {patterns{route{type shortName}geometry{lat lon}} name code lat lon alerts {route{shortName}}stoptimesWithoutPatterns(numberOfDepartures: 100) {stop {platformCode} serviceDay headsign scheduledArrival scheduledDeparture realtimeState realtimeArrival realtimeDeparture trip { tripHeadsign route { type gtfsId  longName     shortName        }      }      headsign    }  }}\"}`
-        try {
-            rawdata = await fetch("https://api.digitransit.fi/routing/v1/routers/finland/index/graphql?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94", { "credentials": "omit", "headers": { "Content-Type": "application/json", }, "body": query, "method": "POST", });
-            data = await rawdata.json()
-        } catch (error) {
-            popup(false)
-            setError({ code: (rawdata ? rawdata.status : ''), message: (data ? data.message : 'Could not connect to the Hekinav Routing Services') }, 10000)
-        }
-        let popupText
-        let reload = true
-        if (data) {
-            if (data.errors) {
-                setError({ code: rawdata.status, message: data.errors[0].message }, 30000)
-            } else {
-                const deps = data.data.stop.stoptimesWithoutPatterns
-                //removes entries which have passed more than 60 seconds ago (why does digitransit even have those)
-                // loop goes backward so indices don't change when removing something
-                const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
-                const dateInUnix = new Date().setHours(0, 0, 0, 0) / 1000
-                for (let i = deps.length - 1; i > -1; i--) {
-                    if (deps[i].realtimeArrival < date - 60 && deps[i].serviceDay <= dateInUnix) {
-                        deps.splice(i, 1);
-                    }
-                }
-                if (data.data.stop.stoptimesWithoutPatterns.length > 0) {
-                    clearMap()
-                    renderShapes(data.data.stop.patterns)
-                    vehicles.length = 0
-                    vehicleLayer.clearLayers()
-                    mqttInstances.forEach(i => i.end())
-                    deps.forEach(d => {
-                        const id = d.trip.route.gtfsId
-                        const isHsl = id.split(":")[0].toLowerCase() == "hsl"
-                        mqttInstances.push(
-                            new realtimeHandler(
-                                isHsl ? "wss://mqtt.hsl.fi:443/" : "wss://mqtt.digitransit.fi:443/",
-                                isHsl ? `/hfp/v2/journey/ongoing/+/+/+/+/${id.split(":")[1]/* number part */}/#` :
-                        /* digitransit */`/gtfsrt/vp/${id.split(":")[0]/* feed string part */}/+/+/+/${id.split(":")[1]/* number part */}/#`,
-                                isHsl ? "JSON" : "GTFSRT",
-                                (data, topic) => {
-                                    renderVehicle(isHsl, data, topic)
-                                }
-                            )
-                        )
-                    })
-                    popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
-                             <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
-                    popupText += '<tr><th>Departures</th></tr>'
 
-                    let platforms = false
-                    deps.forEach(dep => {
-                        if (dep.stop.platformCode) {
-                            platforms = true
-                            return
-                        }
-                    })
-                    let latency = false
-                    deps.forEach(dep => {
-                        if (dep.realtimeState == "UPDATED") {
-                            latency = true
-                            return
-                        }
-                    })
 
-                    //sort by date then time
-                    deps.sort((a, b) => {
-                        if (a.serviceDay < b.serviceDay) return -1;
-                        if (a.serviceDay > b.serviceDay) return 1;
 
-                        if (a.realtimeArrival < b.realtimeArrival) return -1;
-                        if (a.realtimeArrival > b.realtimeArrival) return 1;
-                        // Both idential, return 0
-                        return 0;
-                    });
 
-                    popupText += `<tr>${platforms ? '<th>Platform</th>' : ''}<th>Route</th><th>Estimated time</th><th>Scheduled time</th>${latency ? '<th>Latency</th>' : ''}</tr>`
 
-                    for (let i = 0; i < deps.length; i++) {
-                        const dep = deps[i];
-                        dep.latency = dep.realtimeArrival - dep.scheduledArrival
-                        const latencyMin = Math.floor(dep.latency / 60)
-                        if (dep.realtimeState == "SCHEDULED") {
-                            dep.status = "UNKNOWN"
-                        } else if (latencyMin <= 1 && latencyMin >= -1) {
-                            dep.status = "ON_TIME"
-                        } else if (latencyMin < 1) {
-                            dep.status = "EARLY"
-                        } else if (latencyMin > 3) {
-                            dep.status = "DELAY_LARGE"
-                        } else if (latencyMin > 0) {
-                            dep.status = "DELAY_SMALL"
-                        }
-                        const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
-                        const diff = dep.realtimeArrival - date;
-                        if (diff < 600 && dep.status != 'UNKNOWN') {
-                            changeDepTime(dep.realtimeArrival, 'time' + i, stopPopup, stop, gen)
-                            reload = null
-                        }
-                        if (diff < 400) reload = false
-                        const tomorrow = dep.serviceDay > dateInUnix
-                        if (diff >= -60 | tomorrow) {
-                            popupText += `<tr>${platforms ? `<td class="center">${dep.stop.platformCode}</td>` : ''}
-                                    <td><span class="depRoute"style="background-color:${routeType(dep.trip.route.type).color}">${dep.trip.route.shortName || dep.trip.route.longName}</span>&nbsp${dep.headsign || dep.trip.tripHeadsign}</td>
-                                    <td class="center time${i} ${dep.status}">${tomorrow ? "tomorrow " + sToTime(dep.realtimeArrival) : sToTime(dep.realtimeArrival)}</td><td class="center">${sToTime(dep.scheduledArrival)}</td>
-                                    ${dep.status == 'UNKNOWN' ? '</tr>' : `<td class="center ${dep.status}">${dep.latency < 0 ? Math.floor(dep.latency / 60) : "+" + Math.floor(dep.latency / 60)}&nbspmin</td></tr>`}`
-                        }
-                    }
-                    popupText += '</table>'
-                } else {
-                    popupText = `<h3>${stop.code ? stop.code : ""} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr>
-                             <tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><table>`
-                    popupText += '<tr><th>This station has no departures</th></tr>'
-                }
-            }
-            console.timeEnd(`loading departures for ${stop.text}`)
-            if (isPopupOpen && reload == true) {
-                timeouts.push(setTimeout((stop, stopPopup, g) => {
-                    if (isPopupOpen && gen == g) {
-                        getDepartures(stop, stopPopup)
-                    }
-                }, 30000, stop, stopPopup, gen))
-            }
-            stopPopupC.innerHTML = popupText
-            const labels = document.querySelector(".stop-routes").children
-            for (let i = 0; i < labels.length; i++) {
-                const label = labels.item(i);
-                label.addEventListener("click", e => {
-                    if (label.selected) {
-                        label.selected = false
-                    } else {
-                        label.selected = true
-                    }
-                    for (let i = 0; i < labels.length; i++) {
-                        const l = labels.item(i)
-                        if (l.selected) {
-                            l.style.backgroundColor = l.style.borderColor
-                        } else {
-                            l.style.backgroundColor = "gray"
-                        }
-
-                    }
-                })
-                label.addEventListener("dblclick", e => {
-                    for (let i = 0; i < labels.length; i++) {
-                        const l = labels.item(i)
-                        l.style.backgroundColor = l.style.borderColor
-                        l.selected = false
-                    }
-                })
-            }
-            setTimeout(e => {
-                depsRunning = false
-            }, 500)
-        }
-    }
-}
-function changeDepTime(dep_date, className, popup, stop, v) {
-    const elementList = document.getElementsByClassName(className)
-    for (let i = 0; i < elementList.length; i++) {
-        const element = elementList.item(i);
-        const date = new Date().getHours() * 3600 + new Date().getMinutes() * 60 + new Date().getSeconds()
-        const diff = dep_date - date;
-
-        if (diff <= -60) {
-            getDepartures(stop, popup)
-        } else if (diff <= 0) {
-            element.innerHTML = "Now"
-        } else {
-            element.innerHTML = `&nbsp${Math.floor(diff / 60)}&nbspmin ${Math.floor((diff % 60))}&nbsps&nbsp${sToTime(dep_date)}`
-        }
-    }
-    if (isPopupOpen && v == gen) {
-        setTimeout(changeDepTime, 1000, dep_date, className, popup, stop, v)
-    } else {
-        for (let i = 0; i < elementList.length; i++) {
-            const element = elementList.item(i);
-            element.classList.remove(className)
-        }
-        return
-    }
-}
-function renderShapes(shapes) {
-    shapes.forEach(p => {
-        const polyline = renderPolyline(p.geometry, routeType(p.route.type).color, false, true)
-        polyline.addTo(tempGroup)
-        polyline.route = p.route
-        polyline.bindTooltip("test", {
-            sticky: true,
-            interactive: true
-        })
-        polyline.on("mousemove", e => moveHandler(e, polyline))
-        /* let latlons = []
-        polyline._latlngs.forEach(latlon => {
-            if (map.getBounds().contains(latlon)) latlons.push(latlon)
-            else if (latlons.length > 0) return
-        });
-        polyline.bindTooltip(p.route.shortName, {
-            sticky: true,
-            permanent: true
-        })
-        polyline.on("mouseover", e => {
-            polyline.openTooltip(e.latlng)
-        })
-        const latlon = latlons[Math.floor(latlons.length/2)]
-        if (latlon) {
-            const label = L.marker(latlon, {interactive: true,
-                icon: L.divIcon({
-                    className: 'label',
-                    html: `<div height="20" style="width:${p.route.shortName.length * 8 + 8}px;background-color:${routeType(p.route.type).color};" class="route-name"><h1>${p.route.shortName}</h1></div>`
-                })
-            }).addTo(tempGroup)
-        } */
-    })
-}
-function renderCircle(stop = { lat: 0, lon: 0 }, color, transfer, draw = true) {
-    //Radius of the circle rendered on the map
-    let radius = 8
-    //If transfer
-    if (transfer == true) {
-        //Larger radius if transfer
-        radius = 10
-    }
-    //Adds a circle to the stop coords
-    const marker = L.circleMarker([stop.lat, stop.lon],
-        {
-            radius: radius,
-            color: color,
-            fillColor: 'white',
-            fillOpacity: 1,
-            pane: 'transfermarkers'
-        })
-    if (draw) {
-        marker.addTo(layerGroup)
-    }
-    return marker
-}
-function clearMap(all = true) {
-    tempGroup.clearLayers();
-    if (all) {
-        layerGroup.clearLayers();
-    }
-}
-function renderPolyline(shape, color, draw = true, interactive = false) {
-    let latlngs = []
-    for (let i = 0; i < shape.length / 2; i++) {
-        //Reformat the latlongs
-        const lat = shape[i];
-        const lon = shape[i + shape.length / 2]
-        //Check for bad latlon
-        if (lat == undefined || lat == '' || lon == undefined || lon == '') {
-        } else {
-            const latlon = [lat, lon]
-            latlngs.push(latlon)
-        }
-
-    }
-
-    //Draw polyline
-    const polyline = L.polyline(shape, {
-        color: color,
-        interactive: interactive,
-        dashArray: color == 'gray' ? [2, 3] : null,
-        renderer: canvasRenderer,
-    })
-    if (draw) {
-        polyline.addTo(layerGroup);
-    }
-    return polyline
-
-}
-function routeType(code) {
-    if (/.*,.*/.test(code)) code = code.split(",")[0]
-    if (code instanceof String || typeof code == 'string') {
-        code = code.toUpperCase()
-    }
-    switch (code) {
-        case "TRAM":
-        case 0:
-            text = 'tram'
-            color = 'green'
-            importance = 13
-            break;
-        case 0:
-        case "TRAM":
-            text = 'tram'
-            color = 'green'
-            importance = 13
-            break;
-        case 1:
-        case "SUBWAY":
-        case "METRO":
-            text = 'metro'
-            color = 'red'
-            importance = 12
-            break;
-        case 4:
-        case "FERRY":
-            text = 'ferry'
-            color = 'teal'
-            importance = 13
-            break;
-        case 109:
-        case "RAIL":
-        case "TRAIN":
-            text = 'train'
-            color = 'purple'
-            importance = 9
-            break;
-        case 700:
-        case 3:
-        case 715:
-        case "BUS":
-            text = 'bus'
-            color = 'blue'
-            importance = 15
-            break;
-        case 701:
-            text = 'regional bus'
-            color = 'blue'
-            importance = 15
-            break;
-        case 702:
-            text = 'trunk bus'
-            color = '#EA7000'
-            importance = 13
-            break;
-        case 704:
-        case 712:
-            text = 'local bus'
-            color = 'cyan'
-            importance = 15
-            break;
-        case 900:
-            text = 'lightrail'
-            color = 'darkgreen'
-            importance = 13
-            break;
-        case "WALK":
-        case 2:
-            text = 'walk'
-            color = 'gray'
-            importance = null
-            break;
-        case "WAIT":
-            text = 'wait'
-            color = 'gray'
-            importance = null
-            break;
-        case 1104:
-        case "AIRPLANE":
-            text = 'airplane'
-            color = 'darkblue'
-            importance = 0
-            break;
-        case 102:
-            text = 'intercity train'
-            color = 'green'
-            break;
-        case '':
-            text = 'none'
-            color = 'white'
-            importance = null
-            break;
-        default:
-            //If not any code
-            text = 'main'
-            color = 'pink'
-            importance = null
-            console.trace('Unsupported vehicle type: ', code)
-    }
-    //Return the information
-    return { text: text, color: color, importance: importance }
-}
 async function search(inputElement, display = true) {
     const input = document.getElementById('input' + inputElement).value
     const rawdata = await fetch('https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94&text=' + input)
@@ -964,6 +541,7 @@ async function api() {
         const r = data.data.planConnection.edges[i];
         routes.push(route(r, i))
         map.flyToBounds(routes[0].bbox, 0.3)
+        console.log(route)
     }
     viewRoute(0, false)
     apiRunning = false
@@ -973,7 +551,6 @@ function sidebarMode(mode) {
     currentMode = mode
     switch (mode) {
         case 'main':
-            stopImportanceOffset = 0
             clearMap()
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
@@ -995,7 +572,6 @@ function sidebarMode(mode) {
             "options options options map map"`
             break;
         case 'routepreview':
-            stopImportanceOffset = 3
             clearMap()
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
@@ -1017,7 +593,6 @@ function sidebarMode(mode) {
             "routes routes routes map map"`
             break;
         case 'route':
-            stopImportanceOffset = 3
             for (let i = 0; i < sb1.length; i++) {
                 const element = sb1.item(i)
                 element.hidden = true
@@ -1046,6 +621,7 @@ function route(route, i) {
     clearMap()
     route = route.node
     console.log(route)
+    console.log(route)
     let routeHTML = '<table border="0" cellspacing="0" cellpadding="0">'
 
     let routepreview = '<span class="preview">'
@@ -1063,7 +639,7 @@ function route(route, i) {
         leg.startTime = startTime
         leg.endTime = endTime
         if ((leg.route ? leg.route.type : leg.mode) == "WALK") {
-            const color = routeType("WALK").color
+            const color = Util.routeType("WALK").color
             routepreview += leg.duration > 30 ? `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${image.walk(15)}</span>` : ''
             if (i == 0) {
                 const img1 = `background-image:url("img/startmarker.svg"),url("img/route/startgray.png")`
@@ -1114,7 +690,7 @@ function route(route, i) {
 
         } /* transit */ else {
             const waittime = startTime - previousTrip.endTime
-            let color = routeType(leg.route.type).color
+            let color = Util.routeType(leg.route.type).color
             if (color == '#EA7000') color = 'orange'
             routepreview += `<span class="preview-cell" style="width:${100 / route.duration * leg.duration - 1}%;background-color:${color}">${leg.route.shortName}</span>`
             if (i == 0) {
@@ -1131,7 +707,7 @@ function route(route, i) {
                 <td class="td" id="img" style=${img5}></td>
                 <td class="td">wait ${sToHMinS(waittime)}</td>
                 </tr>` : ""}<tr>
-                <td class="top_td">${sToTime(startTime)}\n${routeType(leg.route.type).text}</td>
+                <td class="top_td">${sToTime(startTime)}\n${Util.routeType(leg.route.type).text}</td>
                 <td class="border_td" id="img" style=${img1}></td>
                 <td class="top_td">${leg.from.stop.name} ${leg.from.stop.code ? leg.from.stop.code : ""}</td>
                 </tr><tr>
@@ -1202,7 +778,7 @@ function route(route, i) {
         } else {
             nextTrip = "NONE"
         }
-        const tripInfo = routeType(trip.mode)
+        const tripInfo = Util.routeType(trip.mode)
         console.log(`trip start ${trip.startTime} end ${trip.endTime} next start ${nextTrip.startTime}`)
         trip.startTime = trip.startTime / 1000
         trip.endTime = trip.endTime / 1000
@@ -1325,66 +901,6 @@ function setValue(lat, lon, display, field) {
         document.getElementById('input2').value = display
     }
 }
-function getPreviousRoute() {
-    const popup = document.getElementById('popup')
-    let popupC = ''
-    let buttons = `<button id="ok" onclick="document.getElementById('popup').style.left = '-50%';setTimeout(() => {document.getElementById('popup').style.display = 'none'},1000)">Cancel</button>`
-    buttons += '<button id="ok" onclick="loadPreviousRoute()">OK</button>'
-    if (localStorage.getItem('route')) {
-        const data = JSON.parse(localStorage.getItem('route'))
-        popupC = 'Load saved route from '
-        popupC += data.from.display
-        popupC += ' to '
-        popupC += data.to.display
-        popupC += ' at '
-        popupC += data.time
-        popupC += ' '
-        popupC += data.date
-        popupC += ' ?<br>'
-        popupC += buttons
-        popup.innerHTML = popupC
-        popup.style.left = '0'
-        popup.addEventListener('mouseover', () => {
-            if (popup.style.left != '-50%') {
-                popup.style.left = '0'
-                if (!popup.timoutActive) {
-                    popup.timoutActive = setTimeout(function () {
-                        popup.timoutActive = false
-
-                        popup.style.left = '-27%'
-                    }, 4000)
-                }
-            }
-        })
-        popup.timoutActive = true
-        setTimeout(function () {
-            popup.timoutActive = false
-            popup.style.left = '-27%'
-        }, 10000)
-    }
-}
-function loadPreviousRoute() {
-    const popup = document.getElementById('popup')
-    document.getElementById('routes').innerHTML = ""
-    routes.length = 0
-    popup.style.left = '-50%'
-    setTimeout(() => {
-        popup.style.display = 'none'
-    }, 1000)
-    sidebarMode('routepreview')
-    const data = JSON.parse(localStorage.getItem('route'))
-    setValue(data.from.value, data.from.display, 1)
-    setValue(data.to.value, data.to.display, 2)
-    document.getElementById('input3').value = data.time
-    document.getElementById('input4').value = data.date
-    document.getElementById('rph').innerHTML = `Loaded ${data.routes.length} routes from ${data.from.display} to ${data.to.display}`
-    for (let i = 0; i < data.routes.length; i++) {
-        const r = data.routes[i];
-        routes.push(route(r, i))
-    }
-    map.flyToBounds(routes[0].bbox, 0.3)
-    viewRoute(0, false)
-}
 function getRecentSearches() {
     if (localStorage.getItem('search')) {
         return JSON.parse(localStorage.getItem('search'))
@@ -1393,22 +909,6 @@ function getRecentSearches() {
 }
 function saveRecentSearches(data) {
     localStorage.setItem('search', JSON.stringify(data))
-}
-function popup(open, stop) {
-    if (open) {
-        isPopupOpen = true
-        stopPopup.style.top = `${500}px`
-        stopPopup.style.height = `${window.innerHeight - 500}px`
-        stopPopupC.innerHTML = `<h3>${stop.code} ${stop.text}</h3><table><tr><td class="stop-routes">${stop.labels}</td></tr><tr><td><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',1)">Set as origin</button><button onclick="setValue(${JSON.stringify(stop.position)},'${stop.name}',2)">Set as destination</button></td></tr></table><div class="loading"><h4>Loading departures</h4>${loadingHTML}</div>`
-    } else {
-        vehicles.length = 0
-        vehicleLayer.clearLayers()
-        mqttInstances.forEach(i => i.end())
-        gen++
-        isPopupOpen = false
-        stopPopup.style.top = '100%'
-        stopPopup.style.height = '0px'
-    }
 }
 function setError(error = { code: undefined, message: '' }, timer) {
     const popup = document.getElementById('errorMessage')
@@ -1426,52 +926,8 @@ function setError(error = { code: undefined, message: '' }, timer) {
         }, timer)
     }
 }
-function hhmmssToS(text) {
-    const parsed = String(text).match(/^(?<hours>\d+):(?<minutes>\d+):(?<seconds>\d+)$/);
-    if (parsed !== null) {
-        const hours = parseInt(parsed.groups.hours, 10);
-        const minutes = parseInt(parsed.groups.minutes, 10);
-        const seconds = parseInt(parsed.groups.seconds, 10);
-        const totalSeconds = 3600 * hours + 60 * minutes + seconds;
-        return totalSeconds
-    }
-}
-function sToHMinS(seconds) {
-    return `${seconds >= 3600 ? `${Math.floor(seconds / 3600)}h ` : ''}${Math.floor(seconds % 3600 / 60)}min ${seconds % 60 ? `${seconds % 60}s` : ''}`
-}
-function sToTime(seconds) {
-    if (seconds > 24 * 3600) seconds -= 24 * 3600
-    return `${Math.floor(seconds / 3600)}:${padNumber(Math.floor(seconds % 3600 / 60))}${seconds % 60 ? `:${padNumber(seconds % 60)}` : ''}`
-}
-class realtimeHandler {
-    constructor(url, query, returnFormat, callback) {
-        this.callback = callback
-        this.returnFormat = returnFormat
-        this.client = mqtt.connect(url)
-        this.client.on("connect", () => {
-            this.client.subscribe(query, (err) => {
-                if (err) console.log("MQTT Error:", err)
-                else console.log("Subscription succeeded to", url)
-            });
-        })
-        this.client.on("message", (topic, message) => {
-            switch (this.returnFormat) {
-                case "JSON":
-                    this.callback(JSON.parse(message.toString()), topic.split("/"))
-                    break
-                case "GTFSRT":
-                    this.callback(gtfsrt.decode(new Uint8Array(message)), topic.split("/"))
-                    break
-                default:
-                    this.callback(message, topic)
-                    break
-            }
-        });
-    }
-    end() {
-        this.client.end()
-    }
-}
+
+
 function renderVehicle(isHsl, data, topic) {
     if (isHsl) {
         const id = topic[7] + topic[8]
@@ -1482,7 +938,7 @@ function renderVehicle(isHsl, data, topic) {
             const marker = L.marker([values.lat, values.long], {
                 pane: "vehiclePane",
                 icon: L.divIcon({
-                    html: image.vehicle(25, routeType(topic[6]).color, values.hdg, values.desi),
+                    html: image.vehicle(25, Util.routeType(topic[6]).color, values.hdg, values.desi),
                     iconSize: [25, 25],
                     className: "vehicle-marker"
                 })
@@ -1502,11 +958,11 @@ function renderVehicle(isHsl, data, topic) {
 
         if (!pos.lat || !pos.lon) return
         if (!pV) {
-            console.log(topic[20].length ? topic[20] : routeType(topic[6]).color, topic[19])
+            console.log(topic[20].length ? topic[20] : Util.routeType(topic[6]).color, topic[19])
             const marker = L.marker([pos.lat, pos.lon], {
                 pane: "vehiclePane",
                 icon: L.divIcon({
-                    html: image.vehicle(25, topic[20].length ? topic[20] : routeType(topic[6]).color, 0, topic[19]),
+                    html: image.vehicle(25, topic[20].length ? topic[20] : Util.routeType(topic[6]).color, 0, topic[19]),
                     iconSize: [25, 25],
                     className: "vehicle-marker"
                 })
@@ -1567,7 +1023,7 @@ function viewRoute(i, click) {
         //polyline
         const polyline = renderPolyline(L.Polyline.fromEncoded(trip.shape).getLatLngs(), trip.color)
         //Add route label
-        if (trip.routeType != "WALK") {
+        if (trip.Util.routeType != "WALK") {
             let latlons = []
             polyline._latlngs.forEach(latlng => {
                 if (map.getBounds().contains(latlng)) {
@@ -1623,17 +1079,7 @@ function viewRoute(i, click) {
         }
     }
 }
-function parseHTML(string) {
-    const div = document.createElement("div")
-    div.innerHTML = string
-    return div.children
-}
-function polylineIntersects(latlons, bbox) {
-    for (let i = 1; i < latlons.length; i++) {
-        if (L.polyline([latlons[i - 1], latlons[i]]).getBounds().intersects(bbox)) return true
-    }
-    return false
-}
+
 function moveHandler(e, polyline) {
     const a = 2000000
     const b = 10000
@@ -1646,24 +1092,15 @@ function moveHandler(e, polyline) {
     })
     labels += `<div class="route-tooltip">`
     routes.forEach(r => {
-        const name = r.shortName || routeType(r.gtfsType).text
-        if (lines.find(e => { return (e.name == name && e.color == routeType(r.type).color && e.headsign == r.headsign) })) return
-        lines.push({ headsign: r.headsign, name: name, color: routeType(r.type).color, o: r })
-        labels += `<span height="20" style="width:${name ? name.length * 8 + 8 : routeType(r.gtfsType).text.length * 8 + 8}px;border-color:${routeType(r.type).color};background-color:${routeType(r.type).color};" class="route-label"><h1>${name}</h1></span>`
+        const name = r.shortName || Util.routeType(r.gtfsType).text
+        if (lines.find(e => { return (e.name == name && e.color == Util.routeType(r.type).color && e.headsign == r.headsign) })) return
+        lines.push({ headsign: r.headsign, name: name, color: Util.routeType(r.type).color, o: r })
+        labels += `<span height="20" style="width:${name ? name.length * 8 + 8 : Util.routeType(r.gtfsType).text.length * 8 + 8}px;border-color:${Util.routeType(r.type).color};background-color:${Util.routeType(r.type).color};" class="route-label"><h1>${name}</h1></span>`
     })
     labels += `</div>`
     polyline.openTooltip(e.latlng).setTooltipContent(labels)
 }
-function routeTypeToSortValue(routeType) {
-    if (routeType == 102) return 110
-    if (routeType == 702) return 699
-    return routeType
-}
-function preferencesToOptions(obj) {
-    let opt = ""
-    Object.keys(obj).forEach(key => { if (obj[key].length) opt += `${key}:"${obj[key].toString()}",` })
-    return opt
-}
+
 
 async function digitransitRoute() {
     clearMap()
@@ -1749,86 +1186,3 @@ function apiNameToUrl(apiName) {
     }
   }
 }`*/
-function addParameters(data) {
-    data.forEach(p => {
-        parameters.push(
-            new SearchParameter(p)
-        )
-    })
-    const container = document.getElementById("parameters")
-    parameters.forEach(p => {
-        container.appendChild(p.element)
-    })
-    //this stuff could be somewhere else
-    if (document.getElementById("apiSelect").value == "hslv2" || document.getElementById("apiSelect").value == "finlandv2") {
-        document.getElementById("preferrercontainer").style.display = 'none'
-        if (viaStop.type != "visit" || viaStop.id == "") {
-            document.getElementById("timeforvisit(s)Container").style.display = "none"
-        }
-        else {
-            document.getElementById("timeforvisit(s)Container").style.display = "block"
-        }
-    }
-    else {
-        document.getElementById("preferrercontainer").style.display = 'block'
-    }
-}
-class SearchParameter {
-    constructor(o) {
-        this.type = o.type
-        if (o.type == "number") {
-            this.min = o.min
-            this.max = o.max
-        }
-        this.label = o.label
-        this.default = o.default
-        this.graphqlName = o.graphqlName
-        this.graphqlCategory1 = o.graphqlCategory1
-        this.graphqlCategory2 = o.graphqlCategory2
-        this.graphqlCategory3 = o.graphqlCategory3
-        this.id = encodeURIComponent(this.label.replaceAll(" ", "").toLowerCase())
-        this.element = this.#createElements()
-    }
-    #createElements() {
-        const container = document.createElement("div")
-        container.id = this.id + "Container"
-        const label = document.createElement("label")
-        label.setAttribute("for", this.id)
-        label.textContent = this.label + " "
-        const input = document.createElement("input")
-        input.id = this.id
-        input.setAttribute("type", this.type)
-        if (this.type == "number") {
-            input.value = this.default
-            input.setAttribute("min", this.min)
-            input.setAttribute("max", this.max)
-            input.addEventListener("change", function () {
-                let v = parseInt(this.value);
-                if (v < this.min) this.value = this.min
-                if (v > this.max) this.value = this.max
-            })
-            container.append(label, input)
-        }
-        if (this.type == "checkbox") {
-            input.checked = this.default
-            const slider = document.createElement("span")
-            slider.classList.add("slider")
-            const background = document.createElement("label")
-            background.classList.add("switch")
-            background.append(input, slider)
-            container.append(label, background)
-        }
-        return container
-    }
-    get value() {
-        const input = this.element.querySelector("input")
-        switch (this.type) {
-            case "number":
-                return parseInt(input.value)
-            case "checkbox":
-                return input.checked
-            default:
-                return input.value
-        }
-    }
-}
