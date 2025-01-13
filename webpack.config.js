@@ -28,6 +28,7 @@ module.exports = {
     rules: [
       {
         test: /\.css$/i,
+        sideEffects: true,
         use: ['style-loader', 'css-loader'], // Handle CSS files
       },
       {
