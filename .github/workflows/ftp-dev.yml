@@ -1,0 +1,29 @@
+on: 
+  push:
+    branches:
+      - "development"
+
+name: Deploy to dev.hekinav
+
+jobs:
+  web-deploy:
+    name: Deploy to dev.hekinav
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Get latest code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+        
+    - name: Upload to dev.hekinav
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: if0_35306213
+        password: ${{ secrets.ftppassword }}
+        protocol: ftp
+        server-dir: ./dev.hekinav.42web.io/htdocs/
