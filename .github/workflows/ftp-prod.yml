@@ -26,7 +26,7 @@ jobs:
         username: if0_35306213
         password: ${{ secrets.ftppassword }}
         protocol: ftp
-        server-dir: ./prod.hekinav.42web.io/htdocs/
+        server-dir: ./htdocs/
 
     - name: Install Dependencies
       run: npm install
@@ -42,4 +42,4 @@ jobs:
         password: ${{ secrets.ftppassword }}
         protocol: ftp
         local-dir: ./dist/
-        server-dir: ./htdocs/
+        server-dir: ./prod.hekinav.42web.io/htdocs/
