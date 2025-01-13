@@ -2,7 +2,7 @@
   "name": "your-project",
   "version": "1.0.0",
   "scripts": {
-    "build": "parcel build index.html"
+    "build": "parcel build index.html ./nav/index.html"
   },
   "devDependencies": {
     "parcel": "^2.0.0"
