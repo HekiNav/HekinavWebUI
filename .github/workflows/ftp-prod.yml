@@ -23,4 +23,4 @@ jobs:
       uses: JossyDevers/minify-js@v1.0.1
       with:
         directory: /
-        output: minify/
+        output: /minify/
