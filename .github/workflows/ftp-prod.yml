@@ -31,7 +31,7 @@ jobs:
         protocol: ftp
         server-dir: ./prod.hekinav.42web.io/htdocs/
 
-    - name: Run Webpack Build
+    - name: Run esbuild build
       run: npm run build
 
     - name: Upload to hekinav main website
