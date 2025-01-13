@@ -1,14 +1,13 @@
 import { defineConfig } from 'vite';
+import legacy from '@vitejs/plugin-legacy';
 
 export default defineConfig({
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11'], // Specify browser support
+    }),
+  ],
   build: {
-    rollupOptions: {
-      input: {
-        main: 'index.html',
-        routing: 'nav/index.html',
-        linemap: 'map/index.html',
-      },
-    },
-    outDir: 'dist',
+    outDir: 'dist', // Output directory
   },
 });
