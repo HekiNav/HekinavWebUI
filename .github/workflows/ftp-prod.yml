@@ -28,7 +28,7 @@ jobs:
         protocol: ftp
         server-dir: ./htdocs/
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: npm install
 
     - name: Build website
