@@ -9,6 +9,8 @@
     "lint": "eslint src/**/*.js"
   },
   "devDependencies": {
+    "style-loader": "^3.3.2",
+    "css-loader": "^6.8.1",   
   "html-webpack-plugin": "^5.5.3"
   }
 }
