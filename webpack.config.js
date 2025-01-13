@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   entry: {
     main: './script.js',  // Entry point for the main bundle
-    admin: './nav/main.js' // Entry point for the admin bundle
+    nav: './nav/script/main.js' // Entry point for the admin bundle
   },
   output: {
     filename: '[name].bundle.js', // Dynamic filenames based on entry keys
