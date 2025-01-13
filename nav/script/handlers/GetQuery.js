@@ -1,21 +1,25 @@
-function getQuery() {
+import SearchParameters from "../handlers/SearchParameters.js"
+import SearchOptions from "../handlers/SearchParameters.js"
 
+export default function getQuery() {
+  const fromTo = SearchOptions.getFromTo
+  console.log(fromTo)
   switch (document.getElementById("apiSelect").value) {
     case "hslv1":
     case "finlandv1":
       let options = ""
-      for (let i = 0; i < parameters.length; i++) {
+      /*for (let i = 0; i < parameters.length; i++) {
         p = parameters[i]
         if (p.graphqlCategory1 == "option") {
           options += ` ${p.graphqlName}:${p.value},`
           continue
         }
-      }
+      }*/
 
       modeString = ""
-      modes.forEach(mode => {
+      /*modes.forEach(mode => {
         modeString += `{mode: ${mode}},`
-      })
+      })*/
 
       return `{
   plan(
@@ -23,7 +27,7 @@ function getQuery() {
     to: {lat: ${values.to.lat}, lon: ${values.to.lon}}
     date: "${document.getElementById('input4').value}",
     time: "${document.getElementById('input3').value}",
-    transportModes: [{mode: WALK}, ${modeString}]
+    transportModes: [{mode: WALK}, {mode: BUS}, {mode: RAIL}${modeString}]
     ${options}
   ) {
     itineraries {
@@ -88,7 +92,7 @@ function getQuery() {
       let option = ""
       let pref = {}
       let via = {}
-      for (let i = 0; i < parameters.length; i++) {
+      /*for (let i = 0; i < parameters.length; i++) {
         p = parameters[i]
         if (p.graphqlCategory1 == "option") {
           option += ` ${p.graphqlName}:${p.value},`
@@ -126,28 +130,25 @@ function getQuery() {
       else {
         //cuz one of the params implements itself even if theres no viastop
         delete via['visit']
-      }
+      }*/
 
-      modeString = ""
-      modes.forEach(mode => {
+      //modeString = ""
+      /*modes.forEach(mode => {
         modeString += `{mode: ${mode}},`
-      })
+      })*/
 
       //remove quotes for graphql
       pref = JSON.stringify(pref).replaceAll(/"/g, "")
-      console.log(via)
-      epic = via
       via = JSON.stringify(via).replaceAll(/"/g, "").replaceAll(/§/g, '"')
-
+  //readd prefs: preferences: ${pref}
+  //viastop ${viaStop.id != "" ? `via: ${via}` : ""}
       return `{
   planConnection(
-    origin: {location: {coordinate: {latitude: ${values.from.lat}, longitude: ${values.from.lon}}}}
-    destination: {location: {coordinate: {latitude: ${values.to.lat}, longitude: ${values.to.lon}}}}
-    dateTime: {earliestDeparture: "${document.getElementById("input4").value}T${document.getElementById("input3").value}+02:00"}
-    preferences: ${pref}
+    origin: {location: {coordinate: {latitude: ${fromTo[0][0]}, longitude: ${fromTo[0][1]}}}}
+    destination: {location: {coordinate: {latitude: ${fromTo[1][0]}, longitude: ${fromTo[1][1]}}}}
+    dateTime: {earliestDeparture: "${SearchParameters.date}T${SearchParameters.time}+02:00"}
     ${option}
-    ${viaStop.id != "" ? `via: ${via}` : ""}
-    modes: {transit: {transit: [${modeString}]}}
+    modes: {transit: {transit: [{mode: BUS}, {mode: RAIL}]}}
   ) {
     pageInfo {
       endCursor

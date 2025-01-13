@@ -1,5 +1,9 @@
 import Popup from "./elements/Popup.js";
-import SearchOptions from "./elements/SearchOptions.js";
+import SearchParameters from "./handlers/SearchParameters.js";
+import setSidebarMode from "./handlers/setSidebar.js"
+import getRoutes from "./handlers/GetRoutes.js";
+
+getRoutes()
 
 const canvasRenderer = L.canvas({ padding: 0.5, tolerance: 5 });
 const svgRenderer = L.svg({ padding: 0.5 })
@@ -81,13 +85,16 @@ const baseLayers = {
 }
 L.control.layers(baseLayers).addTo(map)
 
-const searchOptions = new SearchOptions()
+const searchOptions = new SearchParameters
 
 const stopPopupElement = document.getElementById("stopPopup")
 const stopPopup = new Popup(stopPopupElement)
 map.stopPopup = stopPopup
 
 stopPopup.close()
+
+setSidebarMode("main")
+
 /* let recentSearches = []
 let maxRecentSearches = 10
 recentSearches.add = function (values) {

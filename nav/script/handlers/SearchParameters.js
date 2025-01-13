@@ -1,12 +1,21 @@
-import JsonImport from "../handlers/JsonImport.js"
+import JsonImport from "./JsonImport.js"
 import SearchParameter from "../models/SearchParameter.js"
+import Util from "../Util.js"
 
-export default class SearchOptions {
+export default class SearchParameters {
+    static from = "";
+    static to = "";
+    static time = `${Util.padNumber(new Date().getHours())}:${Util.padNumber(new Date().getMinutes())}`
+    static date = new Date().toISOString().split('T')[0]
+
     constructor() {
         this.data
         this.#getParameters()
+        this.#setDateInit()
         this.param = []
+        
     }
+    
     #getParameters() {
         JsonImport("searchParameters.json", data => {
             this.data = data.finlandv2  
@@ -37,5 +46,20 @@ export default class SearchOptions {
         else {
             document.getElementById("preferrercontainer").style.display = 'block'
         } */
+    }
+    #setDateInit() {
+        document.getElementById('input3').value = SearchParameters.time
+        document.getElementById('input4').value = SearchParameters.date
+    }
+    static get getFromTo() {
+        let ans = []
+        console.log(this.from)
+        if(this.from == ""){
+            ans[0] = [60.17663436599454, 24.65653036035333]
+        }
+        if(this.to == ""){
+            ans[1] = [60.295692665358935, 25.066264871369405]
+        }
+        return ans
     }
 }

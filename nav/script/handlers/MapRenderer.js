@@ -1,6 +1,6 @@
 export default class mapRenderer{
     
-function renderShapes(shapes) {
+renderShapes(shapes) {
     shapes.forEach(p => {
         const polyline = renderPolyline(p.geometry, Util.routeType(p.route.type).color, false, true)
         polyline.addTo(tempGroup)
@@ -33,7 +33,7 @@ function renderShapes(shapes) {
         } */
     })
 }
-function renderCircle(stop = { lat: 0, lon: 0 }, color, transfer, draw = true) {
+renderCircle(stop = { lat: 0, lon: 0 }, color, transfer, draw = true) {
     //Radius of the circle rendered on the map
     let radius = 8
     //If transfer
@@ -55,13 +55,13 @@ function renderCircle(stop = { lat: 0, lon: 0 }, color, transfer, draw = true) {
     }
     return marker
 }
-function clearMap(all = true) {
+clearMap(all = true) {
     tempGroup.clearLayers();
     if (all) {
         layerGroup.clearLayers();
     }
 }
-function renderPolyline(shape, color, draw = true, interactive = false) {
+renderPolyline(shape, color, draw = true, interactive = false) {
     let latlngs = []
     for (let i = 0; i < shape.length / 2; i++) {
         //Reformat the latlongs
