@@ -347,8 +347,7 @@ h4 {
 }
 
 #modePopup.hidden {
-  left: 20vw;
-  z-index: -1;
+  display: none;
 }
 
 #modesButton {

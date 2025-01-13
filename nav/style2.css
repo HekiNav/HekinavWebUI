@@ -128,7 +128,7 @@
 .text3 {
   margin: 0;
   align-self: flex-start;
-  color: var(--text-white);
+  color: var(--c-white);
   font-size: var(--font-size);
   grid-area: text3;
   width: 99%;
@@ -140,7 +140,7 @@
   align-self: flex-start;
   color: var(c--secondary);
   font-size: var(--font-size);
-  background: var(--c-background);
+  background: var(--c-white);
   grid-area: input3;
   width: auto;
   height: 100%;
@@ -188,5 +188,5 @@
   border: var(--main-border);
   color: var(c--secondary);
   font-size: var(--font-size);
-  background: var(--c-background);;
+  background: var(--c-white);;
 }
