@@ -21,7 +21,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './nav/index.html',
       chunks: ['admin'], // Include only the 'admin' bundle
-      filename: 'indexnav.html' // Output file name
+      filename: './nav/index.html' // Output file name
     })
   ],
   module: {
