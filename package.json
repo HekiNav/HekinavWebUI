@@ -2,7 +2,7 @@
   "name": "my-website",
   "version": "1.0.0",
   "scripts": {
-    "build": "webpack --mode production"  // Runs Webpack to build the site
+    "build": "webpack --mode production"
   },
   "devDependencies": {
     "webpack": "^5.0.0",
