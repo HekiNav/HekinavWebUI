@@ -17,13 +17,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '14'
-
-    - name: Install dependencies
-      uses: bahmutov/npm-install@v1
-
-    - name: Build project
-      run: npm run build
+        node-version: '18'
 
     - name: Upload production-ready build files
       uses: actions/upload-artifact@v3
@@ -40,7 +34,11 @@ jobs:
         protocol: ftp
         server-dir: ./prod.hekinav.42web.io/htdocs/
 
-    - name: Run esbuild build
+    - name: Install Dependencies
+      run: npm install
+
+    # Step 4: Build the Website
+    - name: Build Website
       run: npm run build
 
     - name: Upload to hekinav main website
