@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    # Step to get the latest code
     - name: Get latest code
       uses: actions/checkout@v4
 
-    # Step to set up Node.js
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '14'
-        
-    # Step to upload to prod.hekinav (before minification)
+
+    - name: Install dependencies
+      run: npm install
+    
     - name: Upload to prod.hekinav
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
@@ -30,13 +30,9 @@ jobs:
         password: ${{ secrets.ftppassword }}
         protocol: ftp
         server-dir: ./prod.hekinav.42web.io/htdocs/
-        
-    - name: Minify
-      run: |
-        npm install -g html-minifier-terser clean-css-cli terser
-        find ./ -name "*.html" -exec html-minifier-terser --collapse-whitespace --remove-comments --minify-js true --minify-css true {} -o {} \;
-        find ./ -name "*.css" -exec cleancss -o {} {} \;
-        find ./ -name "*.js" -exec terser {} --compress --mangle -o {} \;
+
+    - name: Run Webpack Build
+      run: npm run build
 
     - name: Upload to hekinav main website
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
