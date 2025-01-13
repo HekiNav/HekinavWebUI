@@ -2,9 +2,9 @@
   "name": "hekinav",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",         // For local development
-    "build": "vite build", // For building the project
-    "preview": "vite preview" // For previewing the production build
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "vite": "^4.0.0"
