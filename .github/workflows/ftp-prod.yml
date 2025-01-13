@@ -24,3 +24,12 @@ jobs:
       with:
         output: ./minify/
         overwrite: true
+    - name: Upload to hekinav main website
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: if0_35306213
+        password: ${{ secrets.ftppassword }}
+        protocol: ftp
+        local-dir: ./minify/
+        server-dir: ./htdocs/
