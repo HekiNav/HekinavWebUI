@@ -22,4 +22,5 @@ jobs:
     - name: minify code
       uses: nizarmah/auto-minify@v3
       with:
-        output: minify/
+        output: ./minify/
+        overwrite: true
