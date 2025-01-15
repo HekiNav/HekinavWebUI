@@ -15,13 +15,13 @@ const strokeWidth = ref(2);
 const stroke = ref("#ff0000");
 const fill = ref("#ffffff");
 
-const overrideStyleFunction = (feature: unknown, style: unknown) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const overrideStyleFunction = (feature: any, style: any) => {
 
     const properties = feature.get('type');  //from extra data in properties of the feature
     console.log(properties)
-    if (properties == "....") // change the style
-        style.getImage().getFill().setColor("red");
-
+    style.getImage().getFill().setColor("red");
+    return style;
 
 }
 </script>
