@@ -16,52 +16,52 @@ const mvtFormat = new MVT();
 
 <script lang="ts">
 export default {
-  name: "RoutingPage",
+    name: "RoutingPage",
 }
 </script>
 
 <template>
-  <div class="container">
-    <div class="sidebar">
-      <RoutingHome></RoutingHome>
-    </div>
-    <div class="map-container">
-      <Map.OlMap id="map">
-        <!-- Providing ol-options to the Map component -->
-        <Map.OlView :projection="projection" :zoom="zoom" :center="center" />
+    <div class="container">
+        <div class="sidebar">
+            <RoutingHome></RoutingHome>
+        </div>
+        <div class="map-container">
+            <Map.OlMap id="map">
+                <!-- Providing ol-options to the Map component -->
+                <Map.OlView :projection="projection" :zoom="zoom" :center="center" />
 
-        <!-- Base Tile Layer -->
-        <Layers.OlTileLayer>
-          <Sources.OlSourceXyz :url="mapUrl" />
-        </Layers.OlTileLayer>
+                <!-- Base Tile Layer -->
+                <Layers.OlTileLayer>
+                    <Sources.OlSourceXyz :url="mapUrl" />
+                </Layers.OlTileLayer>
 
-        <!-- Vector Tile Layer -->
-        <Layers.OlVectorTileLayer>
-          <Sources.OlSourceVectorTile :url="stopsUrl" :format="mvtFormat"></Sources.OlSourceVectorTile>
-        </Layers.OlVectorTileLayer>
-      </Map.OlMap>
+                <!-- Vector Tile Layer -->
+                <Layers.OlVectorTileLayer>
+                    <Sources.OlSourceVectorTile :url="stopsUrl" :format="mvtFormat"></Sources.OlSourceVectorTile>
+                </Layers.OlVectorTileLayer>
+            </Map.OlMap>
+        </div>
     </div>
-  </div>
 </template>
 
 <style>
 .container {
-  height: 90vh;
-  width: 100%;
-  display: flex;
-  flex-direction: row;
+    height: 90vh;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
 }
 
 .map-container {
-  width: 70%;
+    width: 70%;
 }
 
 .sidebar {
-  width: 30%;
+    width: 30%;
 }
 
 #map {
-  width: 100%;
-  height: 100%;
+    width: 100%;
+    height: 100%;
 }
 </style>

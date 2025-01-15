@@ -96,7 +96,7 @@ h1 {
 .selected {
   background-color: var(--c-secondary);
   position: relative;
-  z-index: 100000;
+  z-index: 10000;
   font-size: var(--fs-h3);
   display: flex;
   align-items: center;
