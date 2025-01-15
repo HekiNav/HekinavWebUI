@@ -1,22 +1,29 @@
 <script lang="ts">
+import { useSearchOptionsStore } from '@/stores/options';
 import { ref } from 'vue';
 
 
 export default {
     name: "RoutingModeSelector",
     props: ['mode'],
-    setup() {
+    setup(props) {
+        const mode = props.mode
+        const searchOptions = useSearchOptionsStore()
         const enabled = ref(true)
-
+        function toggleMode() {
+            enabled.value = !enabled.value
+            searchOptions.toggleMode(mode)
+        }
         // expose the ref to the template
         return {
-            enabled
+            enabled,
+            toggleMode
         }
     }
 }
 </script>
 <template>
-    <div class="modeSelector" @click="enabled = !enabled">
+    <div class="modeSelector" @click="toggleMode">
         <img v-if="mode == 'subway'" :class="String(enabled)" src="../assets/img/icons/station.subway.svg">
         <img v-if="mode == 'bus'" :class="String(enabled)" src="../assets/img/icons/station.bus.svg">
         <img v-if="mode == 'ferry'" :class="String(enabled)" src="../assets/img/icons/station.ferry.svg">

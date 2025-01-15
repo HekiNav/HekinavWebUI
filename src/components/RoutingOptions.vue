@@ -16,8 +16,7 @@ const modes = [
 const options = useSearchOptionsStore()
 
 function doStuff() {
-    options.increment()
-    console.log(options.count)
+    console.log(options.options.modes)
 }
 </script>
 <template>
