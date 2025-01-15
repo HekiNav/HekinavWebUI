@@ -1,5 +1,6 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts">
+import "../assets/root.css"
 
 export default {
     name: 'NavBar',
@@ -10,24 +11,25 @@ import { RouterLink } from 'vue-router';
 <template>
     <nav>
         <ul>
-            <li>
-                <RouterLink to="/"><img class="logo" src="../assets/img/hekinav.png" alt="hekinav logo"></RouterLink>
-            </li>
-            <li class="navItem">
-                <RouterLink to="/map/">Line Map</RouterLink>
-            </li>
-            <li class="navItem">
-                <RouterLink to="/nav/">Routing</RouterLink>
-            </li>
-            <li class="navItem">
-                <RouterLink to="/changelog/">Changelog</RouterLink>
-            </li>
-            <li class="navItem">
-                <RouterLink to="/tools/">Tools</RouterLink>
-            </li>
-            <li class="navItem">
-                <RouterLink to="/discord/">Discord</RouterLink>
-            </li>
+            <RouterLink to="/">
+                <li class="navItem"><img class="logo" src="../assets/img/hekinav.png" alt="hekinav logo"></li>
+            </RouterLink>
+            <RouterLink to="/nav/">
+                <li class="navItem">Routing</li>
+            </RouterLink>
+            <RouterLink to="/map/">
+                <li class="navItem">Line Graph</li>
+            </RouterLink>
+            <RouterLink to="/changelog/">
+                <li class="navItem">Changelog</li>
+            </RouterLink>
+            <RouterLink to="/tools/">
+                <li class="navItem">Tools</li>
+            </RouterLink>
+            <RouterLink to="/discord/">
+                <li class="navItem">Discord</li>
+            </RouterLink>
+
         </ul>
     </nav>
 </template>
@@ -48,7 +50,11 @@ nav ul {
     height: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+}
+
+nav a {
+    flex-grow: 1;
+    flex-shrink: 0;
 }
 
 li {
@@ -56,7 +62,9 @@ li {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     height: 100%;
+    width: 100%;
 }
 
 

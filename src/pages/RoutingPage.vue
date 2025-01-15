@@ -1,5 +1,5 @@
 <!-- eslint-disable @typescript-eslint/no-unused-vars -->
-<script lang="ts">
+<script setup lang="ts">
 import "leaflet/dist/leaflet.css";
 import {
     LMap,
@@ -13,6 +13,10 @@ import {
     LPolygon,
     LRectangle,
 } from "@vue-leaflet/vue-leaflet";
+import RoutingHome from "../components/RoutingHome.vue";
+
+</script>
+<script lang="ts">
 export default {
     name: "RoutingPage",
     components: {
@@ -30,10 +34,7 @@ export default {
 <template>
     <div class="container">
         <div class="sidebar">
-            <h1>Routing goes here</h1>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Recusandae quod consectetur, nostrum officiis
-                eaque quae odit porro corporis quam, perferendis quis commodi illo distinctio iste quaerat, vitae
-                eligendi rerum officia!</p>
+            <RoutingHome></RoutingHome>
         </div>
         <div class="map-container">
             <l-map id="map" ref="map" v-model:zoom="zoom" :center="[47.41322, -1.219482]" :use-global-leaflet="false">
