@@ -1,11 +1,33 @@
-<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script lang="ts">
+import { ref } from 'vue';
+import { autocomplete } from '../scripts/Digitransit.ts';
+import PlaceSearchResult from './PlaceSearchResult.vue';
+
 export default {
   name: "RoutingHome",
 }
 </script>
 <script setup lang="ts">
-import RoutingOptions from './RoutingOptions.vue';
+const origin = defineModel('origin', { default: "" })
+const destination = defineModel('destination', { default: "" })
+const originResults = ref([])
+const destinationResults = ref([])
+function search(type: LocationType) {
+  if (type == 0 && origin.value.length > 1) {
+    autocomplete(origin.value).then(data => {
+      originResults.value = data.features
+    })
+  } else if (type == 1 && destination.value.length > 1) {
+    autocomplete(destination.value).then(data => {
+      destinationResults.value = data.features
+    })
+
+  }
+}
+enum LocationType {
+  origin,
+  destination
+}
 </script>
 
 <template>
@@ -40,8 +62,21 @@ import RoutingOptions from './RoutingOptions.vue';
       </div>
 
     </h1>
-    <h1>from</h1><input type="text" placeholder="Origin" class="placeInput" name="origin" id="origin">
-    <h1>to</h1><input type="text" placeholder="Destination" class="placeInput" name="destination" id="destination">
+    <h1>from</h1>
+    <div class="placeInput-c" id="origin-c">
+      <input v-model="origin" @keyup="search(LocationType.origin)" type="text" placeholder="Origin" class="placeInput"
+        name="origin" id="origin">
+      <div class="placeSearch" id="originSearch">
+        <PlaceSearchResult v-for="result in originResults" :place=result :key="result.name"></PlaceSearchResult>
+      </div>
+
+    </div>
+    <h1>to</h1>
+    <div class="placeInput-c" id="destination-c">
+      <input v-model="destination" @keyup="search(LocationType.destination)" type="text" placeholder="Destination"
+        class="placeInput" name="destination" id="destination">
+      <div class="placeSearch" id="destinationSearch"></div>
+    </div>
     <h1>at</h1><input type="time" class="timeInput" name="time" id="time"><input type="date" class="dateInput"
       name="date" id="date">
     <RoutingOptions></RoutingOptions>
@@ -194,11 +229,11 @@ h1 {
 
 
 
-#origin {
+#origin-c {
   grid-area: origin;
 }
 
-#destination {
+#destination-c {
   grid-area: destination;
 }
 
@@ -207,7 +242,7 @@ input {
   font-size: var(--fs-h4);
 }
 
-.placeInput {
+.placeInput-c {
   margin: 2%;
   height: 80%;
   width: 96%;
@@ -215,6 +250,13 @@ input {
   border-color: black;
   border-style: solid;
   color: var(--c-text);
+}
+
+.placeInput {
+  height: 100%;
+  width: 100%;
+  color: var(--c-text);
+  border: 0;
 }
 
 .timeInput {
