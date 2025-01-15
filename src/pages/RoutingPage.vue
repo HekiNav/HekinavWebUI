@@ -11,16 +11,39 @@ const mapUrl = ref("https://digitransit-prod-cdn-origin.azureedge.net/map/v2/hsl
 const stopsUrl = ref("https://digitransit-prod-cdn-origin.azureedge.net/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94")
 const mvtFormat = new MVT();
 const radius = ref(10);
-const strokeWidth = ref(2);
-const stroke = ref("#ff0000");
+
 const fill = ref("#ffffff");
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const overrideStyleFunction = (feature: any, style: any) => {
+    const type = feature.get('type');
+    let color = ""
+    switch (type) {
+        case "TRAM":
+            color = "#00985f"
+            break
+        case "BUS":
+            color = "#007ac9"
+            break
+        case "RAIL":
+            color = "#8c4799"
+            break
+        case "FERRY":
+            color = "#00b9e4"
+            break
+        case "SUBWAY":
+            color = "#ff6319"
+            break
+        case "AIRPLANE":
+            color = "#0046ad"
+            break
+        default:
+            color = "#fc03f0"
+    }
 
-    const properties = feature.get('type');  //from extra data in properties of the feature
-    style.getImage().getFill().setColor("#ff0000");
-    return style;
+    style.getImage().getFill().setColor(color);
+
+    return style
 
 }
 </script>
@@ -52,7 +75,6 @@ export default {
                     <Styles.OlStyle :overrideStyleFunction="overrideStyleFunction">
                         <Styles.OlStyleCircle :radius="radius">
                             <Styles.OlStyleFill :color="fill" />
-                            <Styles.OlStyleStroke :color="stroke" :width="strokeWidth"></Styles.OlStyleStroke>
                         </Styles.OlStyleCircle>
                     </Styles.OlStyle>
                 </Layers.OlVectorTileLayer>
