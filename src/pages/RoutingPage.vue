@@ -47,7 +47,7 @@ export default {
 </template>
 <style>
 .container {
-    height: 100%;
+    height: 90vh;
     width: 100%;
     display: flex;
     flex-direction: row;
