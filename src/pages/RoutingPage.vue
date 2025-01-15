@@ -15,6 +15,15 @@ const strokeWidth = ref(2);
 const stroke = ref("#ff0000");
 const fill = ref("#ffffff");
 
+const overrideStyleFunction = (feature: unknown, style: unknown) => {
+
+    const properties = feature.get('type');  //from extra data in properties of the feature
+    console.log(properties)
+    if (properties == "....") // change the style
+        style.getImage().getFill().setColor("red");
+
+
+}
 </script>
 
 <script lang="ts">
@@ -41,7 +50,7 @@ export default {
                 <!-- Vector Tile Layer -->
                 <Layers.OlVectorTileLayer :style="null">
                     <Sources.OlSourceVectorTile :url="stopsUrl" :format="mvtFormat" />
-                    <Styles.OlStyle>
+                    <Styles.OlStyle :overrideStyleFunction="overrideStyleFunction">
                         <Styles.OlStyleCircle :radius="radius">
                             <Styles.OlStyleFill :color="fill" />
                             <Styles.OlStyleStroke :color="stroke" :width="strokeWidth"></Styles.OlStyleStroke>
