@@ -1,13 +1,12 @@
-import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { SearchOptions, type TransitModeOptions } from '@/types/SearchOptions'
 
-export const useSearchOptionsStore = defineStore('counter', () => {
-  const count = ref(0)
-  const name = ref('Eduardo')
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
+export const useSearchOptionsStore = defineStore('searchOption', () => {
+  const options = new SearchOptions()
+
+  function toggleMode(mode: keyof TransitModeOptions) {
+    options.toggleMode(mode)
   }
 
-  return { count, name, doubleCount, increment }
+  return { options, toggleMode }
 })
