@@ -6,7 +6,7 @@ export default {
     name: "RoutingModeSelector",
     props: ['mode'],
     setup() {
-        const enabled = ref(false)
+        const enabled = ref(true)
 
         // expose the ref to the template
         return {
@@ -40,7 +40,7 @@ img {
     transition: 300ms;
 }
 
-.true {
+.false {
     filter: grayscale(1);
 }
 </style>
