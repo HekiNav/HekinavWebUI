@@ -38,7 +38,8 @@ nav {
     top: 0;
     width: 100vw;
     height: 10vh;
-    font-family: var(--f-normal);
+    font-family: var(--f-header);
+    z-index: 12000;
 }
 
 nav ul {

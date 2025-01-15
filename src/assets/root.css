@@ -1,7 +1,8 @@
 :root {
     /*f: font, c: color, fs: font size*/
-    --f-header: "GothamXNarrow";
-    --f-normal: "Yu Gothic UI", "Gill Sans MT";
+    --f-header: "Gotham Rounded Medium";
+    --f-header-2: "GothamXNarrow";
+    --f-normal: "Yu Gothic UI", "Gill Sans MT", "Inter";
 
     --c-primary: #173cf2;
     --c-secondary: #0b1f84;
@@ -14,12 +15,22 @@
 
     --fs-h1: 5rem;
     --fs-h2: 3rem;
-    --fs-h3: 1.5rem;
-    --fs-h4: 1.2rem;
+    --fs-h3: 2rem;
+    --fs-h4: 1.5rem;
+    --fs-h5: 1.2rem;
     --fs: 1rem
 }
 
 @font-face {
     font-family: "GothamXNarrow";
-    src: url("./fonts/Gotham\ XNarrow\ Bold.woff") format("woff");
+    src: url("./fonts/Gotham-XNarrow-Medium.woff") format("woff");
+}
+
+@font-face {
+    font-family: "Gotham Rounded Medium";
+    src: url("./fonts/Gotham-Rounded-Medium.woff") format("woff");
+}
+
+body {
+    font-family: var(--f-normal);
 }
