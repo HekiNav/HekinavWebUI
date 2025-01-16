@@ -1,20 +1,39 @@
 <script lang="ts">
 import { ref, type Ref } from 'vue';
-import { autocomplete } from '../scripts/Digitransit.ts';
+import { autocomplete, getItieneraries } from '../scripts/Digitransit.ts';
 import PlaceSearchResult from './PlaceSearchResult.vue';
 import type { Place } from '@/types/Place.ts';
 import RoutingOptions from './RoutingOptions.vue';
 import { useSearchOptionsStore } from '@/stores/options.ts';
+import { currentDateString, currentTimeString } from '@/scripts/Util.ts';
 
 export default {
   name: "RoutingHome",
 }
 </script>
 <script setup lang="ts">
+const searchOptions = useSearchOptionsStore()
+
 const origin = defineModel('origin', { default: "" })
 const destination = defineModel('destination', { default: "" })
+const timeString = defineModel('timeString', { default: currentTimeString() })
+const dateString = defineModel('dateString', { default: currentDateString() })
 const originResults: Ref<Array<Place>> = ref([])
 const destinationResults: Ref<Array<Place>> = ref([])
+function time() {
+  searchOptions.setTime(timeString.value, dateString.value)
+}
+function date() {
+  searchOptions.setTime(timeString.value, dateString.value)
+}
+function planRoute() {
+  const query = searchOptions.toGraphQL()
+  console.log(query)
+  getItieneraries(query).then(data => {
+    console.log(data)
+
+  })
+}
 function search(type: LocationType) {
   if (type == 0 && origin.value.length > 1) {
     autocomplete(origin.value).then(data => {
@@ -30,7 +49,6 @@ function search(type: LocationType) {
     originResults.value = []
   }
 }
-const searchOptions = useSearchOptionsStore()
 function setPlace(place: Place, type: LocationType) {
   searchOptions.setPlace(place, type)
   if (type == LocationType.origin) {
@@ -97,8 +115,10 @@ enum LocationType {
         </PlaceSearchResult>
       </div>
     </div>
-    <h1>at</h1><input type="time" class="timeInput" name="time" id="time"><input type="date" class="dateInput"
-      name="date" id="date">
+    <h1>at</h1>
+    <input v-model="timeString" @change="time" type="time" class="timeInput" name="time" id="time">
+    <input v-model="dateString" @change="date" type="date" class="dateInput" name="date" id="date">
+    <button class="planRoute" @click="planRoute">Search</button>
     <RoutingOptions></RoutingOptions>
   </div>
 </template>
@@ -110,12 +130,13 @@ enum LocationType {
   background-color: var(--c-secondary);
   display: grid;
   grid-template-columns: 1fr 2fr 4fr;
-  grid-template-rows: repeat(5, 1fr) 10fr;
+  grid-template-rows: repeat(6, 1fr) 10fr;
   grid-template-areas:
     "header header header"
     "from origin origin"
     "to destination destination"
     "at time date"
+    "planRoute planRoute planRoute"
     "transitmodes transitmodes transitmodes";
 }
 
@@ -314,5 +335,9 @@ input {
   border-width: 1px 1px 1px 0;
   border-color: black;
   border-style: solid;
+}
+
+.planRoute {
+  grid-area: planRoute;
 }
 </style>

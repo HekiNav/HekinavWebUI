@@ -27,7 +27,7 @@ export default {
         <img v-if="mode == 'subway'" :class="String(enabled)" src="../assets/img/icons/station.subway.svg">
         <img v-if="mode == 'bus'" :class="String(enabled)" src="../assets/img/icons/station.bus.svg">
         <img v-if="mode == 'ferry'" :class="String(enabled)" src="../assets/img/icons/station.ferry.svg">
-        <img v-if="mode == 'train'" :class="String(enabled)" src="../assets/img/icons/station.train.svg">
+        <img v-if="mode == 'rail'" :class="String(enabled)" src="../assets/img/icons/station.rail.svg">
         <img v-if="mode == 'tram'" :class="String(enabled)" src="../assets/img/icons/station.tram.svg">
     </div>
 

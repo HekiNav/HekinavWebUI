@@ -20,8 +20,8 @@ export async function autocomplete(query: string) {
         region: r.properties.region,
         postalcode: r.properties.postalcode,
         coordinates: {
-            lat: r.geometry.coordinates[0],
-            lon: r.geometry.coordinates[1],
+            lat: r.geometry.coordinates[1],
+            lon: r.geometry.coordinates[0],
         },
         transitModes: r.properties.addendum ? r.properties.addendum.GTFS.modes : null,
         code: r.properties.addendum ? r.properties.addendum.GTFS.code : null,
@@ -29,4 +29,17 @@ export async function autocomplete(query: string) {
 
     }))
     return newData
+}
+export async function getItieneraries(query: string) {
+    const response = await fetch(`https://api.digitransit.fi/routing/v2/hsl/gtfs/v1?digitransit-subscription-key=06421a1eb31d4cc9a4781a585bb306c2`, {
+        method: "POST",
+        body: query,
+        headers: {
+            "Content-Type": "application/graphql;"
+        }
+    })
+    const data = await response.json().then(results => {
+        return results
+    })
+    return data
 }

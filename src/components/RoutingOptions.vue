@@ -6,7 +6,7 @@ export default {
 <script setup lang="ts">
 import RoutingModeSelector from './RoutingModeSelector.vue';
 const modes = [
-    "train",
+    "rail",
     "bus",
     "subway",
     "ferry",
