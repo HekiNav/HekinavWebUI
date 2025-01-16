@@ -68,7 +68,7 @@ enum LocationType {
       <input v-model="origin" @keyup="search(LocationType.origin)" type="text" placeholder="Origin" class="placeInput"
         name="origin" id="origin">
       <div class="placeSearch" id="originSearch">
-        <PlaceSearchResult v-for="result in originResults" :place=result :key="result"></PlaceSearchResult>
+        <PlaceSearchResult v-for="result in originResults" :place=result :key="result.name"></PlaceSearchResult>
       </div>
 
     </div>
@@ -265,8 +265,10 @@ input {
 .placeSearch {
   position: absolute;
   background-color: var(--c-white);
-  width: 24%;
+  width: 24.6%;
+  max-width: 24.6%;
   z-index: 5000;
+  overflow: scroll;
 }
 
 .timeInput {

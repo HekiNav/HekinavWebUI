@@ -4,7 +4,7 @@ export type Place = {
     street?: string
     housenumber?: string
     coordinates: LatLon
-    layer: AutocompleteLayer
+    layer: SearchLayer
     name: string,
     postalCode: string,
     region: string,
@@ -15,8 +15,16 @@ export type Place = {
     platform?: number,
     code?: string,
 }
-enum AutocompleteLayer {
-    address, venue, street, stop, station, bikestation, neighbourhood, localadmin, region
+export enum SearchLayer {
+    address = "address",
+    venue = "venue",
+    street = "street",
+    stop = "stop",
+    station = "station",
+    bikestation = "bikestation",
+    neighbourhood = "neighbourhood",
+    localadmin = "localadmin",
+    region = "region"
 }
 enum TransitMode {
     SPEEDTRAM,

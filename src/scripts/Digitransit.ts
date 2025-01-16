@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-wrapper-object-types */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import type { Place } from "@/types/Place"
 
 export async function autocomplete(query: string) {
@@ -5,9 +8,10 @@ export async function autocomplete(query: string) {
     const data = await response.json().then(results => {
         return results.features
     })
-    // eslint-disable-next-line @typescript-eslint/no-wrapper-object-types, @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newData: Array<Place> = data.map((r: Object<Object<any>>) => ({
         name: r.properties.name,
+        layer: r.properties.layer,
         street: r.properties.street,
         housenumber: r.properties.housenumber,
         neighbourhood: r.properties.neighbourhood,
