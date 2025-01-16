@@ -3,6 +3,7 @@ import { ref, type Ref } from 'vue';
 import { autocomplete } from '../scripts/Digitransit.ts';
 import PlaceSearchResult from './PlaceSearchResult.vue';
 import type { Place } from '@/types/Place.ts';
+import RoutingOptions from './RoutingOptions.vue';
 
 export default {
   name: "RoutingHome",

@@ -26,12 +26,13 @@ export enum SearchLayer {
     localadmin = "localadmin",
     region = "region"
 }
-enum TransitMode {
-    SPEEDTRAM,
-    TRAM,
-    RAIL,
-    BUS,
-    "BUS-LOCAL",
-    "BUS-EXPRESS",
-    AIRPLANE
+export enum TransitMode {
+    SPEEDTRAM = "lightrail",
+    TRAM = "tram",
+    RAIL = "train",
+    BUS = "bus",
+    "BUS-LOCAL" = "bus_local",
+    "BUS-EXPRESS" = "bus_express",
+    AIRPLANE = "plane",
+    SUBWAY = "subway"
 }

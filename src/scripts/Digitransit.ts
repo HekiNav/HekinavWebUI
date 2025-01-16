@@ -22,7 +22,10 @@ export async function autocomplete(query: string) {
         coordinates: {
             lat: r.geometry.coordinates[0],
             lon: r.geometry.coordinates[1],
-        }
+        },
+        transitModes: r.properties.addendum ? r.properties.addendum.GTFS.modes : null,
+        code: r.properties.addendum ? r.properties.addendum.GTFS.code : null,
+        platform: r.properties.addendum ? r.properties.addendum.GTFS.platform : null,
 
     }))
     return newData
