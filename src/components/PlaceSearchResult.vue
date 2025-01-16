@@ -2,6 +2,9 @@
 import { SearchLayer, TransitMode, type Place } from '@/types/Place';
 import { defineProps } from "vue"
 const props = defineProps(["place"])
+const emitter = defineEmits<{
+    "place-click": [place: Place]
+}>()
 const place: Place = props.place
 
 function getImg(mode: TransitMode) {
@@ -14,14 +17,15 @@ export default {
 }
 </script>
 <template>
-    <div v-if="place.layer == SearchLayer.address" @click="$emit('placeClick', place)" class="row spread"><span>{{
-        place.street
+    <div v-if="place.layer == SearchLayer.address" @mousedown="emitter('place-click', place)" class="row spread">
+        <span>{{
+            place.street
             }} {{
                 place.housenumber }} </span><span class="moreinfo">{{ place.locality ? place.locality + ", " :
                 place.localAdmin ? place.localAdmin
                     + ", " : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.street" @click="$emit('placeClick', place)" class="row spread"><span>{{
+    <div v-if="place.layer == SearchLayer.street" @mousedown="emitter('place-click', place)" class="row spread"><span>{{
         place.name
             }} </span><span class="moreinfo">{{ place.neighbourhood ? place.neighbourhood + ", " : "" }}{{
                 place.locality ?
@@ -29,7 +33,7 @@ export default {
                     place.localAdmin ? place.localAdmin
                         + ", " : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.venue" @click="$emit('placeClick', place)" class="row spread"><span>{{
+    <div v-if="place.layer == SearchLayer.venue" @mousedown="emitter('place-click', place)" class="row spread"><span>{{
         place.name
             }} </span><span class="moreinfo">{{ place.street ? place.street + " " + place.housenumber + ", " : "" }}{{
                 place.neighbourhood ?
@@ -39,16 +43,18 @@ export default {
                     place.localAdmin ? place.localAdmin
                         + "," : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.neighbourhood" @click="$emit('placeClick', place)" class="row spread"><span>{{
-        place.name
-            }} </span><span class="moreinfo">{{
+    <div v-if="place.layer == SearchLayer.neighbourhood" @mousedown="emitter('place-click', place)" class="row spread">
+        <span>{{
+            place.name
+        }} </span><span class="moreinfo">{{
                 place.locality ?
                     place.locality + ", " :
                     place.localAdmin ? place.localAdmin
                         + ", " : "" }}{{
-                place.region }}</span></div>
+                place.region }}</span>
+    </div>
     <div v-if="place.layer == SearchLayer.stop || place.layer == SearchLayer.station"
-        @click="$emit('placeClick', place)" class="row spread"><span class="icon-c"><img
+        @mousedown="{ emitter('place-click', place); console.log(place) }" class="row spread"><span class="icon-c"><img
                 v-for="mode in place.transitModes" :key="mode" :src="getImg(mode)" alt="" class="icon"><span
                 v-if="place.code" class="background">{{ place.code }}</span> <span v-if="place.platform"
                 class="background">pl. {{ place.platform }}</span>{{

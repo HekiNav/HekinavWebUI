@@ -4,7 +4,6 @@ export default {
 }
 </script>
 <script setup lang="ts">
-import { useSearchOptionsStore } from '@/stores/options';
 import RoutingModeSelector from './RoutingModeSelector.vue';
 const modes = [
     "train",
@@ -13,18 +12,13 @@ const modes = [
     "ferry",
     "tram"
 ]
-const options = useSearchOptionsStore()
 
-function doStuff() {
-    console.log(options.options.modes)
-}
 </script>
 <template>
     <div class="modesContainer">
         <RoutingModeSelector v-for="mode in modes" :key="mode" :mode="mode">
         </RoutingModeSelector>
     </div>
-    <button @click="doStuff">fooa1</button>
 </template>
 <style>
 .modesContainer {

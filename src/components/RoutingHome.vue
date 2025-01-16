@@ -32,8 +32,12 @@ function search(type: LocationType) {
 }
 const searchOptions = useSearchOptionsStore()
 function setPlace(place: Place, type: LocationType) {
-  console.log(place, type)
   searchOptions.setPlace(place, type)
+  if (type == LocationType.origin) {
+    origin.value = place.name
+  } else {
+    destination.value = place.name
+  }
 }
 enum LocationType {
   origin,
@@ -251,6 +255,10 @@ h1 {
 
 #destination-c {
   grid-area: destination;
+}
+
+.placeInput:not(:focus)+.placeSearch {
+  display: none;
 }
 
 input {
