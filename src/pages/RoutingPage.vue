@@ -1,8 +1,12 @@
+<!-- eslint-disable @typescript-eslint/no-unused-vars -->
 <script setup lang="ts">
 import { Map, Layers, Sources, Styles } from "vue3-openlayers";
 import { ref } from "vue";
 import RoutingHome from "../components/RoutingHome.vue";
 import { MVT } from 'ol/format';
+import { RoutingView, useRoutingGlobalStore } from "@/stores/routingGlobal";
+import RoutingItienararyList from "@/components/RoutingItienararyList.vue";
+import RoutingLoading from "@/components/RoutingLoading.vue";
 
 const zoom = 15;
 const center: Array<GLfloat> = [2776349.9688816136, 8438737.417225536];
@@ -44,8 +48,10 @@ const overrideStyleFunction = (feature: any, style: any) => {
     style.getImage().getFill().setColor(color);
 
     return style
-
 }
+const routingGlobal = ref(useRoutingGlobalStore())
+const { pageBack } = useRoutingGlobalStore()
+
 </script>
 
 <script lang="ts">
@@ -57,7 +63,11 @@ export default {
 <template>
     <div class="container">
         <div class="sidebar">
-            <RoutingHome></RoutingHome>
+            <div class="back-arrow" v-if="routingGlobal.routingView != RoutingView.HOME" @mousedown="pageBack()"><img
+                    src="../assets/img/back.svg" alt="Go back"></div>
+            <RoutingHome v-if="routingGlobal.routingView == RoutingView.HOME"></RoutingHome>
+            <RoutingLoading v-if="routingGlobal.routingView == RoutingView.LOADING"></RoutingLoading>
+            <RoutingItienararyList v-if="routingGlobal.routingView == RoutingView.LIST"></RoutingItienararyList>
         </div>
         <div class="map-container">
             <Map.OlMap id="map">
@@ -89,6 +99,13 @@ export default {
     width: 100%;
     display: flex;
     flex-direction: row;
+}
+
+.back-arrow {
+    position: absolute;
+    height: 2rem;
+    width: 2rem;
+    margin: .5rem;
 }
 
 .map-container {

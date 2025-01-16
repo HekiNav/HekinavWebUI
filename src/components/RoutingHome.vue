@@ -6,6 +6,7 @@ import type { Place } from '@/types/Place.ts';
 import RoutingOptions from './RoutingOptions.vue';
 import { useSearchOptionsStore } from '@/stores/options.ts';
 import { currentDateString, currentTimeString } from '@/scripts/Util.ts';
+import { RoutingView, useRoutingGlobalStore } from '@/stores/routingGlobal.ts';
 
 export default {
   name: "RoutingHome",
@@ -13,11 +14,14 @@ export default {
 </script>
 <script setup lang="ts">
 const searchOptions = useSearchOptionsStore()
+const routingGlobal = useRoutingGlobalStore()
 
 const origin = defineModel('origin', { default: "" })
 const destination = defineModel('destination', { default: "" })
 const timeString = defineModel('timeString', { default: currentTimeString() })
 const dateString = defineModel('dateString', { default: currentDateString() })
+time()
+const endpoint = ref("https://api.digitransit.fi/routing/v2/finland/gtfs/v1")
 const originResults: Ref<Array<Place>> = ref([])
 const destinationResults: Ref<Array<Place>> = ref([])
 function time() {
@@ -29,8 +33,11 @@ function date() {
 function planRoute() {
   const query = searchOptions.toGraphQL()
   console.log(query)
-  getItieneraries(query).then(data => {
+  routingGlobal.routingView = RoutingView.LOADING
+  getItieneraries(query, endpoint.value).then(data => {
     console.log(data)
+    routingGlobal.itieneraries = data
+    routingGlobal.routingView = RoutingView.LIST
 
   })
 }
@@ -80,16 +87,18 @@ enum LocationType {
             alt="Digitransit">
           <div title="option-1" class="option-container">
             <input id="option-1" name="option" type="radio" checked />
-            <label class="option" for="option-1" data-txt="Finland&nbsp;v2"></label>
+            <label class="option" for="option-1" data-txt="Finland&nbsp;v2"
+              @click="endpoint = 'https://api.digitransit.fi/routing/v2/finland/gtfs/v1'"></label>
           </div>
           <div title="option-2" class="option-container">
             <input id="option-2" name="option" type="radio" />
-            <label class="option" for="option-2" data-txt="HSL&nbsp;v2"></label>
+            <label class="option" for="option-2" data-txt="HSL&nbsp;v2"
+              @click="endpoint = 'https://api.digitransit.fi/routing/v2/hsl/gtfs/v1'"></label>
           </div>
-          <img class="digitransit-logo" src="../assets/img/hekinav_white.png" alt="Digitransit">
+          <img class="digitransit-logo" src="../assets/img/hekinav_white.png" alt="Hekinv">
           <div title="option-3" class="option-container">
-            <input id="option-3" name="option" type="radio" />
-            <label class="option" for="option-3" data-txt="Hekinav"></label>
+            <input id="option-3" name="option" type="radio" @click="endpoint = 'N/A'" />
+            <label class="option" for="option-3" data-txt="Hekinav N/A"></label>
           </div>
         </div>
       </div>
