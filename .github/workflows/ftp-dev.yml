@@ -18,6 +18,8 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '14'
+    - name: Build
+      run: npm run build
         
     - name: Upload to dev.hekinav
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -26,4 +28,5 @@ jobs:
         username: if0_35306213
         password: ${{ secrets.ftppassword }}
         protocol: ftp
+        local-dir: /dist/
         server-dir: ./dev.hekinav.42web.io/htdocs/
