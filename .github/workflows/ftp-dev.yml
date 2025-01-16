@@ -1,0 +1,34 @@
+on: 
+  push:
+    branches:
+      - "vue"
+
+name: Deploy to dev.hekinav
+
+jobs:
+  web-deploy:
+    name: Deploy to dev.hekinav
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Get latest code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '23'
+    - name: Install dependencies
+      run: npm install
+    - name: Build Vue.js app
+      run: npm run build
+        
+    - name: Upload to dev.hekinav
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: if0_35306213
+        password: ${{ secrets.ftppassword }}
+        protocol: ftp
+        local-dir: ./dist/
+        server-dir: ./dev.hekinav.42web.io/htdocs/

@@ -1,0 +1,45 @@
+on: 
+  push:
+    branches:
+      - "production"  # Trigger on push to the production branch
+
+name: Deploy website on push
+
+jobs:
+  web-deploy:
+    name: Deploy to main website and prod.hekinav
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Get latest code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+    
+    - name: Upload to prod.hekinav
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: if0_35306213
+        password: ${{ secrets.ftppassword }}
+        protocol: ftp
+        server-dir: ./htdocs/
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build website
+      run: npm run build
+
+    - name: Upload to hekinav main website
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ftpupload.net
+        username: if0_35306213
+        password: ${{ secrets.ftppassword }}
+        protocol: ftp
+        local-dir: ./dist/main/
+        server-dir: ./prod.hekinav.42web.io/htdocs/
