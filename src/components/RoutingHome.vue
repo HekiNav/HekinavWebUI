@@ -260,7 +260,7 @@ input {
 
 .placeInput-c {
   display: flex;
-  width: max-content;
+  width: 100%;
 }
 
 .placeInput {
@@ -274,7 +274,6 @@ input {
   width: 96%;
   color: var(--c-text);
   border: 0;
-  background-color: var(--c-white);
 }
 
 .placeSearch {
