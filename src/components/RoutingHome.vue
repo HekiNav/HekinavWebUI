@@ -1,7 +1,8 @@
 <script lang="ts">
-import { ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { autocomplete } from '../scripts/Digitransit.ts';
 import PlaceSearchResult from './PlaceSearchResult.vue';
+import type { Place } from '@/types/Place.ts';
 
 export default {
   name: "RoutingHome",
@@ -10,16 +11,16 @@ export default {
 <script setup lang="ts">
 const origin = defineModel('origin', { default: "" })
 const destination = defineModel('destination', { default: "" })
-const originResults = ref([])
-const destinationResults = ref([])
+const originResults: Ref<Array<Place>> = ref([])
+const destinationResults: Ref<Array<Place>> = ref([])
 function search(type: LocationType) {
   if (type == 0 && origin.value.length > 1) {
     autocomplete(origin.value).then(data => {
-      originResults.value = data.features
+      originResults.value = data
     })
   } else if (type == 1 && destination.value.length > 1) {
     autocomplete(destination.value).then(data => {
-      destinationResults.value = data.features
+      destinationResults.value = data
     })
 
   }
@@ -67,7 +68,7 @@ enum LocationType {
       <input v-model="origin" @keyup="search(LocationType.origin)" type="text" placeholder="Origin" class="placeInput"
         name="origin" id="origin">
       <div class="placeSearch" id="originSearch">
-        <PlaceSearchResult v-for="result in originResults" :place=result :key="result.name"></PlaceSearchResult>
+        <PlaceSearchResult v-for="result in originResults" :place=result :key="result"></PlaceSearchResult>
       </div>
 
     </div>
@@ -250,6 +251,7 @@ input {
   border-color: black;
   border-style: solid;
   color: var(--c-text);
+  background-color: var(--c-white);
 }
 
 .placeInput {
@@ -257,6 +259,14 @@ input {
   width: 100%;
   color: var(--c-text);
   border: 0;
+  background-color: var(--c-white);
+}
+
+.placeSearch {
+  position: absolute;
+  background-color: var(--c-white);
+  width: 24%;
+  z-index: 5000;
 }
 
 .timeInput {

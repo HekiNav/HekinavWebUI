@@ -1,6 +1,8 @@
 import type { LatLon } from "./LatLon"
 
 export type Place = {
+    street?: string
+    housenumber?: string
     coordinates: LatLon
     layer: AutocompleteLayer
     name: string,
