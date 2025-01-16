@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { SearchLayer, TransitMode, type Place } from '@/types/Place';
-import { defineProps, defineEmits } from "vue"
+import { defineProps } from "vue"
 const props = defineProps(["place"])
 const place: Place = props.place
-const emitters = defineEmits(["click"])
 
 function getImg(mode: TransitMode) {
-    return `/src/assets/img/icons/station.${TransitMode[mode.toString()]}.svg`
+    return `/src/assets/img/icons/station.${TransitMode[mode.toString() as keyof typeof TransitMode]}.svg`
 }
 </script>
 <script lang="ts">
@@ -15,20 +14,23 @@ export default {
 }
 </script>
 <template>
-    <div v-if="place.layer == SearchLayer.address" @click="emitters('click')" class="row spread"><span>{{ place.street
+    <div v-if="place.layer == SearchLayer.address" @click="$emit('placeClick', place)" class="row spread"><span>{{
+        place.street
             }} {{
                 place.housenumber }} </span><span class="moreinfo">{{ place.locality ? place.locality + ", " :
                 place.localAdmin ? place.localAdmin
                     + ", " : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.street" @click="emitters('click')" class="row spread"><span>{{ place.name
+    <div v-if="place.layer == SearchLayer.street" @click="$emit('placeClick', place)" class="row spread"><span>{{
+        place.name
             }} </span><span class="moreinfo">{{ place.neighbourhood ? place.neighbourhood + ", " : "" }}{{
                 place.locality ?
                     place.locality + ", " :
                     place.localAdmin ? place.localAdmin
                         + ", " : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.venue" @click="emitters('click')" class="row spread"><span>{{ place.name
+    <div v-if="place.layer == SearchLayer.venue" @click="$emit('placeClick', place)" class="row spread"><span>{{
+        place.name
             }} </span><span class="moreinfo">{{ place.street ? place.street + " " + place.housenumber + ", " : "" }}{{
                 place.neighbourhood ?
                     place.neighbourhood + ", " : "" }}{{
@@ -37,7 +39,7 @@ export default {
                     place.localAdmin ? place.localAdmin
                         + "," : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.neighbourhood" @click="emitters('click')" class="row spread"><span>{{
+    <div v-if="place.layer == SearchLayer.neighbourhood" @click="$emit('placeClick', place)" class="row spread"><span>{{
         place.name
             }} </span><span class="moreinfo">{{
                 place.locality ?
@@ -45,10 +47,11 @@ export default {
                     place.localAdmin ? place.localAdmin
                         + ", " : "" }}{{
                 place.region }}</span></div>
-    <div v-if="place.layer == SearchLayer.stop || place.layer == SearchLayer.station" @click="emitters('click')"
-        class="row spread"><span><img v-for="mode in place.transitModes" :key="mode" :src="getImg(mode)" alt=""
-                class="icon">&nbsp;<span v-if="place.code" class="background">{{ place.code }}</span> <span
-                v-if="place.platform" class="background">pl. {{ place.platform }}</span>{{
+    <div v-if="place.layer == SearchLayer.stop || place.layer == SearchLayer.station"
+        @click="$emit('placeClick', place)" class="row spread"><span class="icon-c"><img
+                v-for="mode in place.transitModes" :key="mode" :src="getImg(mode)" alt="" class="icon"><span
+                v-if="place.code" class="background">{{ place.code }}</span> <span v-if="place.platform"
+                class="background">pl. {{ place.platform }}</span>{{
                     place.name
                 }} </span><span class="moreinfo">{{
                 place.locality ?
@@ -62,14 +65,24 @@ export default {
     background-color: #aaa;
     color: black;
     border-radius: .1rem;
+    margin: 0 .2rem 0 0;
+
 }
 
 .row {
-    padding: 0 1%;
+    padding: .1rem 1%;
 }
 
 .icon {
-    height: 1rem;
+    height: 1.5rem;
+    padding: 0 .2rem 0 0;
+}
+
+.icon-c {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 }
 
 .spread {

@@ -7,8 +7,8 @@ import { MVT } from 'ol/format';
 const zoom = 15;
 const center: Array<GLfloat> = [2776349.9688816136, 8438737.417225536];
 const projection: string = "EPSG:3857";
-const mapUrl = ref("https://digitransit-prod-cdn-origin.azureedge.net/map/v2/hsl-map/{z}/{x}/{y}.png?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad");
-const stopsUrl = ref("https://digitransit-prod-cdn-origin.azureedge.net/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94")
+const mapUrl = ref("https://cdn.digitransit.fi/map/v2/hsl-map/{z}/{x}/{y}.png?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad");
+const stopsUrl = ref("https://cdn.digitransit.fi/map/v2/finland-stop-map/{z}/{x}/{y}.pbf?digitransit-subscription-key=a1e437f79628464c9ea8d542db6f6e94")
 const mvtFormat = new MVT();
 const radius = ref(10);
 

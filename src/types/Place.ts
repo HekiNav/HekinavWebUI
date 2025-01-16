@@ -27,12 +27,12 @@ export enum SearchLayer {
     region = "region"
 }
 export enum TransitMode {
-    SPEEDTRAM = "lightrail",
-    TRAM = "tram",
-    RAIL = "train",
-    BUS = "bus",
+    "SPEEDTRAM" = "lightrail",
+    "TRAM" = "tram",
+    "RAIL" = "train",
+    "BUS" = "bus",
     "BUS-LOCAL" = "bus_local",
     "BUS-EXPRESS" = "bus_express",
-    AIRPLANE = "plane",
-    SUBWAY = "subway"
+    "AIRPLANE" = "plane",
+    "SUBWAY" = "subway"
 }

@@ -4,6 +4,7 @@ import { autocomplete } from '../scripts/Digitransit.ts';
 import PlaceSearchResult from './PlaceSearchResult.vue';
 import type { Place } from '@/types/Place.ts';
 import RoutingOptions from './RoutingOptions.vue';
+import { useSearchOptionsStore } from '@/stores/options.ts';
 
 export default {
   name: "RoutingHome",
@@ -24,7 +25,15 @@ function search(type: LocationType) {
       destinationResults.value = data
     })
 
+  } else {
+    destinationResults.value = []
+    originResults.value = []
   }
+}
+const searchOptions = useSearchOptionsStore()
+function setPlace(place: Place, type: LocationType) {
+  console.log(place, type)
+  searchOptions.setPlace(place, type)
 }
 enum LocationType {
   origin,
@@ -69,7 +78,8 @@ enum LocationType {
       <input v-model="origin" @keyup="search(LocationType.origin)" type="text" placeholder="Origin" class="placeInput"
         name="origin" id="origin">
       <div class="placeSearch" id="originSearch">
-        <PlaceSearchResult v-for="result in originResults" :place=result :key="result.name"></PlaceSearchResult>
+        <PlaceSearchResult v-for="result in originResults" :place=result :key="result.name"
+          @place-click="(place: Place) => setPlace(place, LocationType.origin)"></PlaceSearchResult>
       </div>
 
     </div>
@@ -77,7 +87,11 @@ enum LocationType {
     <div class="placeInput-c" id="destination-c">
       <input v-model="destination" @keyup="search(LocationType.destination)" type="text" placeholder="Destination"
         class="placeInput" name="destination" id="destination">
-      <div class="placeSearch" id="destinationSearch"></div>
+      <div class="placeSearch" id="destinationSearch">
+        <PlaceSearchResult v-for="result in destinationResults" :place=result :key="result.name"
+          @place-click="(place: Place) => setPlace(place, LocationType.destination)">
+        </PlaceSearchResult>
+      </div>
     </div>
     <h1>at</h1><input type="time" class="timeInput" name="time" id="time"><input type="date" class="dateInput"
       name="date" id="date">
@@ -245,31 +259,36 @@ input {
 }
 
 .placeInput-c {
-  margin: 2%;
-  height: 80%;
-  width: 96%;
+  display: flex;
+  width: max-content;
+}
+
+.placeInput {
   border-width: 1px;
   border-color: black;
   border-style: solid;
   color: var(--c-text);
   background-color: var(--c-white);
-}
-
-.placeInput {
-  height: 100%;
-  width: 100%;
+  margin: 2%;
+  height: 80%;
+  width: 96%;
   color: var(--c-text);
   border: 0;
   background-color: var(--c-white);
 }
 
 .placeSearch {
+  color: var(--c-text);
   position: absolute;
+  left: 30%;
   background-color: var(--c-white);
-  width: 24.6%;
-  max-width: 24.6%;
-  z-index: 5000;
-  overflow: scroll;
+  z-index: 1;
+  overflow-y: scroll;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  flex-flow: column;
+  max-height: 50vh;
 }
 
 .timeInput {
