@@ -61,8 +61,8 @@ function planRoute() {
     console.log(data)
     routingGlobal.itieneraries = data
     searchOptions.saveSearchOptions()
-    /*     routingGlobal.routingView = RoutingView.LIST
-     */
+    routingGlobal.routingView = RoutingView.LIST
+
   })
 }
 function search(type: LocationType) {
