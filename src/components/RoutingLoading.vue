@@ -58,6 +58,7 @@ h1 {
 }
 
 .loader-cube {
+  --cube-size: 3rem;
   width: 100px;
   height: 100px;
   position: relative;
@@ -76,44 +77,44 @@ h1 {
 }
 
 .loader-cube:before {
-  transform: rotateX(90deg) translateZ(50px);
+  transform: rotateX(90deg) translateZ(var(--cube-size));
 }
 
 .loader-cube:after {
-  transform: rotateY(90deg) translateZ(50px);
+  transform: rotateY(90deg) translateZ(3rem);
 }
 
 .loader-cube .face {
   position: absolute;
-  width: 100%;
-  height: 100%;
+  width: 6rem;
+  height: 6rem;
   background-color: rgb(252, 248, 248);
-  opacity: .85;
+  opacity: .8;
   border: 2px solid rgb(252, 250, 250);
 }
 
 .loader-cube .face:nth-child(1) {
-  transform: rotateY(0deg) translateZ(50px);
+  transform: rotateY(0deg) translateZ(3rem);
   background-image: url("/src/assets/img/icons/station.subway.svg");
   background-color: #ff6319;
 }
 
 .loader-cube .face:nth-child(2) {
-  transform: rotateX(90deg) translateZ(50px);
+  transform: rotateX(90deg) translateZ(3rem);
   background-image: url("/src/assets/img/icons/station.bus.svg");
   background-color: #007ac9;
 
 }
 
 .loader-cube .face:nth-child(3) {
-  transform: rotateY(90deg) translateZ(-50px);
+  transform: rotateY(90deg) translateZ(-3rem);
   background-color: #00b9e4;
   background-image: url("/src/assets/img/icons/station.ferry.svg");
 
 }
 
 .loader-cube .face:nth-child(4) {
-  transform: rotateX(-90deg) translateZ(50px);
+  transform: rotateX(-90deg) translateZ(3rem);
   background-image: url("/src/assets/img/icons/station.tram.svg");
   background-color: #00985f;
 }
@@ -121,12 +122,17 @@ h1 {
 .loader-cube .face:nth-child(5) {
   background-image: url("/src/assets/img/icons/station.rail.svg");
   background-color: #8c4799;
-  transform: rotateY(90deg) translateZ(50px);
+  transform: rotateY(90deg) translateZ(3rem);
 }
 
 .loader-cube .face:nth-child(6) {
-  transform: rotateY(0deg) translateZ(-50px);
-  background-color: #1abc9c;
+  transform: rotateY(0deg) translateZ(-3rem);
+  background-color: var(--c-secondary);
+  background-image: url("/src/assets/img/icons/pin.svg");
+  background-size: 4.5rem;
+  background-repeat: no-repeat;
+  background-position-x: center;
+  background-position-y: center;
 }
 
 @keyframes rotate {
