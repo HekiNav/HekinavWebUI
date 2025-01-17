@@ -5,7 +5,12 @@ export const useRoutingGlobalStore = defineStore('routingGlobal', () => {
   const itieneraries: object | undefined = undefined
   const routingView: Ref<number> = ref(RoutingView.HOME)
   function pageBack() {
-    routingView.value--
+    if (routingView.value == RoutingView.LIST) {
+      routingView.value = RoutingView.HOME
+    } else {
+      routingView.value--
+
+    }
   }
 
   return { itieneraries, routingView, pageBack }

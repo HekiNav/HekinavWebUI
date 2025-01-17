@@ -24,16 +24,13 @@ export default {
 </script>
 <template>
     <div class="modeSelector" @click="toggleMode">
-        <img v-if="mode == 'subway'" :class="String(enabled)" src="../assets/img/icons/station.subway.svg">
-        <img v-if="mode == 'bus'" :class="String(enabled)" src="../assets/img/icons/station.bus.svg">
-        <img v-if="mode == 'ferry'" :class="String(enabled)" src="../assets/img/icons/station.ferry.svg">
-        <img v-if="mode == 'rail'" :class="String(enabled)" src="../assets/img/icons/station.rail.svg">
-        <img v-if="mode == 'tram'" :class="String(enabled)" src="../assets/img/icons/station.tram.svg">
+        <img :class="String(enabled)" :src="`/src/assets/img/icons/station.${mode}.svg`">
     </div>
 
 </template>
 <style>
 .modeSelector {
+    margin: 2% 0;
     display: flex;
     height: 3rem;
     width: 3rem;

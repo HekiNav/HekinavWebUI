@@ -12,8 +12,8 @@ export class SearchOptions {
   modes: TransitModeOptions
   origin?: Place
   destination?: Place
-  constructor(origin?: Place, destination?: Place, time?: string) {
-    this.modes = { rail: true, bus: true, tram: true, ferry: true, subway: true }
+  constructor(origin?: Place, destination?: Place, time?: string, modes?: TransitModeOptions) {
+    this.modes = modes || { rail: true, bus: true, tram: true, ferry: true, subway: true }
     this.origin = origin
     this.destination = destination
     this.time = time
@@ -23,7 +23,6 @@ export class SearchOptions {
   }
   modesToString() {
     const string = JSON.stringify(Object.keys(this.modes).map((mode, i) => ({ "mode": mode.toUpperCase(), "used": Object.values(this.modes)[i] })).filter(mode => mode.used).map(mode => ({ "mode": mode.mode }))).replace(/"/g, '')
-    console.log(string)
     return string
   }
   toGraphQL() {

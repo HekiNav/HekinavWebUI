@@ -16,14 +16,37 @@ export default {
 const searchOptions = useSearchOptionsStore()
 const routingGlobal = useRoutingGlobalStore()
 
+
+const searchOptionsData = ref(localStorage.getItem("hekinav.searchOptions") ? JSON.parse(localStorage.getItem("hekinav.searchOptions") || "[]") : null)
+
 const origin = defineModel('origin', { default: "" })
 const destination = defineModel('destination', { default: "" })
 const timeString = defineModel('timeString', { default: currentTimeString() })
 const dateString = defineModel('dateString', { default: currentDateString() })
+
+if (searchOptionsData.value) {
+  if (!searchOptions.timeString.length) {
+    searchOptions.fromJSON(searchOptionsData.value)
+
+  } else {
+    searchOptions.fromJSON(searchOptionsData.value)
+    timeString.value = searchOptions.timeString
+    dateString.value = searchOptions.dateString
+    console.log(searchOptions.options.destination?.name)
+    origin.value = searchOptions.options.origin?.name || ""
+    destination.value = searchOptions.options.destination?.name || ""
+  }
+
+
+}
 time()
+
+
 const endpoint = ref("https://api.digitransit.fi/routing/v2/finland/gtfs/v1")
 const originResults: Ref<Array<Place>> = ref([])
 const destinationResults: Ref<Array<Place>> = ref([])
+
+
 function time() {
   searchOptions.setTime(timeString.value, dateString.value)
 }
@@ -37,8 +60,9 @@ function planRoute() {
   getItieneraries(query, endpoint.value).then(data => {
     console.log(data)
     routingGlobal.itieneraries = data
-    routingGlobal.routingView = RoutingView.LIST
-
+    searchOptions.saveSearchOptions()
+    /*     routingGlobal.routingView = RoutingView.LIST
+     */
   })
 }
 function search(type: LocationType) {
@@ -129,6 +153,9 @@ enum LocationType {
     <input v-model="dateString" @change="date" type="date" class="dateInput" name="date" id="date">
     <button class="planRoute" @click="planRoute">Search</button>
     <RoutingOptions></RoutingOptions>
+    <div class="sidePopup">
+      <!-- <h1>{{ searchOptionsData }}</h1> -->
+    </div>
   </div>
 </template>
 
@@ -147,6 +174,10 @@ enum LocationType {
     "at time date"
     "planRoute planRoute planRoute"
     "transitmodes transitmodes transitmodes";
+}
+
+.sidePopup {
+  position: absolute;
 }
 
 .header {
@@ -332,21 +363,26 @@ input {
   margin: 4% 0 4% 6%;
   height: 80%;
   width: 94%;
-  border-width: 1px 0 1px 1px;
-  border-color: black;
-  border-style: solid;
+  border: 0;
+  background-color: var(--c-white);
+
 }
 
 .dateInput {
-  margin: 2% 3% 2% 0;
+  margin: 2% 3% 3% 0;
   height: 80%;
   width: 97%;
-  border-width: 1px 1px 1px 0;
-  border-color: black;
-  border-style: solid;
+  border: 0;
+  background-color: var(--c-white);
 }
 
 .planRoute {
+  font-family: var(--f-header-2);
+  border: 0;
+  background-color: var(--c-white);
   grid-area: planRoute;
+  height: 100%;
+  margin: 0.8% 1.8% 0% 1.8%;
+  font-size: var(--fs-h3);
 }
 </style>
