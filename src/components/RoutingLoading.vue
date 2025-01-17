@@ -77,7 +77,7 @@ h1 {
 }
 
 .loader-cube:before {
-  transform: rotateX(90deg) translateZ(var(--cube-size));
+  transform: rotateX(90deg) translateZ(-3rem);
 }
 
 .loader-cube:after {
