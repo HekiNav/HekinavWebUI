@@ -61,7 +61,31 @@ const overrideStyleFunction = (feature: any, style: any) => {
 
   return style
 }
-
+function parseLines(data: string) {
+  if (!data) return ""
+  const routes = JSON.parse(data)
+  let text = ""
+  routes.forEach((route: { shortName: string, gtfsType: number }) => {
+    text += `<span class="background" style="background-color:  ${gtfsTypeToColor(route.gtfsType)};">${route.shortName}</span>`
+  });
+  return text
+}
+function gtfsTypeToColor(type: number) {
+  switch (type) {
+    case 1:
+      return "#ff6319"
+    case 102:
+      return "#8c4799"
+    case 109:
+      return "#00a149"
+    case 701:
+    case 702:
+      return "#007ac9"
+    default:
+      console.log(type)
+      return "#ff00ff"
+  }
+}
 function hoverFeature(event: MapBrowserEvent<PointerEvent>) {
   const map = mapRef.value?.map;
   if (!map) {
@@ -71,19 +95,18 @@ function hoverFeature(event: MapBrowserEvent<PointerEvent>) {
   const features: any = map.getFeaturesAtPixel(event.pixel, {
     hitTolerance: 2,
   });
-  console.log(features)
   if (features.length != 0) {
     const feature = features[0]
     popup.show = true
     popup.position = getCenter(
       feature.getGeometry().extent_,
     );
-    popup.content = `${feature.properties_.name} ${feature.properties_.code || ""}`
+    console.log(feature.properties_.platform, typeof feature.properties_.platform, feature.properties_.platform == "null")
+    const lines = parseLines(feature.properties_.routes)
+    popup.content = `<div class="map-popup">${feature.properties_.name} ${feature.properties_.code ? `<span class=  "background">${feature.properties_.code}</span>` : ""}${feature.properties_.platform && feature.properties_.platform != "null" ? `pl. <span class=  "background">${feature.properties_.platform}</span>` : ""}${lines}</div>`
   } else {
     popup.show = false
   }
-  console.log(popup.position)
-  console.log(features)
 }
 
 
@@ -141,6 +164,20 @@ export default {
 </template>
 
 <style>
+.map-popup {
+  color: var(--c-text);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.background {
+  background-color: #aaa;
+  color: black;
+  border-radius: .1rem;
+  margin: 0 .2rem 0 0;
+  padding: 0 .1rem;
+}
+
 .container {
   height: 90vh;
   width: 100%;
