@@ -23,23 +23,22 @@ const origin = defineModel('origin', { default: "" })
 const destination = defineModel('destination', { default: "" })
 const timeString = defineModel('timeString', { default: currentTimeString() })
 const dateString = defineModel('dateString', { default: currentDateString() })
+time()
 
 if (searchOptionsData.value) {
-  if (!searchOptions.timeString.length) {
+  if (!searchOptions.options.destination) {
     searchOptions.fromJSON(searchOptionsData.value)
 
   } else {
     searchOptions.fromJSON(searchOptionsData.value)
     timeString.value = searchOptions.timeString
     dateString.value = searchOptions.dateString
-    console.log(searchOptions.options.destination?.name)
     origin.value = searchOptions.options.origin?.name || ""
     destination.value = searchOptions.options.destination?.name || ""
   }
 
 
 }
-time()
 
 
 const endpoint = ref("https://api.digitransit.fi/routing/v2/finland/gtfs/v1")
@@ -91,6 +90,22 @@ function setPlace(place: Place, type: LocationType) {
 enum LocationType {
   origin,
   destination
+}
+enum SidePopupState {
+  open = "open",
+  peeking = "peeking",
+  closed = "closed"
+}
+const sidePopupState = ref(SidePopupState.open)
+setTimeout(() => {
+  sidePopupState.value = SidePopupState.peeking
+}, 5000)
+function sidePopupAccept() {
+  sidePopupState.value = SidePopupState.closed
+  timeString.value = searchOptions.timeString
+  dateString.value = searchOptions.dateString
+  origin.value = searchOptions.options.origin?.name || ""
+  destination.value = searchOptions.options.destination?.name || ""
 }
 </script>
 
@@ -153,8 +168,10 @@ enum LocationType {
     <input v-model="dateString" @change="date" type="date" class="dateInput" name="date" id="date">
     <button class="planRoute" @click="planRoute">Search</button>
     <RoutingOptions></RoutingOptions>
-    <div class="sidePopup">
-      <!-- <h1>{{ searchOptionsData }}</h1> -->
+    <div id="sidePopup" :class="sidePopupState">
+      <h3>Use previous search from {{ searchOptions.options.origin?.name }} to {{
+        searchOptions.options.destination?.name }} at {{ searchOptions.timeString }}?</h3>
+      <button @click="sidePopupAccept">Yes</button> <button @click="sidePopupState = SidePopupState.closed">No</button>
     </div>
   </div>
 </template>
@@ -176,8 +193,38 @@ enum LocationType {
     "transitmodes transitmodes transitmodes";
 }
 
-.sidePopup {
+#sidePopup {
   position: absolute;
+  background-color: var(--c-white);
+  color: var(--c-text);
+  width: 28%;
+  bottom: 5%;
+  padding: 1% 5% 1% 1%;
+  transition: 500ms ease-in-out;
+}
+
+#sidePopup.peeking {
+  left: -25%;
+}
+
+#sidePopup.closed {
+  left: -30%;
+}
+
+#sidePopup.open {
+  left: 0;
+}
+
+
+#sidePopup.peeking:hover {
+  left: 0;
+}
+
+#sidePopup button {
+  border: 0;
+  background-color: var(--c-secondary);
+  color: var(--c-white);
+  padding: .1rem .5rem;
 }
 
 .header {
