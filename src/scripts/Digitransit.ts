@@ -31,7 +31,7 @@ export async function autocomplete(query: string) {
     return newData
 }
 export async function getItieneraries(query: string, endpoint: string) {
-    const response = await fetch(`${endpoint}?digitransit-subscription-key=06421a1eb31d4cc9a4781a585bb306c2`, {
+    const response = await fetch(`${endpoint}?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad`, {
         method: "POST",
         body: query,
         headers: {
