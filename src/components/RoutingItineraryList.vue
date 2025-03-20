@@ -1,6 +1,4 @@
 <script lang="ts">
-
-
 export default {
     name: "RoutingItineraryList",
 }
@@ -9,7 +7,17 @@ export default {
 import { useRoutingGlobalStore } from '@/stores/routingGlobal';
 import { ref } from 'vue';
 const routingGlobal = useRoutingGlobalStore()
-const routes = ref(routingGlobal.itieneraries)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const routes: any = ref(routingGlobal.itieneraries)
+console.log(routes.value.data.planConnection.edges[0].node.end + "UNTO")
+
+for(let i = 0; i < routes.value.data.planConnection.edges.length; i++){
+  const route = routes.value.data.planConnection.edges[i]
+}
+
+/*function routeToElement(route) {
+
+}*/
 </script>
 
 <template>

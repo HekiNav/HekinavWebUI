@@ -6,7 +6,7 @@ import RoutingHome from "../components/RoutingHome.vue";
 import { MVT } from 'ol/format';
 import type MapRef from "ol/Map.js";
 import { RoutingView, useRoutingGlobalStore } from "@/stores/routingGlobal";
-import RoutingItienararyList from "@/components/RoutingItienararyList.vue";
+import RoutingItineraryList from "@/components/RoutingItineraryList.vue";
 import RoutingLoading from "@/components/RoutingLoading.vue";
 import { MapBrowserEvent } from "ol";
 import { getCenter } from 'ol/extent';
@@ -27,7 +27,6 @@ const popup = reactive({
   content: "",
   position: [0, 0],
 });
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const overrideStyleFunction = (feature: any, style: any) => {
@@ -53,6 +52,7 @@ const overrideStyleFunction = (feature: any, style: any) => {
       color = "#0046ad"
       break
     default:
+      console.log(`type not found: ${type}`)
       color = "#fc03f0"
   }
 
@@ -109,11 +109,8 @@ function hoverFeature(event: MapBrowserEvent<PointerEvent>) {
   }
 }
 
-
 const routingGlobal = ref(useRoutingGlobalStore())
 const { pageBack } = useRoutingGlobalStore()
-
-
 
 </script>
 
@@ -130,7 +127,7 @@ export default {
           src="../assets/img/back.svg" alt="Go back"></div>
       <RoutingHome v-if="routingGlobal.routingView == RoutingView.HOME"></RoutingHome>
       <RoutingLoading v-if="routingGlobal.routingView == RoutingView.LOADING"></RoutingLoading>
-      <RoutingItienararyList v-if="routingGlobal.routingView == RoutingView.LIST"></RoutingItienararyList>
+      <RoutingItineraryList v-if="routingGlobal.routingView == RoutingView.LIST"></RoutingItineraryList>
     </div>
     <div class="map-container">
       <Map.OlMap id="map" @pointermove="hoverFeature" ref="mapRef">
